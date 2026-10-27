@@ -1,0 +1,43 @@
+// Checks the security rules in the Firestore emulator: npm run test:rules
+import { initializeTestEnvironment, assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
+import { readFileSync } from "node:fs";
+import { doc, getDoc, setDoc, updateDoc, getDocs, collection, deleteField } from "firebase/firestore";
+
+const env = await initializeTestEnvironment({ projectId: "demo-lablink", firestore: { rules: readFileSync("firestore.rules", "utf8"), host: "127.0.0.1", port: 8080 } });
+const T = env.authenticatedContext("teacher").firestore();
+const L = env.authenticatedContext("learner").firestore();
+const O = env.authenticatedContext("outsider").firestore();
+const A = env.unauthenticatedContext().firestore();
+let n = 0; const ok = async (name, p) => { await p; n++; console.log("  ok", name); };
+
+await ok("teacher creates class", assertSucceeds(setDoc(doc(T, "classes/ABC234"), { owner: "teacher", name: "Form 4B" })));
+await ok("outsider cannot take over the code", assertFails(setDoc(doc(O, "classes/ABC234"), { owner: "outsider", name: "x" })));
+await ok("cannot create a class for someone else", assertFails(setDoc(doc(O, "classes/XYZ999"), { owner: "teacher" })));
+await ok("signed-out cannot read a class", assertFails(getDoc(doc(A, "classes/ABC234"))));
+await ok("teacher sets work", assertSucceeds(setDoc(doc(T, "classes/ABC234/assign/a1"), { title: "Titration", lab: "chemistry" })));
+await ok("non-member cannot read work", assertFails(getDocs(collection(L, "classes/ABC234/assign"))));
+await ok("learner joins with code", assertSucceeds(setDoc(doc(L, "classes/ABC234/members/learner"), { name: "Rudo" })));
+await ok("cannot join as someone else", assertFails(setDoc(doc(L, "classes/ABC234/members/other"), { name: "x" })));
+await ok("member reads work", assertSucceeds(getDocs(collection(L, "classes/ABC234/assign"))));
+await ok("member cannot set work", assertFails(setDoc(doc(L, "classes/ABC234/assign/a2"), { title: "x" })));
+await ok("member cannot change question sets", assertFails(setDoc(doc(L, "classes/ABC234/qsets/q1"), { title: "x" })));
+await ok("learner submits work", assertSucceeds(setDoc(doc(L, "classes/ABC234/subs/learner"), { nick: "Rudo", work: { a1: { score: 70 } }, _k: "a1" })));
+await ok("learner cannot mark own work", assertFails(updateDoc(doc(L, "classes/ABC234/subs/learner"), { "work.a1.mod": { score: 100 }, _k: "a1" })));
+await ok("learner cannot write another learner's work", assertFails(setDoc(doc(L, "classes/ABC234/subs/other"), { work: {} })));
+await ok("outsider cannot read work", assertFails(getDoc(doc(O, "classes/ABC234/subs/learner"))));
+await ok("teacher lists submissions", assertSucceeds(getDocs(collection(T, "classes/ABC234/subs"))));
+await ok("teacher moderates", assertSucceeds(updateDoc(doc(T, "classes/ABC234/subs/learner"), { "work.a1.mod": { score: 65, comment: "Good" } })));
+await ok("learner cannot remove the mark", assertFails(updateDoc(doc(L, "classes/ABC234/subs/learner"), { "work.a1.mod": deleteField(), _k: "a1" })));
+await ok("learner reads own work and mark", assertSucceeds(getDoc(doc(L, "classes/ABC234/subs/learner"))));
+await ok("learner cannot list class members", assertFails(getDocs(collection(L, "classes/ABC234/members"))));
+await ok("teacher lists class members", assertSucceeds(getDocs(collection(T, "classes/ABC234/members"))));
+await ok("teacher reopens work", assertSucceeds(updateDoc(doc(T, "classes/ABC234/subs/learner"), { "work.a1.mod": null, "work.a1.reopen": true })));
+await ok("learner resubmits after reopen", assertSucceeds(updateDoc(doc(L, "classes/ABC234/subs/learner"), { "work.a1.score": 80, _k: "a1" })));
+await ok("mislabelled write is refused", assertFails(updateDoc(doc(L, "classes/ABC234/subs/learner"), { "work.a2.score": 5, _k: "a1" })));
+await ok("unlabelled write is refused", assertFails(updateDoc(doc(L, "classes/ABC234/subs/learner"), { "work.a3.score": 5 })));
+await ok("own profile", assertSucceeds(setDoc(doc(L, "users/learner"), { name: "Rudo", role: "learner", progress: "" })));
+await ok("cannot read others' profiles", assertFails(getDoc(doc(O, "users/learner"))));
+await ok("learner cannot rename the class", assertFails(updateDoc(doc(L, "classes/ABC234"), { name: "x" })));
+await ok("teacher cannot hand class to someone else", assertFails(updateDoc(doc(T, "classes/ABC234"), { owner: "outsider" })));
+await env.cleanup();
+console.log(`All ${n} rule checks passed.`);

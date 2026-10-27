@@ -1,0 +1,6 @@
+{
+  "appId": "zw.stemlight.lablink",
+  "appName": "STEMLight LabLink",
+  "webDir": "app",
+  "android": { "backgroundColor": "#ffffff" }
+}

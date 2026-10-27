@@ -1,0 +1,57 @@
+rules_version = '2';
+// STEMLight LabLink security rules.
+// users/{uid}                 a person's own profile and saved progress
+// classes/{code}              a teacher's class (code is the join code)
+//   members/{uid}             learners who joined with the code
+//   assign/{id}, qsets/{id}   work the teacher sets: class members read, the teacher writes
+//   subs/{uid}                a learner's submitted work: the learner and the teacher only
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read, write: if isMe(uid);
+    }
+
+    match /classes/{code} {
+      function cls() { return get(/databases/$(database)/documents/classes/$(code)); }
+      function owner() { return signedIn() && exists(/databases/$(database)/documents/classes/$(code)) && cls().data.owner == request.auth.uid; }
+      function member() { return signedIn() && exists(/databases/$(database)/documents/classes/$(code)/members/$(request.auth.uid)); }
+
+      allow get: if signedIn();                       // checking a join code
+      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if owner() && request.resource.data.owner == resource.data.owner;
+      allow delete: if owner();
+
+      match /members/{uid} {
+        allow read: if owner() || isMe(uid);
+        allow create, update: if isMe(uid);
+        allow delete: if owner() || isMe(uid);
+      }
+      match /assign/{id} {
+        allow read: if owner() || member();
+        allow write: if owner();
+      }
+      match /qsets/{id} {
+        allow read: if owner() || member();
+        allow write: if owner();
+      }
+      match /subs/{uid} {
+        // a learner may change only one piece of work at a time, and never the teacher's marks (mod)
+        function workBefore() { return resource == null ? {} : resource.data.get('work', {}); }
+        function workAfter() { return request.resource.data.get('work', {}); }
+        function modOf(w, k) { return (k in w) && w[k] is map ? w[k].get('mod', null) : null; }
+        // the app labels each learner write with the assignment it changes (_k)
+        function learnerEdit() {
+          let keys = workAfter().diff(workBefore()).affectedKeys();
+          let k = request.resource.data.get('_k', '');
+          return keys.size() == 0 || (keys.size() == 1 && keys.hasOnly([k]) && modOf(workAfter(), k) == modOf(workBefore(), k));
+        }
+        allow read: if owner() || isMe(uid);
+        allow delete: if owner();
+        allow create, update: if owner() || (isMe(uid) && member() && learnerEdit());
+      }
+    }
+  }
+}

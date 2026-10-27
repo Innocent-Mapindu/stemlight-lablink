@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body>
+<title>Centre Lathe Trainer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: workshop bay — machine + operator panel left, job card / pass log / inspection right; stacks on phones */
+:root{
+  --bg:#edf0ee; --panel:#ffffff; --ink:#1a2422; --muted:#5a6966; --line:#d2dad7;
+  --accent:#2f6b4f; --accent-soft:#dcebe3; --machine:#4e6b5f; --machine-2:#3a5248; --steel:#9aa7ad; --steel-d:#6f7d83;
+  --good:#2f7d4f; --warn:#b4442f; --caution:#c98a12; --stage:#f6f8f7;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101716; --panel:#172220; --ink:#e3ebe8; --muted:#93a39f; --line:#2b3a37;
+  --accent:#6cc39a; --accent-soft:#1b3329; --machine:#4f7466; --machine-2:#3b5a4e; --steel:#a7b4ba; --steel-d:#7c8a90;
+  --good:#5cc08a; --warn:#ef7a62; --caution:#e8b04a; --stage:#131d1b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101716; --panel:#172220; --ink:#e3ebe8; --muted:#93a39f; --line:#2b3a37;
+  --accent:#6cc39a; --accent-soft:#1b3329; --machine:#4f7466; --machine-2:#3b5a4e; --steel:#a7b4ba; --steel-d:#7c8a90;
+  --good:#5cc08a; --warn:#ef7a62; --caution:#e8b04a; --stage:#131d1b; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:20px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 4px}
+.aim{color:var(--muted);margin:4px 0 0;max-width:66ch}
+.cols{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:960px){.cols{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
+.col{display:grid;gap:20px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h2 small{font-family:var(--f-mono);font-weight:400;font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+h3{font-family:var(--f-display);font-size:.9rem;margin:0 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stage{background:var(--stage);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+#mach{display:block;width:100%;height:300px;touch-action:pan-y}
+@media (max-width:600px){#mach{height:250px}}
+.dro{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:12px}
+.dro div{background:var(--panel);padding:8px 10px}
+.dro .k{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dro .v{font-family:var(--f-mono);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.meter{height:6px;background:var(--line);border-radius:3px;margin-top:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--good);width:0}
+.ctrls{display:grid;gap:14px;margin-top:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:.82rem;font-weight:500;color:var(--muted)}
+select,input[type=number]{font-family:var(--f-mono);font-size:.98rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:42px;width:100%}
+button{font-family:var(--f-body);font-weight:600;font-size:.9rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px;cursor:pointer;min-height:44px}
+button:hover{border-color:var(--machine)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] button.primary{color:#0c1a13}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#0c1a13}}
+button.grow{flex:1 1 130px}
+button.check{flex:1 1 150px;text-align:left;font-weight:500}
+button.check::before{content:"○ ";color:var(--warn)}
+button.check[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+button.check[aria-pressed=true]::before{content:"● ";color:var(--good)}
+button.start{background:var(--good);border-color:var(--good);color:#fff}
+button.stop{background:var(--warn);border-color:var(--warn);color:#fff}
+:root[data-theme="dark"] button.start,:root[data-theme="dark"] button.stop{color:#10130f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.start,:root:not([data-theme="light"]) button.stop{color:#10130f}}
+button:disabled{opacity:.45;cursor:not-allowed}
+.msg{font-size:.88rem;padding:10px 12px;border-radius:8px;background:var(--accent-soft);color:var(--ink);border-left:3px solid var(--accent)}
+.msg.warn{border-left-color:var(--warn)}
+.msg.caution{border-left-color:var(--caution)}
+.msg.good{border-left-color:var(--good)}
+.drawing{color:var(--ink);overflow-x:auto}
+.drawing svg{display:block;width:100%;max-width:460px;height:auto}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.88rem;margin-top:10px}
+.spec dt{color:var(--muted)} .spec dd{margin:0;font-family:var(--f-mono)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.84rem}
+th,td{text-align:right;padding:6px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:var(--f-mono);font-weight:500;font-size:.68rem;color:var(--muted);letter-spacing:.03em}
+td{font-family:var(--f-mono)}
+th:first-child,td:first-child{text-align:left}
+td.note{text-align:left;font-family:var(--f-body);white-space:normal;min-width:140px;color:var(--muted)}
+tr.bad td{color:var(--warn)}
+.empty{color:var(--muted);font-size:.88rem;padding:10px 0}
+.report{display:grid;gap:6px;font-size:.9rem}
+.report .line{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:5px 0}
+.report .line span:last-child{font-family:var(--f-mono)}
+.pass{color:var(--good);font-weight:600} .fail{color:var(--warn);font-weight:600}
+.verdict{font-family:var(--f-display);font-weight:800;font-size:1.4rem;margin:4px 0 8px}
+details{font-size:.88rem} summary{cursor:pointer;font-weight:600;padding:4px 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Virtual learning factory · Machine shop · Turning</p>
+    <h1>Centre Lathe Trainer</h1>
+    <p class="aim">Job: turn a bar to the drawing below, within tolerance and surface finish, safely and in a sensible cycle time. Plan your roughing and finishing passes using the cutting data chart.</p>
+  </header>
+
+  <div class="cols">
+    <div class="col">
+      <section class="card">
+        <h2>Lathe <small>side view · chuck left, tailstock end right</small></h2>
+        <div class="stage"><canvas id="mach" aria-label="Lathe with chuck, workpiece, tool post and carriage"></canvas></div>
+        <div class="dro">
+          <div><div class="k">Spindle</div><div class="v" id="dN">0 rpm</div></div>
+          <div><div class="k">Cutting speed Vc</div><div class="v" id="dVc">–</div></div>
+          <div><div class="k">Cutting force</div><div class="v" id="dF">–</div></div>
+          <div><div class="k">Power</div><div class="v" id="dP">–</div><div class="meter"><i id="mP"></i></div></div>
+          <div><div class="k">Tool wear</div><div class="v" id="dW">0%</div><div class="meter"><i id="mW"></i></div></div>
+          <div><div class="k">Cycle time</div><div class="v" id="dT">0.0 min</div></div>
+        </div>
+
+        <div class="ctrls">
+          <div>
+            <h3>Pre-start checks</h3>
+            <div class="row">
+              <button class="check" id="ckKey" aria-pressed="false">Chuck key removed</button>
+              <button class="check" id="ckGrip" aria-pressed="false">Workpiece tightened</button>
+              <button class="check" id="ckGuard" aria-pressed="false">Chuck guard closed</button>
+              <button class="check" id="ckPPE" aria-pressed="false">Safety glasses on</button>
+            </div>
+          </div>
+          <div>
+            <h3>Cutting parameters</h3>
+            <div class="grid2">
+              <div class="field"><label for="spd">Spindle speed (gearbox)</label><select id="spd"></select></div>
+              <div class="field"><label for="feed">Feed (mm/rev)</label><select id="feed"></select></div>
+              <div class="field"><label for="doc">Depth of cut, radial (mm)</label><input id="doc" type="number" inputmode="decimal" step="0.05" min="0.05" max="5" value="1.50"></div>
+              <div class="field"><label for="tool">Tool</label><select id="tool"><option value="hss">HSS, r = 0.4 mm</option><option value="hss8">HSS, r = 0.8 mm</option><option value="carb">Carbide insert, r = 0.8 mm</option></select></div>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <label style="font-size:.88rem"><input type="checkbox" id="cool"> Coolant on</label>
+              <button id="snd" aria-pressed="true">Sound: on</button>
+            </div>
+          </div>
+          <div class="row">
+            <button id="spin" class="grow start">Start spindle</button>
+            <button id="cut" class="grow primary">Take a pass</button>
+          </div>
+          <div class="row">
+            <button id="meas" class="grow">Measure diameter</button>
+            <button id="tchg" class="grow">Change tool</button>
+            <button id="insp" class="grow">Submit for inspection</button>
+            <button id="newjob" class="grow">New job</button>
+          </div>
+          <div class="msg" id="msg" role="status">Complete the pre-start checks, choose a speed for your diameter and tool, then start the spindle.</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <h2>Job card <small id="jobNo">JC-001</small></h2>
+        <div class="drawing" aria-label="Drawing: bar 50 mm diameter, turned to 40 mm diameter for 60 mm from the free end">
+          <svg viewBox="0 0 460 170" fill="none" stroke="currentColor" stroke-width="1.4" font-family="IBM Plex Mono, monospace" font-size="11">
+            <path d="M40 40 H260 V55 H400 V115 H260 V130 H40 Z"/>
+            <path d="M30 85 H410" stroke-dasharray="10 3 2 3" stroke-width=".8"/>
+            <path d="M40 140 V158 M260 140 V158 M400 125 V158" stroke-width=".7"/>
+            <path d="M262 150 H398" stroke-width=".8"/><path d="M262 150 l7 -3 v6 z M398 150 l-7 -3 v6 z" fill="currentColor"/>
+            <text x="300" y="166" fill="currentColor" stroke="none">60 ±0.2</text>
+            <path d="M420 55 V115" stroke-width=".8"/><path d="M420 57 l-3 7 h6 z M420 113 l-3 -7 h6 z" fill="currentColor"/>
+            <path d="M400 55 H426 M400 115 H426" stroke-width=".6"/>
+            <text x="428" y="82" fill="currentColor" stroke="none">⌀40</text><text x="428" y="96" fill="currentColor" stroke="none">±0.05</text>
+            <path d="M20 40 V130" stroke-width=".8"/><path d="M20 42 l-3 7 h6 z M20 128 l-3 -7 h6 z" fill="currentColor"/>
+            <text x="2" y="30" fill="currentColor" stroke="none">⌀50 bar</text>
+            <path d="M320 55 l8 -16 l4 8 h22" stroke-width=".9"/><text x="336" y="34" fill="currentColor" stroke="none">Ra 3.2</text>
+            <text x="44" y="20" fill="currentColor" stroke="none" id="matLbl">Material: mild steel (EN3)</text>
+          </svg>
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <div class="field"><label for="mat">Material</label><select id="mat"><option value="steel">Mild steel (EN3)</option><option value="al">Aluminium (6082)</option><option value="brass">Brass (CZ121)</option></select></div>
+        </div>
+        <dl class="spec">
+          <dt>Operation</dt><dd>Turn ⌀50 → ⌀40, length 60</dd>
+          <dt>Tolerance</dt><dd>⌀39.95 – 40.05 mm</dd>
+          <dt>Surface finish</dt><dd>Ra ≤ 3.2 µm</dd>
+          <dt>Target cycle</dt><dd id="tgtT">≤ 6 min</dd>
+        </dl>
+        <details style="margin-top:12px">
+          <summary>Cutting data chart</summary>
+          <div class="tbl" style="margin-top:6px">
+            <table>
+              <thead><tr><th>Material</th><th>HSS Vc m/min</th><th>Carbide Vc m/min</th></tr></thead>
+              <tbody><tr><td>Mild steel</td><td>20–35</td><td>120–200</td></tr><tr><td>Aluminium</td><td>60–120</td><td>250–450</td></tr><tr><td>Brass</td><td>45–80</td><td>150–280</td></tr></tbody>
+            </table>
+          </div>
+          <p style="margin:8px 0 0;color:var(--muted)">Spindle speed N = 1000 × Vc ÷ (π × D). Roughing: deeper cut, feed 0.20–0.32 mm/rev. Finishing: 0.2–0.5 mm cut, feed 0.05–0.12 mm/rev. Surface finish Ra ≈ f² ÷ (32 r).</p>
+        </details>
+      </section>
+
+      <section class="card">
+        <h2>Pass log <small id="nPass">0 passes</small></h2>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>#</th><th>N rpm</th><th>f</th><th>ap</th><th>Vc</th><th>F / N</th><th>Ra µm</th><th>Note</th></tr></thead>
+            <tbody id="log"><tr><td colspan="8" class="empty" style="text-align:left;font-family:inherit">No passes yet.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Inspection report</h2>
+        <div class="report" id="report"><div class="empty">Submit the part when you think it is finished. The inspector checks diameter, finish, safety and cycle time.</div></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+const SPEEDS=[70,110,180,280,450,710,1120,1800];
+const FEEDS=[0.05,0.08,0.12,0.16,0.20,0.25,0.32,0.40];
+const MAT={
+  steel:{name:"mild steel (EN3)", kc:2100, vc:{hss:[20,35],carb:[120,200]}, chip:"#7d8b97", hot:"#4a63b8", bue:true},
+  al:   {name:"aluminium (6082)", kc:800,  vc:{hss:[60,120],carb:[250,450]}, chip:"#c7cfd4", hot:"#c7cfd4", bue:false},
+  brass:{name:"brass (CZ121)",   kc:1100, vc:{hss:[45,80],carb:[150,280]},  chip:"#c9a53b", hot:"#c9a53b", bue:false}
+};
+const TOOL={ hss:{grade:"hss",r:0.4,n:0.125,Fbreak:2600}, hss8:{grade:"hss",r:0.8,n:0.125,Fbreak:2600}, carb:{grade:"carb",r:0.8,n:0.25,Fbreak:3400} };
+const MOTOR_KW=5.5, CHATTER_N=1900, L=60, D0=50, TARGET=40, TOL=0.05;
+
+const s={};
+function newJob(){
+  Object.assign(s,{ mat:$("mat").value, D:D0, measured:null, wear:0, broken:false, running:false, n:0,
+    checks:{key:false,grip:false,guard:false,ppe:false}, violations:[], passes:[], time:0, lastRa:null,
+    pass:null, chips:[], cool:[], phase:0, inspected:false, toolChanges:0 });
+  document.querySelectorAll(".check").forEach(b=>b.setAttribute("aria-pressed","false"));
+  $("jobNo").textContent="JC-"+String(Math.floor(100+Math.random()*900));
+  $("matLbl").textContent="Material: "+MAT[s.mat].name;
+  setSpin(false); renderLog(); $("report").innerHTML='<div class="empty">Submit the part when you think it is finished. The inspector checks diameter, finish, safety and cycle time.</div>';
+  say("New ⌀50 "+MAT[s.mat].name+" bar loaded in the chuck. Complete the pre-start checks, set your speed, then start the spindle.");
+  readouts();
+}
+
+// ---------- cutting model ----------
+const tool=()=>TOOL[$("tool").value];
+const N=()=>+$("spd").value, F=()=>+$("feed").value, AP=()=>Math.max(0,+$("doc").value||0);
+const Vc=(D,n)=>Math.PI*D*n/1000;
+function model(D,n,f,ap){
+  const m=MAT[s.mat], t=tool(), [lo,hi]=m.vc[t.grade], vmid=(lo+hi)/2;
+  const v=Vc(D,n), Fc=m.kc*f*ap*(1+0.6*s.wear), P=Fc*v/60000;
+  let Cc=vmid*Math.pow(60,t.n); if($("cool").checked) Cc*=t.grade==="hss"?1.15:1.05;
+  Cc/=Math.pow(f/0.2,0.35)*Math.pow(Math.max(ap,0.1)/2,0.15);
+  const life=Math.pow(Cc/Math.max(v,1),1/t.n);                 // Taylor tool life, minutes
+  const chatter=Fc>CHATTER_N;
+  let Ra=f*f/(32*t.r)*1000, why=[];
+  if(m.bue && v<0.7*lo){ Ra*=2.2; why.push("built-up edge at low cutting speed"); }
+  if(chatter){ Ra*=2.6; why.push("chatter"); }
+  if(s.wear>0.5){ Ra*=1+(s.wear-0.5)*2; why.push("worn tool"); }
+  if(m.bue && !$("cool").checked && t.grade==="hss") Ra*=1.2;
+  return {v,Fc,P,life,chatter,Ra,why,lo,hi};
+}
+
+// ---------- readouts ----------
+function readouts(){
+  const n=s.running?N():0, m=model(s.D,N(),F(),AP());
+  $("dN").textContent=n+" rpm";
+  $("dVc").textContent=m.v.toFixed(0)+" m/min";
+  $("dVc").style.color= m.v>m.hi*1.15||m.v<m.lo*0.7 ? css("--warn") : "";
+  $("dF").textContent=Math.round(m.Fc)+" N";
+  $("dF").style.color= m.Fc>CHATTER_N ? css("--warn") : "";
+  $("dP").textContent=m.P.toFixed(2)+" kW";
+  const pp=Math.min(1,m.P/MOTOR_KW); $("mP").style.width=(pp*100)+"%"; $("mP").style.background= pp>0.9?css("--warn"):pp>0.7?css("--caution"):css("--good");
+  $("dW").textContent=s.broken?"BROKEN":Math.round(s.wear*100)+"%"; $("mW").style.width=Math.min(100,s.wear*100)+"%";
+  $("mW").style.background= s.wear>0.8?css("--warn"):s.wear>0.5?css("--caution"):css("--good");
+  $("dT").textContent=s.time.toFixed(1)+" min";
+}
+["spd","feed","doc","tool","cool"].forEach(id=>$(id).addEventListener("input",readouts));
+
+// ---------- controls ----------
+function say(t,k){ const m=$("msg"); m.textContent=t; m.className="msg"+(k?" "+k:""); }
+function setSpin(on){ s.running=on; const b=$("spin"); b.textContent=on?"Stop spindle":"Start spindle"; b.className="grow "+(on?"stop":"start"); readouts(); }
+const CK={ckKey:"key",ckGrip:"grip",ckGuard:"guard",ckPPE:"ppe"};
+for(const id in CK) $(id).onclick=()=>{
+  if(s.running && (id==="ckKey"||id==="ckGrip"||id==="ckGuard")){ say("Stop the spindle before touching the chuck or guard.","warn"); return; }
+  const k=CK[id]; s.checks[k]=!s.checks[k]; $(id).setAttribute("aria-pressed",s.checks[k]);
+};
+let lastSpd=$("spd").value;
+$("spd").addEventListener("change",e=>{ if(s.running){ e.target.value=lastSpd; say("Stop the spindle before changing gear. Changing gear while running damages the gearbox.","warn"); readouts(); return; } lastSpd=e.target.value; });
+$("tool").addEventListener("change",e=>{ if(s.running){ say("Stop the spindle before changing the tool.","warn"); } });
+$("mat").onchange=()=>newJob();
+
+$("spin").onclick=()=>{
+  audio();
+  if(s.running){ setSpin(false); say("Spindle stopped."); return; }
+  if(s.pass) return;
+  if(!s.checks.guard){ say("Interlock: the spindle will not start with the chuck guard open.","warn"); return; }
+  if(!s.checks.key){ s.violations.push("Started the spindle with the chuck key in the chuck"); keyThrown=1; say("DANGER: the chuck key was left in the chuck and was thrown out at "+N()+" rpm. On a real machine this causes serious injury. Always remove the key immediately after use. The job has failed on safety.","warn"); return; }
+  if(!s.checks.ppe) { s.violations.push("Operated the lathe without safety glasses"); say("Spindle running, but you are not wearing safety glasses. This has been recorded.","caution"); }
+  else say("Spindle running at "+N()+" rpm. Vc = "+Vc(s.D,N()).toFixed(0)+" m/min on ⌀"+s.D.toFixed(2)+".");
+  setSpin(true);
+};
+$("meas").onclick=()=>{
+  if(s.running){ s.violations.push("Measured the workpiece while the spindle was running"); say("Never measure a rotating workpiece. Stop the spindle first. This has been recorded.","warn"); return; }
+  if(s.passes.length===0){ say("Micrometer reading: ⌀"+D0.toFixed(2)+" mm (uncut bar)."); return; }
+  const r=Math.round((s.D+(Math.random()-0.5)*0.008)*100)/100; s.measured=r;
+  const left=(r-TARGET)/2;
+  say("Micrometer reading: ⌀"+r.toFixed(2)+" mm. "+(r>TARGET+TOL?"Still "+(r-TARGET).toFixed(2)+" mm oversize on diameter, so "+left.toFixed(2)+" mm to remove on the radius.":r<TARGET-TOL?"Undersize: the part is out of tolerance.":"Within tolerance."), r<TARGET-TOL?"warn":r<=TARGET+TOL?"good":"");
+};
+$("tchg").onclick=()=>{ if(s.running){ say("Stop the spindle before changing the tool.","warn"); return; } s.wear=0; s.broken=false; s.toolChanges++; s.time+=1.5; readouts(); say("Tool changed and reset to centre height (1.5 min added to cycle time)."); };
+$("newjob").onclick=newJob;
+$("snd").onclick=()=>{ sound=!sound; $("snd").textContent="Sound: "+(sound?"on":"off"); $("snd").setAttribute("aria-pressed",sound); if(sound) audio(); };
+
+$("cut").onclick=()=>{
+  audio();
+  if(s.pass) return;
+  if(keyThrown){ say("The job failed on safety. Start a new job.","warn"); return; }
+  if(!s.running){ say("Start the spindle first.","warn"); return; }
+  if(s.broken){ say("The tool is broken. Stop the spindle and change the tool.","warn"); return; }
+  const ap=AP(); if(ap<0.05||ap>5){ say("Set a depth of cut between 0.05 and 5 mm.","warn"); return; }
+  if(ap*2>=s.D-10){ say("That depth of cut is far too large for this bar.","warn"); return; }
+  if(!s.checks.grip){ s.violations.push("Machined with the workpiece not tightened"); setSpin(false);
+    say("The workpiece was not tightened. It was pulled out of the jaws as the tool engaged. The part is scrapped and the tool damaged. Always tighten the chuck and check the work runs true before cutting.","warn"); s.broken=true; s.scrapped=true; readouts(); return; }
+  const m=model(s.D,N(),F(),ap), t=tool();
+  if(m.P>MOTOR_KW){ setSpin(false); say("The motor stalled: the cut needs "+m.P.toFixed(1)+" kW but the lathe has "+MOTOR_KW+" kW. Reduce the depth of cut or feed.","warn"); logPass({n:N(),f:F(),ap,v:m.v,Fc:m.Fc,Ra:null,note:"Motor stalled, no cut",bad:true}); return; }
+  const cutMin=L/(F()*N());
+  const wearAdd=cutMin/m.life;
+  const breaks = m.Fc>t.Fbreak || s.wear+wearAdd>=1;
+  const deflect = m.Fc/60000 + s.wear*0.012;   // radial deflection and wear spring-back, mm
+  const newD = s.D - 2*ap + 2*deflect;
+  s.pass={ t:0, dur:2.6+Math.min(2.5,cutMin*1.5), frac:breaks?(m.Fc>t.Fbreak?0.15:Math.max(0.1,(1-s.wear)/wearAdd)):1,
+    prevD:s.D, newD, m, ap, cutMin, wearAdd, breaks, n:N(), f:F() };
+  say(m.chatter?"Cutting… the tool is chattering: the cut is too heavy for this set-up.":"Cutting…", m.chatter?"caution":"");
+};
+function finishPass(){
+  const p=s.pass, m=p.m; s.pass=null;
+  if(p.breaks){
+    const doneFrac=Math.min(1,p.frac); s.time+=p.cutMin*doneFrac; s.broken=true; s.wear=1;
+    const why=m.Fc>tool().Fbreak?"the cutting force ("+Math.round(m.Fc)+" N) was too high for this tool":"it wore out: cutting speed too high for its tool life";
+    s.stepPartial=true; s.partialAt=doneFrac; s.partialD=p.newD;
+    logPass({n:p.n,f:p.f,ap:p.ap,v:m.v,Fc:m.Fc,Ra:null,note:"Tool broke: "+why,bad:true});
+    say("The tool broke because "+why+". Stop the spindle and change the tool. The pass was not completed.","warn");
+  } else {
+    s.D=p.newD; s.wear+=p.wearAdd; s.time+=p.cutMin+0.15; s.lastRa=m.Ra; s.stepPartial=false;
+    const notes=[]; if(m.chatter) notes.push("chatter"); if(m.why.includes("built-up edge at low cutting speed")) notes.push("built-up edge"); if(m.v>m.hi*1.15) notes.push("Vc above chart"); if(m.v<m.lo*0.7) notes.push("Vc below chart");
+    logPass({n:p.n,f:p.f,ap:p.ap,v:m.v,Fc:m.Fc,Ra:m.Ra,note:notes.join(", ")||"ok",bad:notes.length>0});
+    let t="Pass complete. Ra ≈ "+m.Ra.toFixed(1)+" µm"+(m.why.length?" ("+m.why.join(", ")+")":"")+". Stop the spindle and measure before the final pass.";
+    say(t, m.Ra>3.2||m.chatter?"caution":"good");
+  }
+  readouts();
+}
+function logPass(r){ s.passes.push(r); renderLog(); }
+function renderLog(){
+  const tb=$("log"); tb.innerHTML="";
+  if(!s.passes||!s.passes.length){ tb.innerHTML='<tr><td colspan="8" class="empty" style="text-align:left;font-family:inherit">No passes yet.</td></tr>'; $("nPass").textContent="0 passes"; return; }
+  s.passes.forEach((r,i)=>{ const tr=document.createElement("tr"); if(r.bad) tr.className="bad";
+    tr.innerHTML=`<td>${i+1}</td><td>${r.n}</td><td>${r.f.toFixed(2)}</td><td>${r.ap.toFixed(2)}</td><td>${r.v.toFixed(0)}</td><td>${Math.round(r.Fc)}</td><td>${r.Ra==null?"–":r.Ra.toFixed(1)}</td><td class="note">${r.note}</td>`; tb.appendChild(tr); });
+  $("nPass").textContent=s.passes.length+(s.passes.length===1?" pass":" passes");
+}
+
+$("insp").onclick=()=>{
+  if(s.running){ say("Stop the spindle and remove the part before inspection.","warn"); return; }
+  const dOk=s.D>=TARGET-TOL && s.D<=TARGET+TOL, raOk=s.lastRa!=null && s.lastRa<=3.2, safe=s.violations.length===0 && !s.scrapped, tgt=6;
+  const cyc=s.time, cycOk=cyc<=tgt;
+  const ok=dOk&&raOk&&safe;
+  const line=(k,v,good)=>`<div class="line"><span>${k}</span><span class="${good?"pass":"fail"}">${v}</span></div>`;
+  let tips=[];
+  if(!dOk) tips.push(s.D>TARGET+TOL?"The part is oversize. Measure, then take a light finishing pass to remove exactly what is left.":"The part is undersize and cannot be recovered. Measure before the final pass and allow for tool deflection.");
+  if(!raOk) tips.push("Surface finish is too rough. Finish with a feed of 0.08–0.12 mm/rev, a light cut and the correct cutting speed.");
+  if(!cycOk) tips.push("Cycle time is long. Use deeper roughing cuts and higher feeds, within the machine's power.");
+  if(s.violations.length) tips.push("Safety: "+s.violations.join("; ")+".");
+  $("report").innerHTML=`<div class="verdict ${ok?"pass":"fail"}">${ok?"ACCEPTED":"REJECTED"}</div>`+
+    line("Diameter (⌀40 ±0.05)", s.passes.length?s.D.toFixed(3)+" mm":"not machined", dOk)+
+    line("Surface finish (Ra ≤ 3.2)", s.lastRa==null?"–":s.lastRa.toFixed(2)+" µm", raOk)+
+    line("Safety", s.violations.length?s.violations.length+" violation(s)":(s.scrapped?"part scrapped":"no violations"), safe)+
+    line("Cycle time (target ≤ "+tgt+" min)", cyc.toFixed(1)+" min", cycOk)+
+    line("Passes / tool changes", s.passes.length+" / "+s.toolChanges, true)+
+    (tips.length?`<div class="msg ${ok?"caution":"warn"}" style="margin-top:8px">${tips.join(" ")}</div>`:`<div class="msg good" style="margin-top:8px">Well done. The part meets the drawing and was made safely.</div>`);
+  say(ok?"Part accepted by inspection.":"Part rejected. See the inspection report.", ok?"good":"warn");
+};
+
+// ---------- sound ----------
+let AC=null, motor=null, motorG=null, cutG=null, chatO=null, chatG=null, sound=true;
+function audio(){
+  if(AC){ if(AC.state==="suspended") AC.resume().catch(()=>{}); return; }
+  if(!sound) return;
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    motor=AC.createOscillator(); motor.type="sawtooth"; const lp=AC.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=400;
+    motorG=AC.createGain(); motorG.gain.value=0; motor.connect(lp); lp.connect(motorG); motorG.connect(AC.destination); motor.start();
+    const len=AC.sampleRate, buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=AC.createBufferSource(); src.buffer=buf; src.loop=true; const bp=AC.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=2400; bp.Q.value=0.9;
+    cutG=AC.createGain(); cutG.gain.value=0; src.connect(bp); bp.connect(cutG); cutG.connect(AC.destination); src.start();
+    chatO=AC.createOscillator(); chatO.type="square"; chatO.frequency.value=880; chatG=AC.createGain(); chatG.gain.value=0; chatO.connect(chatG); chatG.connect(AC.destination); chatO.start();
+  }catch(e){ AC=null; }
+}
+function soundUpdate(cutting,m){
+  if(!AC) return; const t=AC.currentTime, on=sound&&s.running;
+  motor.frequency.setTargetAtTime(30+N()/18,t,0.2); motorG.gain.setTargetAtTime(on?0.05:0,t,0.15);
+  cutG.gain.setTargetAtTime(on&&cutting?Math.min(0.25,0.05+m.P/12):0,t,0.05);
+  chatG.gain.setTargetAtTime(on&&cutting&&m.chatter?0.03*(0.5+Math.random()):0,t,0.03);
+}
+
+// ---------- drawing ----------
+const mc=$("mach"), mx=mc.getContext("2d");
+function sizeCanvas(c){ const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1; c.width=r.width*d; c.height=r.height*d; c.getContext("2d").setTransform(d,0,0,d,0,0); return r; }
+let MR=sizeCanvas(mc); let keyThrown=0, keyAnim=0;
+function draw(dt){
+  const W=MR.width,H=MR.height, ink=css("--ink"), muted=css("--muted"), mach=css("--machine"), mach2=css("--machine-2"), st=css("--steel"), std=css("--steel-d"), line=css("--line");
+  mx.clearRect(0,0,W,H);
+  const cy=H*0.44, chuckW=Math.max(40,W*0.11), x0=14+chuckW+18, sc=Math.min((W-x0-30)/122, (H*0.34)/D0), xEnd=x0+120*sc, xStep=xEnd-L*sc;
+  // bed
+  mx.fillStyle=mach2; mx.fillRect(0,H*0.82,W,H*0.18); mx.fillStyle=mach; mx.fillRect(0,H*0.80,W,8);
+  // headstock + chuck
+  mx.fillStyle=mach; mx.fillRect(0,cy-H*0.32,14+chuckW*0.3,H*0.62);
+  mx.fillStyle=std; mx.fillRect(14,cy-D0*sc*0.8,chuckW,D0*sc*1.6);
+  mx.fillStyle=st; const jaw=(D0/2+6)*sc; mx.fillRect(14+chuckW,cy-jaw,14,jaw-D0/2*sc+4); mx.fillRect(14+chuckW,cy+D0/2*sc-4,14,jaw-D0/2*sc+4);
+  // chuck key
+  if(!s.checks.key && !keyThrown){ mx.fillStyle=ink; mx.fillRect(14+chuckW*0.4,cy-D0*sc*0.8-22,6,22); mx.fillRect(14+chuckW*0.4-14,cy-D0*sc*0.8-26,34,6); }
+  if(keyThrown){ keyAnim+=dt; const kx=14+chuckW*0.4+keyAnim*260, ky=cy-D0*sc-30-keyAnim*180+keyAnim*keyAnim*300; if(ky<H) { mx.save(); mx.translate(kx,ky); mx.rotate(keyAnim*14); mx.fillStyle=css("--warn"); mx.fillRect(-17,-3,34,6); mx.fillRect(-3,-3,6,26); mx.restore(); } }
+  // workpiece profile
+  const p=s.pass; const spinning=s.running;
+  let toolX=xEnd+20, toolR=s.D/2;
+  const R0=D0/2*sc;
+  mx.fillStyle=st;
+  mx.fillRect(x0-4,cy-R0,xStep-x0+4,2*R0);                                   // uncut shoulder
+  if(p){ p.t+=dt; const f=Math.min(1,p.t/p.dur), fr=Math.min(f,p.frac); toolX=xEnd-(xEnd-xStep)*fr; toolR=p.newD/2;
+    const rp=p.prevD/2*sc, rn=p.newD/2*sc;
+    mx.fillRect(xStep,cy-rp,toolX-xStep,2*rp); mx.fillRect(toolX,cy-rn,xEnd-toolX,2*rn);
+    if(spinning && fr<1 && f<p.frac+0.02){ emitChips(toolX,cy+rn,p.m,dt); }
+    if(f>=1 || (p.breaks && f>=p.frac)){ finishPass(); }
+  } else {
+    const r=s.D/2*sc; mx.fillRect(xStep,cy-r,xEnd-xStep,2*r);
+    if(s.stepPartial){ const xb=xEnd-(xEnd-xStep)*s.partialAt, rn=s.partialD/2*sc; mx.fillStyle=css("--stage"); mx.fillRect(xb,cy-r,xEnd-xb,r-rn); mx.fillRect(xb,cy+rn,xEnd-xb,r-rn); mx.fillStyle=st; }
+  }
+  // rotation streaks
+  if(spinning){ s.phase+=dt*N()/60*6.28; mx.strokeStyle="rgba(255,255,255,0.35)"; mx.lineWidth=1;
+    for(let i=0;i<5;i++){ const yy=cy+Math.sin(s.phase+i*1.25)*R0*0.85; mx.beginPath(); mx.moveTo(x0,yy); mx.lineTo(xStep,yy); mx.stroke(); } }
+  // centre line
+  mx.strokeStyle=muted; mx.setLineDash([10,3,2,3]); mx.beginPath(); mx.moveTo(x0-10,cy); mx.lineTo(W-6,cy); mx.stroke(); mx.setLineDash([]);
+  // guard
+  if(s.checks.guard){ const gy=Math.max(4,cy-D0*sc*0.8-30); mx.fillStyle="rgba(240,180,40,0.22)"; mx.strokeStyle=css("--caution"); mx.fillRect(8,gy,chuckW+34,22); mx.strokeRect(8,gy,chuckW+34,22); mx.fillStyle=css("--caution"); mx.font="10px "+css("--f-mono"); mx.textAlign="left"; mx.fillText("guard",chuckW+46,gy+15); }
+  // tool post + carriage
+  const tx = p? toolX : Math.min(W-30, xEnd+18), tipY=cy+toolR*sc;
+  mx.fillStyle=mach; mx.fillRect(tx-30,H*0.66,70,H*0.14);
+  mx.fillStyle=css("--steel-d"); mx.fillRect(tx-6,tipY+14,40,H*0.66-tipY-14);
+  mx.fillStyle=s.broken?css("--warn"):(tool().grade==="carb"?"#c9a227":ink);
+  mx.beginPath(); mx.moveTo(tx,tipY+2); mx.lineTo(tx+28,tipY+16); mx.lineTo(tx+4,tipY+18); mx.closePath(); mx.fill();
+  // coolant
+  if($("cool").checked && spinning){ for(let i=0;i<2;i++) s.cool.push({x:tx+8+Math.random()*6,y:tipY-40,v:120}); }
+  mx.fillStyle="rgba(120,190,230,0.7)"; s.cool.forEach(c=>{ c.y+=c.v*dt; mx.fillRect(c.x,c.y,2,4); }); s.cool=s.cool.filter(c=>c.y<tipY+10);
+  // chips
+  s.chips.forEach(c=>{ c.vy+=400*dt; c.x+=c.vx*dt; c.y+=c.vy*dt; c.a+=c.spin*dt; mx.save(); mx.translate(c.x,c.y); mx.rotate(c.a); mx.strokeStyle=c.col; mx.lineWidth=1.6; mx.beginPath(); mx.arc(0,0,c.r,0,4.5); mx.stroke(); mx.restore(); });
+  s.chips=s.chips.filter(c=>c.y<H*0.82);
+  // dimension labels
+  mx.fillStyle=muted; mx.font="11px "+css("--f-mono"); mx.textAlign="center";
+  mx.fillText("⌀50", (x0+xStep)/2, cy-R0-8);
+  mx.fillText(s.passes&&s.passes.length?"⌀"+(s.measured!=null?s.measured.toFixed(2):"?"):"60 mm to turn", (xStep+xEnd)/2, cy-R0-8);
+  mx.strokeStyle=line; mx.beginPath(); mx.moveTo(xStep,cy-R0-14); mx.lineTo(xStep,cy+R0+4); mx.stroke();
+  soundUpdate(!!(p&&p.t<p.dur*Math.min(1,p.frac)), p?p.m:model(s.D,N(),F(),AP()));
+}
+function emitChips(x,y,m,dt){
+  const k=Math.min(6,1+m.P*2); const hotSteel=s.mat==="steel" && m.v>150;
+  for(let i=0;i<k;i++) if(Math.random()<0.6) s.chips.push({x:x+10,y:y+6,vx:30+Math.random()*90,vy:-60-Math.random()*90,r:2+Math.random()*4,a:0,spin:8+Math.random()*10,col:hotSteel&&Math.random()<0.6?MAT.steel.hot:MAT[s.mat].chip});
+  if(s.chips.length>220) s.chips.splice(0,s.chips.length-220);
+}
+let last=performance.now();
+function loop(now){ const dt=Math.min((now-last)/1000,0.05); last=now; draw(dt); requestAnimationFrame(loop); }
+window.addEventListener("resize",()=>{ MR=sizeCanvas(mc); });
+
+// ---------- start ----------
+SPEEDS.forEach(v=>$("spd").add(new Option(v+" rpm",v))); $("spd").value=180; lastSpd="180";
+FEEDS.forEach(v=>$("feed").add(new Option(v.toFixed(2)+" mm/rev",v))); $("feed").value=0.2;
+const _nj=newJob; newJob=function(){ keyThrown=0; keyAnim=0; s.scrapped=false; s.stepPartial=false; _nj(); };
+$("newjob").onclick=newJob; $("mat").onchange=newJob;
+newJob(); requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>

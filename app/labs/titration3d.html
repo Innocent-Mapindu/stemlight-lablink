@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3D Titration Lab</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: full-screen 3D bench; HUD (title + steps) top, view switcher right, control sheet bottom. One deliberate light look. */
+:root{--navy:#023d84;--orange:#f58300;--chem:#c45f00;--ink:#17221f;--muted:#5a6966;--panel:rgba(255,255,255,.94);--line:#d3dbd8;--good:#2f7d4f;--warn:#b4442f;--caution:#c08512;--soft:#fdebd6;
+ --f-display:"Montserrat",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#cfd6d4;color:var(--ink);font-family:var(--f-body);font-size:14px;overflow:hidden}
+[hidden]{display:none!important}
+#c{position:fixed;left:0;top:0;width:100%;display:block;touch-action:none}
+.hud{position:fixed;left:max(10px,env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));max-width:min(340px,calc(100% - 140px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.hud h1{font-family:var(--f-display);font-size:1rem;color:var(--navy);margin:0 0 2px}
+.hud .sub{font-family:var(--f-mono);font-size:.68rem;color:var(--chem);letter-spacing:.06em;text-transform:uppercase}
+#steps{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:3px;font-size:.8rem}
+#steps li{display:flex;gap:6px;align-items:baseline;color:var(--muted)}
+#steps li::before{content:"○";color:var(--line);font-weight:700}
+#steps li.on{color:var(--ink);font-weight:600} #steps li.on::before{content:"●";color:var(--orange)}
+#steps li.done{color:var(--good)} #steps li.done::before{content:"✓";color:var(--good)}
+#cur{font-size:.8rem;font-weight:600;margin-top:4px;display:flex;gap:6px} #cur::before{content:"●";color:var(--orange)}
+#togSteps{font-size:.72rem;padding:2px 8px;min-height:26px;margin-top:6px}
+.views{position:fixed;right:max(10px,env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));display:grid;gap:6px}
+.views button{background:var(--panel);font-size:.8rem;min-height:36px;padding:6px 10px}
+.views button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.sheet{position:fixed;left:0;right:0;bottom:0;padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));background:var(--panel);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(0,0,0,.12);max-height:46vh;overflow:auto}
+.sheet-in{max-width:760px;margin:0 auto;display:grid;gap:8px}
+.msg{font-size:.9rem;padding:8px 10px;border-radius:8px;background:var(--soft);border-left:3px solid var(--orange)}
+.msg.warn{border-left-color:var(--warn);background:#fbe7e3} .msg.good{border-left-color:var(--good);background:#e3f1e8}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grow{flex:1 1 120px}
+button{font-family:var(--f-body);font-weight:600;font-size:.9rem;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 12px;min-height:42px;cursor:pointer;-webkit-user-select:none;user-select:none}
+button.primary{background:var(--chem);border-color:var(--chem);color:#fff}
+button.navy{background:var(--navy);border-color:var(--navy);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.hold.on{background:#7a3a00}
+button:focus-visible,input:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.field{display:grid;gap:3px;flex:1 1 130px;min-width:0}
+.field label{font-size:.78rem;font-weight:600;color:var(--muted)}
+input[type=number]{font-family:var(--f-mono);font-size:1rem;padding:7px 9px;border-radius:8px;border:1px solid var(--line);min-height:42px;width:100%}
+input[type=range]{width:100%;accent-color:var(--orange)}
+.tbl{overflow-x:auto} table{border-collapse:collapse;width:100%;font-size:.82rem;font-variant-numeric:tabular-nums}
+th,td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap} th{font-family:var(--f-mono);font-weight:500;font-size:.68rem;color:var(--muted)} th:first-child,td:first-child{text-align:left}
+.ok{color:var(--good);font-weight:700}
+#tag{position:fixed;pointer-events:none;background:var(--navy);color:#fff;font-size:.78rem;font-weight:600;padding:4px 8px;border-radius:6px;transform:translate(-50%,-130%);white-space:nowrap;z-index:5}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#e9edec;font-family:var(--f-display);color:var(--navy);font-size:1.1rem;z-index:20;text-align:center;padding:20px}
+.eye{display:flex;gap:8px;align-items:center;font-size:.8rem;color:var(--muted)}
+.report{position:fixed;inset:0;background:rgba(10,20,25,.55);display:grid;place-items:center;z-index:15;padding:16px}
+.rbox{background:#fff;border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:16px 18px}
+.rbox h2{font-family:var(--f-display);color:var(--navy);margin:0 0 6px}
+.score{font-family:var(--f-display);font-weight:800;font-size:2.4rem;color:var(--chem);margin:0}
+.line{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:6px 0;font-size:.9rem}
+.line span:last-child{font-family:var(--f-mono)}
+.rbox ul{padding-left:1.2em;margin:6px 0}
+@media (max-width:560px){button{min-height:38px;font-size:.84rem;padding:6px 10px} input[type=number]{min-height:38px} .sheet-in{gap:6px} .msg{font-size:.84rem;padding:6px 9px} .hud{max-width:calc(100% - 120px);padding:8px 10px} #steps{font-size:.74rem} .views button{font-size:.74rem;padding:5px 8px;min-height:34px}}
+</style></head><body>
+<canvas id="c" aria-label="3D chemistry bench"></canvas>
+<div class="hud"><div class="sub">STEMLight LabLink · 3D lab</div><h1>Acid–base titration</h1><div id="cur" hidden></div><ul id="steps"></ul><button id="togSteps">Hide steps</button></div>
+<div class="views" role="group" aria-label="Camera view"><button data-v="shelf" aria-pressed="true">Shelf</button><button data-v="bench" aria-pressed="false">Bench</button><button data-v="meniscus" aria-pressed="false">Burette scale</button><button data-v="flask" aria-pressed="false">Flask</button></div>
+<div class="sheet"><div class="sheet-in"><div class="msg" id="msg" role="status"></div><div id="ctrl"></div></div></div>
+<div id="tag" hidden></div>
+<div id="loading">Loading the 3D lab…</div>
+<div class="report" id="report" hidden><div class="rbox" id="rbox"></div></div>
+<script src="../vendor/three.min.js"></script>
+<script src="../vendor/OrbitControls.js"></script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+if(!window.THREE||!THREE.OrbitControls){ $("loading").innerHTML="The 3D lab could not load. Check your connection and open it again. The 2D titration practical works without it."; return; }
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas:$("c"),antialias:true}); }catch(e){ $("loading").textContent="This device cannot show 3D graphics. Use the 2D titration practical instead."; return; }
+const R=(a,b)=>a+Math.random()*(b-a), esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.05;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xdfe5e3);
+const camera=new THREE.PerspectiveCamera(40,1,0.01,20);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true; controls.minDistance=0.12; controls.maxDistance=2.8; controls.maxPolarAngle=1.5; controls.target.set(0,0.3,-0.2);
+camera.position.set(0,0.62,1.05);
+
+// ---------- lights ----------
+scene.add(new THREE.HemisphereLight(0xffffff,0x9a8f80,0.55));
+const sun=new THREE.DirectionalLight(0xffffff,0.95); sun.position.set(0.7,1.6,1.0); sun.castShadow=true; sun.shadow.mapSize.set(1024,1024);
+Object.assign(sun.shadow.camera,{left:-1,right:1,top:1,bottom:-1,near:0.2,far:4}); sun.shadow.bias=-0.0005; scene.add(sun);
+const fill=new THREE.DirectionalLight(0xfff3e0,0.3); fill.position.set(-1,0.8,0.6); scene.add(fill);
+
+// ---------- textures ----------
+function canvasTex(w,h,draw){ const c=document.createElement("canvas"); c.width=w; c.height=h; draw(c.getContext("2d"),w,h); const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=renderer.capabilities.getMaxAnisotropy(); return t; }
+const woodTex=canvasTex(1024,512,(g,w,h)=>{ g.fillStyle="#a8774b"; g.fillRect(0,0,w,h); for(let i=0;i<260;i++){ const y=Math.random()*h; g.strokeStyle=`rgba(${80+Math.random()*40},${45+Math.random()*25},${20},${0.08+Math.random()*0.12})`; g.lineWidth=1+Math.random()*3; g.beginPath(); g.moveTo(0,y); for(let x=0;x<=w;x+=64) g.lineTo(x,y+Math.sin(x/90+i)*4); g.stroke(); } });
+const tileTex=canvasTex(512,512,(g,w,h)=>{ g.fillStyle="#f1f4f3"; g.fillRect(0,0,w,h); g.strokeStyle="#c9d1cf"; g.lineWidth=4; for(let i=0;i<=4;i++){ g.beginPath(); g.moveTo(i*w/4,0); g.lineTo(i*w/4,h); g.stroke(); g.beginPath(); g.moveTo(0,i*h/4); g.lineTo(w,i*h/4); g.stroke(); } });
+tileTex.wrapS=tileTex.wrapT=THREE.RepeatWrapping; tileTex.repeat.set(6,3);
+function labelTex(lines,bg,fg){ return canvasTex(256,192,(g,w,h)=>{ g.fillStyle=bg; g.fillRect(0,0,w,h); g.strokeStyle=fg; g.lineWidth=6; g.strokeRect(6,6,w-12,h-12); g.fillStyle=fg; g.textAlign="center"; lines.forEach((l,i)=>{ g.font=(i===0?"bold 46px":"28px")+" IBM Plex Sans, Arial"; g.fillText(l,w/2,62+i*48); }); }); }
+
+// ---------- materials ----------
+const M={
+ wood:new THREE.MeshStandardMaterial({map:woodTex,roughness:0.6}),
+ cabinet:new THREE.MeshStandardMaterial({color:0x5b6b67,roughness:0.8}),
+ wall:new THREE.MeshStandardMaterial({map:tileTex,roughness:0.4}),
+ shelf:new THREE.MeshStandardMaterial({color:0xe9e3d6,roughness:0.7}),
+ metal:()=>new THREE.MeshStandardMaterial({color:0x3e4a4f,roughness:0.45,metalness:0.6}),
+ chrome:()=>new THREE.MeshStandardMaterial({color:0xb8c2c6,roughness:0.25,metalness:0.9}),
+ glass:()=>new THREE.MeshPhongMaterial({color:0xe8f4f8,specular:0xffffff,shininess:120,transparent:true,opacity:0.22,depthWrite:false,side:THREE.DoubleSide}),
+ white:()=>new THREE.MeshStandardMaterial({color:0xf7f7f5,roughness:0.15}),
+ rubber:()=>new THREE.MeshStandardMaterial({color:0xb3261e,roughness:0.6}),
+ liquid:c=>new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:0.6,shininess:90,depthWrite:false,side:THREE.DoubleSide})
+};
+
+// ---------- room ----------
+const bench=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.05,0.85),M.wood); bench.position.set(0,-0.025,-0.05); bench.receiveShadow=true; scene.add(bench);
+const cab=new THREE.Mesh(new THREE.BoxGeometry(1.85,0.85,0.8),M.cabinet); cab.position.set(0,-0.475,-0.05); scene.add(cab);
+const wall=new THREE.Mesh(new THREE.PlaneGeometry(4,1.6),M.wall); wall.position.set(0,0.75,-0.48); wall.receiveShadow=true; scene.add(wall);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(6,6),new THREE.MeshStandardMaterial({color:0x8d918c,roughness:0.9})); floor.rotation.x=-Math.PI/2; floor.position.y=-0.9; scene.add(floor);
+const SHELF_Y=[0.34,0.66];
+SHELF_Y.forEach(y=>{ const s=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.02,0.18),M.shelf); s.position.set(0,y-0.01,-0.38); s.castShadow=true; s.receiveShadow=true; scene.add(s); });
+[-0.85,0.85].forEach(x=>{ const s=new THREE.Mesh(new THREE.BoxGeometry(0.02,0.7,0.18),M.shelf); s.position.set(x,0.33,-0.38); scene.add(s); });
+
+// ---------- geometry helpers ----------
+const lathe=(pts,seg=40)=>new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),seg);
+function mesh(geo,mat,shadow=true){ const m=new THREE.Mesh(geo,mat); m.castShadow=shadow; m.receiveShadow=true; return m; }
+function glassMesh(geo){ const m=new THREE.Mesh(geo,M.glass()); m.renderOrder=2; return m; }
+
+// flask profile (outer radius against height, metres)
+const FL=[[0.0,0.0],[0.040,0.0],[0.043,0.004],[0.040,0.02],[0.030,0.05],[0.020,0.08],[0.0135,0.105],[0.0125,0.115],[0.0125,0.155],[0.0145,0.158]];
+const flaskR=y=>{ for(let i=1;i<FL.length;i++){ if(y<=FL[i][1]){ const [r0,y0]=FL[i-1],[r1,y1]=FL[i]; return r0+(r1-r0)*((y-y0)/(y1-y0||1)); } } return 0.0125; };
+const volTable=(()=>{ const t=[]; let v=0, dy=0.0002; for(let y=0.003;y<0.11;y+=dy){ const r=flaskR(y)-0.0016; v+=Math.PI*r*r*dy; t.push([y,v]); } return t; })();
+const heightFor=cm3=>{ const v=cm3*1e-6; for(const [y,vv] of volTable) if(vv>=v) return y; return 0.11; };
+
+// ---------- apparatus ----------
+const ITEMS={}; const pickables=[];
+function item(id,name,need,group){ Object.assign(group.userData,{id,name,need}); group.traverse(o=>{ if(o.isMesh){ o.userData.item=id; pickables.push(o); } }); ITEMS[id]={id,name,need,g:group,state:"shelf"}; scene.add(group); return group; }
+function bottle(lines,bg,fg,liquidColor,h=0.14,r=0.032,amber=false){ const g=new THREE.Group();
+  const body=glassMesh(new THREE.CylinderGeometry(r,r,h,32,1,true)); body.position.y=h/2; g.add(body);
+  const bmat=amber?new THREE.MeshPhongMaterial({color:0x8a4a12,transparent:true,opacity:0.55,shininess:80,depthWrite:false}):null; if(bmat) body.material=bmat;
+  const liq=mesh(new THREE.CylinderGeometry(r*0.94,r*0.94,h*0.7,32),M.liquid(liquidColor),false); liq.position.y=h*0.36; g.add(liq);
+  const sh=mesh(new THREE.CylinderGeometry(r*0.55,r,0.02,32),M.glass(),false); sh.position.y=h+0.01; g.add(sh);
+  const cap=mesh(new THREE.CylinderGeometry(r*0.5,r*0.5,0.025,24),new THREE.MeshStandardMaterial({color:0x1d2b33,roughness:0.5})); cap.position.y=h+0.032; g.add(cap);
+  const lab=new THREE.Mesh(new THREE.PlaneGeometry(r*1.5,r*1.1),new THREE.MeshStandardMaterial({map:labelTex(lines,bg,fg),roughness:0.7})); lab.position.set(0,h*0.5,r+0.0008); g.add(lab);
+  return g; }
+
+// retort stand
+(()=>{ const g=new THREE.Group(), m=M.metal();
+  const base=mesh(new THREE.BoxGeometry(0.22,0.014,0.14),m); base.position.set(0,0.007,0); g.add(base);
+  const rod=mesh(new THREE.CylinderGeometry(0.006,0.006,0.96,16),M.chrome()); rod.position.set(-0.07,0.48,-0.03); g.add(rod);
+  const boss=mesh(new THREE.BoxGeometry(0.025,0.03,0.025),m); boss.position.set(-0.07,0.915,-0.03); g.add(boss);
+  const arm=mesh(new THREE.CylinderGeometry(0.004,0.004,0.07,12),M.chrome()); arm.rotation.z=Math.PI/2; arm.position.set(-0.035,0.915,-0.03); g.add(arm);
+  [-1,1].forEach(sd=>{ const jaw=mesh(new THREE.BoxGeometry(0.004,0.03,0.022),m); jaw.position.set(sd*0.0085,0.915,-0.012); g.add(jaw); const pad=mesh(new THREE.BoxGeometry(0.003,0.026,0.012),new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.9})); pad.position.set(sd*0.0072,0.915,-0.012); g.add(pad); });
+  item("stand","Retort stand and burette clamp",true,g); })();
+// burette (origin at the bottom of the tip)
+const BUR={x:0.07,z:-0.03,tipY:0.165,zeroY:0.89,perCm3:0.012};
+const burette=(()=>{ const g=new THREE.Group();
+  const tube=glassMesh(new THREE.CylinderGeometry(0.0065,0.0065,0.72,24,1,true)); tube.position.y=0.06+0.36; g.add(tube);
+  const cone=glassMesh(lathe([[0.0065,0.06],[0.003,0.04],[0.0018,0.0],[0.0012,0.0]],20)); g.add(cone);
+  const tap=mesh(new THREE.CylinderGeometry(0.004,0.004,0.03,16),M.white()); tap.rotation.z=Math.PI/2; tap.position.set(0,0.045,0); g.add(tap);
+  const handle=mesh(new THREE.BoxGeometry(0.004,0.018,0.005),new THREE.MeshStandardMaterial({color:0x1f6fb5})); handle.position.set(0.017,0.045,0); g.add(handle); g.userData.handle=handle;
+  // scale strip
+  const sc=canvasTex(256,4096,(c,w,h)=>{ c.clearRect(0,0,w,h); c.fillStyle="#111"; c.strokeStyle="#111"; c.font="bold 54px IBM Plex Mono, monospace"; c.textAlign="left";
+    for(let t=0;t<=500;t++){ const y=40+t*(h-80)/500, L=t%10===0?150:t%5===0?110:70; c.lineWidth=t%10===0?6:4; c.beginPath(); c.moveTo(0,y); c.lineTo(L,y); c.stroke(); if(t%10===0) c.fillText(String(t/10),160,y+18); } });
+  const stripH=(50*BUR.perCm3)*(4096/(4096-80));
+  const strip=new THREE.Mesh(new THREE.PlaneGeometry(0.012,stripH),new THREE.MeshBasicMaterial({map:sc,transparent:true,depthWrite:false})); strip.position.set(0.0,(BUR.zeroY-BUR.tipY)-stripH/2+(40/4096)*stripH,0.0068); strip.renderOrder=3; g.add(strip);
+  // liquid
+  const liqMat=M.liquid(0xa9d3e2); liqMat.opacity=0.5;
+  const col=new THREE.Mesh(new THREE.CylinderGeometry(0.0059,0.0059,1,24,1,true),liqMat); col.renderOrder=1; g.add(col); g.userData.col=col;
+  const men=new THREE.Mesh(lathe([[0,0],[0.0018,0.0003],[0.0035,0.0011],[0.005,0.0023],[0.0059,0.0032]],24),new THREE.MeshBasicMaterial({color:0x2c5866,transparent:true,opacity:0.9,side:THREE.DoubleSide,depthWrite:false})); men.renderOrder=1; g.add(men); g.userData.men=men;
+  const tipLiq=new THREE.Mesh(new THREE.CylinderGeometry(0.0012,0.0045,0.06,12),liqMat); tipLiq.position.y=0.03; g.add(tipLiq); g.userData.tip=tipLiq;
+  return item("burette","Burette, 50 cm³",true,g); })();
+// funnel
+item("funnel","Filter funnel",true,(()=>{ const g=new THREE.Group(); g.add(glassMesh(lathe([[0.003,0],[0.003,0.035],[0.032,0.075],[0.033,0.077]],28))); return g; })());
+// conical flask
+const flask=(()=>{ const g=new THREE.Group(); g.add(glassMesh(lathe(FL,48)));
+  const liq=new THREE.Mesh(new THREE.BufferGeometry(),new THREE.MeshLambertMaterial({color:0xf3c64a,transparent:true,opacity:0.88,depthWrite:false,side:THREE.DoubleSide,toneMapped:false})); liq.renderOrder=1; liq.visible=false; g.add(liq); g.userData.liq=liq;
+  const flash=new THREE.Mesh(new THREE.SphereGeometry(0.012,16,12),new THREE.MeshBasicMaterial({color:0xd62839,transparent:true,opacity:0,depthWrite:false})); flash.scale.y=0.25; g.add(flash); g.userData.flash=flash;
+  return item("flask","Conical flask, 250 cm³",true,g); })();
+// white tile
+item("tile","White tile",true,(()=>{ const g=new THREE.Group(); const t=mesh(new THREE.BoxGeometry(0.15,0.008,0.15),M.white()); t.position.y=0.004; g.add(t); return g; })());
+// pipette with filler
+const pipette=(()=>{ const g=new THREE.Group(); g.add(glassMesh(lathe([[0.0012,0],[0.003,0.01],[0.003,0.17],[0.011,0.20],[0.011,0.24],[0.003,0.27],[0.003,0.43]],20)));
+  const ring=mesh(new THREE.TorusGeometry(0.0034,0.0006,6,20),new THREE.MeshBasicMaterial({color:0x111111}),false); ring.rotation.x=Math.PI/2; ring.position.y=0.36; g.add(ring);
+  const fil=mesh(new THREE.SphereGeometry(0.018,20,16),M.rubber()); fil.scale.y=1.25; fil.position.y=0.455; g.add(fil);
+  const pl=new THREE.Mesh(new THREE.CylinderGeometry(0.0026,0.0026,1,12),M.liquid(0xe6eef0)); pl.visible=false; g.add(pl); g.userData.liq=pl;
+  return item("pipette","25.0 cm³ pipette and filler",true,g); })();
+item("acid","Hydrochloric acid, 0.100 mol/dm³",true,bottle(["HCl(aq)","0.100 mol/dm³","CORROSIVE"],"#ffffff","#b4442f",0xd9eef5));
+item("carb","Sodium carbonate solution",true,bottle(["Na₂CO₃(aq)","unknown conc.","25.0 cm³ portions"],"#ffffff","#023d84",0xe6eef0));
+item("mo","Methyl orange indicator",true,bottle(["Methyl","orange"],"#fff5e6","#c45f00",0xe8902a,0.07,0.016,true));
+// distractors
+item("beaker","Beaker, 250 cm³",false,(()=>{ const g=new THREE.Group(); g.add(glassMesh(lathe([[0,0.001],[0.034,0.001],[0.035,0.003],[0.035,0.1],[0.038,0.104]],32))); return g; })());
+item("cyl","Measuring cylinder, 100 cm³",false,(()=>{ const g=new THREE.Group(); const b=mesh(new THREE.CylinderGeometry(0.03,0.032,0.008,6),M.glass()); b.position.y=0.004; g.add(b); const t=glassMesh(new THREE.CylinderGeometry(0.013,0.013,0.25,24,1,true)); t.position.y=0.13; g.add(t); return g; })());
+item("bunsen","Bunsen burner",false,(()=>{ const g=new THREE.Group(), m=M.chrome(); const b=mesh(new THREE.CylinderGeometry(0.035,0.04,0.012,24),M.metal()); b.position.y=0.006; g.add(b); const t=mesh(new THREE.CylinderGeometry(0.009,0.009,0.13,16),m); t.position.y=0.075; g.add(t); return g; })());
+item("thermo","Thermometer",false,(()=>{ const g=new THREE.Group(); const t=glassMesh(new THREE.CylinderGeometry(0.003,0.003,0.3,12,1,true)); t.position.y=0.15; g.add(t); const bl=mesh(new THREE.SphereGeometry(0.004,12,10),new THREE.MeshStandardMaterial({color:0xc0392b})); bl.position.y=0.004; g.add(bl); const s=mesh(new THREE.CylinderGeometry(0.0009,0.0009,0.2,8),new THREE.MeshStandardMaterial({color:0xc0392b})); s.position.y=0.1; g.add(s); g.rotation.z=0.12; return g; })());
+item("tubes","Test tubes in a rack",false,(()=>{ const g=new THREE.Group(); const r=mesh(new THREE.BoxGeometry(0.14,0.05,0.04),new THREE.MeshStandardMaterial({color:0xd8c6a0})); r.position.y=0.025; g.add(r); for(let i=0;i<4;i++){ const t=glassMesh(new THREE.CylinderGeometry(0.008,0.008,0.12,16,1,true)); t.position.set(-0.05+i*0.033,0.07,0); g.add(t); } return g; })());
+
+(()=>{ const r=mesh(new THREE.BoxGeometry(0.05,0.02,0.05),M.metal()); r.position.set(0.8,0.01,-0.24); scene.add(r); })();
+// shelf layout (shuffled), bench staging spots
+const TALL={stand:[-0.74,0,-0.2],burette:[0.8,0.02,-0.24],cyl:[0.66,0,-0.24]};
+Object.entries(TALL).forEach(([id,p])=>{ ITEMS[id].shelf={pos:new THREE.Vector3(...p)}; ITEMS[id].g.position.set(...p); });
+const order=Object.keys(ITEMS).filter(id=>!TALL[id]).sort(()=>Math.random()-0.5);
+order.forEach((id,i)=>{ const s=i%2, k=Math.floor(i/2), n=Math.ceil(order.length/2); const x=-0.72+k*(1.44/(n-1)); ITEMS[id].shelf={pos:new THREE.Vector3(x,SHELF_Y[s],-0.38),rot:0}; ITEMS[id].g.position.copy(ITEMS[id].shelf.pos); if(id==="pipette"){ ITEMS[id].g.rotation.z=Math.PI/2; ITEMS[id].g.position.y+=0.02; } });
+const STAGE={stand:[-0.55,0,0.12],burette:[-0.42,0.012,0.2,"lie"],funnel:[-0.3,0,0.22],flask:[0.32,0,0.16],tile:[0.48,0,0.2],pipette:[-0.28,0.02,0.3,"lie"],acid:[0.6,0,0.02],carb:[0.42,0,0.0],mo:[0.28,0,0.02]};
+const WORK={stand:[0.07,0,0.042],tile:[0.07,0.014,0.03],flask:[0.07,0.022,0.03],funnel:[0.07,0.925,0.03]};
+// the clamped burette sits in the clamp jaw
+WORK.burette=[0.07,BUR.tipY,0.03];
+
+// ---------- tweens ----------
+const tweens=[];
+function tween(obj,to,dur,done,rot){ tweens.push({obj,from:obj.position.clone(),to:new THREE.Vector3(...to),fr:obj.rotation.clone(),tr:rot,t:0,dur,done}); }
+function arc(obj,to,dur,done,rot){ tween(obj,to,dur,done,rot); tweens[tweens.length-1].arc=true; }
+function stepTweens(dt){ for(let i=tweens.length-1;i>=0;i--){ const w=tweens[i]; w.t+=dt/w.dur; const k=Math.min(1,w.t), e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  w.obj.position.lerpVectors(w.from,w.to,e); if(w.arc) w.obj.position.y+=Math.sin(Math.PI*e)*0.12;
+  if(w.tr){ w.obj.rotation.x=w.fr.x+(w.tr[0]-w.fr.x)*e; w.obj.rotation.y=w.fr.y+(w.tr[1]-w.fr.y)*e; w.obj.rotation.z=w.fr.z+(w.tr[2]-w.fr.z)*e; }
+  if(k>=1){ tweens.splice(i,1); if(w.done) w.done(); } } }
+
+// ---------- chemistry (methyl orange, Na2CO3 + 2HCl) ----------
+const C_ACID=0.100, V_ALK=25.0, conc=R(0.042,0.058);
+const S={stage:"collect",errors:{app:0,setup:0,funnel:0,read:0,over:0},level:50,startLevel:50,Va:0,flaskVol:0,mo:false,funnelIn:false,funnelEverRead:false,running:false,flash:0,flashDur:0.3,co2:0,fizz:0,bubbles:[],drops:[],rows:[],busy:false,swirl:true,eye:0,view:"shelf",readFunnelWarned:false};
+const nAlk=()=>conc*V_ALK/1000, nAcid=()=>C_ACID*S.Va/1000, endVol=()=>conc*V_ALK/C_ACID*2;
+function pH(){ if(S.flaskVol<1) return 7; const na=nAcid(), nb=nAlk(), V=(V_ALK+S.Va)/1000, x=na/nb;
+  if(na<=0) return 11.6; if(x<1) return Math.min(11.6,Math.max(8.34,10.33+Math.log10((nb-na)/na))); if(x<2) return Math.min(8.34,Math.max(4.2,6.35+Math.log10((2*nb-na)/(na-nb)))); return -Math.log10((na-2*nb)/V+Math.pow(10,-4.2)); }
+const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t), sm=(e0,e1,x)=>{ const t=Math.min(1,Math.max(0,(x-e0)/(e1-e0))); return t*t*(3-2*t); };
+function moColour(p){ const red=[214,40,57],orange=[238,120,32],yellow=[245,200,50]; return p<3.8?mix(red,orange,sm(3.1,3.8,p)):mix(orange,yellow,sm(3.8,4.4,p)); }
+const toColor=c=>new THREE.Color(c[0]/255,c[1]/255,c[2]/255).convertSRGBToLinear();
+
+// ---------- steps & UI ----------
+const STEPS=[["collect","Collect the apparatus from the shelf"],["setup","Set up the stand, burette, tile and flask"],["fill","Fill the burette through a funnel, then remove the funnel"],["pipette","Pipette 25.0 cm³ of sodium carbonate into the flask"],["indicator","Add 2–3 drops of methyl orange"],["titrate","Titrate to the end point and record"],["report","Get two concordant titres, then finish"]];
+const NEED=Object.values(ITEMS).filter(i=>i.need).map(i=>i.id);
+function renderSteps(){ const idx=STEPS.findIndex(s=>s[0]===S.stage); $("cur").textContent=`Step ${idx+1} of ${STEPS.length}: ${STEPS[idx][1]}`; $("steps").innerHTML=STEPS.map((s,i)=>`<li class="${i<idx?"done":i===idx?"on":""}">${s[1]}</li>`).join(""); }
+function showSteps(on){ $("steps").hidden=!on; $("cur").hidden=on; $("togSteps").textContent=on?"Hide steps":"All steps"; }
+$("togSteps").onclick=()=>showSteps($("steps").hidden); showSteps(innerWidth>560);
+function say(t,k){ $("msg").textContent=t; $("msg").className="msg"+(k?" "+k:""); }
+function setStage(s){ S.stage=s; renderSteps(); renderCtrl(); }
+function renderCtrl(){
+  const c=$("ctrl");
+  if(S.stage==="collect"){ const got=NEED.filter(id=>ITEMS[id].state!=="shelf").length; c.innerHTML=`<div class="row"><span style="font-size:.85rem;color:var(--muted)">On the bench: <b>${got} of ${NEED.length}</b> items needed. Tap an item on the shelf to bring it to the bench. Drag to look around; pinch or scroll to zoom.</span></div>
+    <details><summary style="cursor:pointer;font-size:.85rem;font-weight:600;color:var(--navy)">Hard to tap? Choose from a list</summary><div class="row" style="margin-top:6px">${Object.values(ITEMS).filter(i=>i.state==="shelf").sort((a,b)=>a.name.localeCompare(b.name)).map(i=>`<button data-pick="${i.id}" style="min-height:36px;font-size:.8rem">${esc(i.name)}</button>`).join("")}</div></details>`;
+    const op=window.__listOpen; if(op) c.querySelector("details").open=true; c.querySelector("details").ontoggle=e=>{ window.__listOpen=e.target.open; };
+    c.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>tapItem(b.dataset.pick,ITEMS[b.dataset.pick].g.position.clone().add(new THREE.Vector3(0,0.08,0)))); return; }
+  if(S.stage==="setup"||S.stage==="fill"||S.stage==="pipette"||S.stage==="indicator"){ c.innerHTML=`<div class="row"><button class="grow" id="hint">Show me what to tap next</button></div>`; $("hint").onclick=hint; return; }
+  if(S.stage==="titrate"||S.stage==="report"){
+    c.innerHTML=`<div class="row"><button class="primary hold grow" id="tap">Hold to open the tap</button><button class="grow" id="drop">Add 1 drop</button><label class="eye"><input type="checkbox" id="sw" ${S.swirl?"checked":""}> Swirl</label></div>
+    <div class="row" style="align-items:end"><div class="field"><label for="ini">Initial reading / cm³</label><input id="ini" type="number" step="0.05" inputmode="decimal"></div><div class="field"><label for="fin">Final reading / cm³</label><input id="fin" type="number" step="0.05" inputmode="decimal"></div><button class="navy" id="look">Read the scale</button></div>
+    <div class="row"><button class="primary grow" id="rec">Record titration</button><button class="grow" id="newf">Rinse flask, start again</button><button class="grow" id="refill">Refill burette</button></div>
+    <div class="tbl" id="tbl"></div><div class="row" id="finrow"></div>`;
+    const tap=$("tap"); const start=e=>{ e.preventDefault(); if(!canTitrate()) return; S.running=true; tap.classList.add("on"); tap.textContent="Tap open… release to close"; audio(); try{ tap.setPointerCapture(e.pointerId); }catch(_){} };
+    const stop=()=>{ if(!S.running) return; S.running=false; tap.classList.remove("on"); tap.textContent="Hold to open the tap"; };
+    tap.addEventListener("pointerdown",start); tap.addEventListener("pointerup",stop); tap.addEventListener("pointercancel",stop); tap.addEventListener("lostpointercapture",stop); tap.addEventListener("contextmenu",e=>e.preventDefault());
+    $("drop").onclick=()=>{ if(!canTitrate()) return; audio(); S.drops.push({y:BUR.tipY-0.002,v:0}); };
+    $("sw").onchange=e=>{ S.swirl=e.target.checked; };
+    $("look").onclick=()=>setView("meniscus");
+    $("rec").onclick=record; $("newf").onclick=newFlask; $("refill").onclick=refill;
+    renderTable(); return; }
+}
+function canTitrate(){ if(S.funnelIn){ say("Take the funnel out of the burette first: drops left in it would run in and change the reading.","warn"); S.errors.funnel++; return false; } if(S.flaskVol<1||!S.mo){ say("Prepare the flask first: 25.0 cm³ of sodium carbonate and methyl orange.","warn"); return false; } if(S.level>=50){ say("The burette is empty. Refill it.","warn"); return false; } return true; }
+
+// ---------- picking ----------
+const ray=new THREE.Raycaster(), ptr=new THREE.Vector2(); let down=null;
+renderer.domElement.addEventListener("pointerdown",e=>{ down={x:e.clientX,y:e.clientY,t:performance.now()}; });
+renderer.domElement.addEventListener("pointerup",e=>{ if(!down) return; const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y); down=null; if(moved>8) return;
+  const r=renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1); ray.setFromCamera(ptr,camera);
+  const hit=ray.intersectObjects(pickables,false)[0]; if(hit) tapItem(hit.object.userData.item,hit.point); });
+let tagT=0; function showTag(id,point){ const p=point.clone().project(camera), r=renderer.domElement.getBoundingClientRect(); const t=$("tag"); t.textContent=ITEMS[id].name; t.style.left=(r.left+(p.x+1)/2*r.width)+"px"; t.style.top=(r.top+(1-p.y)/2*r.height)+"px"; t.hidden=false; tagT=1.6; }
+function hint(){ const id=nextTarget(); if(!id) return; pulse(id); say("Tap the "+ITEMS[id].name.split(",")[0].toLowerCase()+"."); }
+function nextTarget(){
+  if(S.stage==="setup"){ if(ITEMS.stand.state!=="work") return "stand"; if(ITEMS.burette.state!=="work") return "burette"; if(ITEMS.tile.state!=="work") return "tile"; if(ITEMS.flask.state!=="work") return "flask"; }
+  if(S.stage==="fill"){ if(S.level>=49&&!S.funnelIn) return "funnel"; if(S.level>=49) return "acid"; if(S.funnelIn) return "funnel"; }
+  if(S.stage==="pipette") return "pipette"; if(S.stage==="indicator") return "mo"; return null; }
+let pulseId=null, pulseT=0; function pulse(id){ pulseId=id; pulseT=2.5; }
+function shake(id){ const g=ITEMS[id].g, p=g.position.clone(); let n=0; const iv=setInterval(()=>{ g.position.x=p.x+(n%2?0.006:-0.006); if(++n>6){ clearInterval(iv); g.position.copy(p); } },50); }
+
+function tapItem(id,point){
+  showTag(id,point); if(S.busy) return; const it=ITEMS[id];
+  if(S.stage==="collect"){
+    if(it.state!=="shelf"){ say(it.name+" is already on the bench."); return; }
+    if(!it.need){ S.errors.app++; shake(id); say(`A ${it.name.toLowerCase()} is not needed for this titration. Choose apparatus for measuring volumes accurately.`,"warn"); return; }
+    it.state="bench"; const s=STAGE[id]; arc(it.g,[s[0],s[1],s[2]],0.8,null,s[3]==="lie"?[0,0,Math.PI/2]:[0,0,0]);
+    const left=NEED.filter(i=>ITEMS[i].state==="shelf");
+    if(!left.length){ say("All the apparatus is on the bench. Now set it up: start with the retort stand.","good"); setTimeout(()=>{ setStage("setup"); setView("bench"); },700); }
+    else { say(`${it.name} on the bench. ${left.length} more item${left.length>1?"s":""} to collect.`); renderCtrl(); }
+    return; }
+  if(it.state==="shelf"){ say(it.need?"Collect apparatus is done; this one is already where it needs to be.":`The ${it.name.toLowerCase()} is not needed.`); return; }
+  if(S.stage==="setup"){
+    if(id==="stand"&&it.state!=="work"){ it.state="work"; arc(it.g,WORK.stand,0.8,()=>say("Stand in place. Now clamp the burette in it.","good")); return; }
+    if(id==="burette"&&it.state!=="work"){ if(ITEMS.stand.state!=="work"){ S.errors.setup++; say("Set up the retort stand first, so the burette has something to be clamped to.","warn"); return; }
+      it.state="work"; S.busy=true; arc(it.g,WORK.burette,1.0,()=>{ S.busy=false; say("Burette clamped vertically, tap at the bottom. Now put the white tile under it.","good"); },[0,0,0]); return; }
+    if(id==="tile"&&it.state!=="work"){ if(ITEMS.burette.state!=="work"){ S.errors.setup++; say("Clamp the burette first, so you know where the tile goes.","warn"); return; }
+      it.state="work"; arc(it.g,WORK.tile,0.7,()=>say("White tile under the burette: colour changes will be easy to see. Now place the conical flask on it.","good")); return; }
+    if(id==="flask"&&it.state!=="work"){ if(ITEMS.tile.state!=="work"){ S.errors.setup++; say("Put the white tile under the burette first, then stand the flask on it.","warn"); return; }
+      it.state="work"; arc(it.g,WORK.flask,0.7,()=>{ say("Set-up complete. Now fill the burette: put the funnel in the top.","good"); setStage("fill"); }); return; }
+    if(id==="funnel"||id==="acid"){ S.errors.setup++; say("Finish setting up first: the burette must be clamped before you fill it.","warn"); return; }
+    if(["pipette","carb","mo"].includes(id)){ S.errors.setup++; say("Set up the stand, burette, tile and flask before preparing the solution.","warn"); return; }
+    say(it.name+" is already in place."); return; }
+  if(S.stage==="fill"||(S.stage==="titrate"&&S.refilling)){
+    if(id==="funnel"){ if(!S.funnelIn){ S.funnelIn=true; arc(it.g,WORK.funnel,0.8,()=>say(S.level>=49?"Funnel in. Now pour in the hydrochloric acid.":"Funnel back in place.")); }
+      else { S.funnelIn=false; const s=STAGE.funnel; arc(it.g,[s[0],s[1],s[2]],0.8,()=>{ if(S.level<49){ say("Funnel removed. The burette is ready: read the scale at the bottom of the meniscus.","good"); S.refilling=false; if(S.stage==="fill") setStage(S.flaskVol>0?(S.mo?"titrate":"indicator"):"pipette"); else renderCtrl(); } }); }
+      return; }
+    if(id==="acid"){ if(!S.funnelIn){ S.errors.setup++; say("Put the funnel in the top of the burette first, so the acid does not spill.","warn"); return; } if(S.level<49){ say("The burette is already full."); return; } pourAcid(); return; }
+    if(id==="burette"){ say("Fill it using the funnel and the acid bottle."); return; }
+    say("Fill the burette first: funnel, then acid."); return; }
+  if(S.stage==="pipette"){ if(id==="pipette") return doPipette(); say("Use the pipette to put exactly 25.0 cm³ of sodium carbonate into the flask."); return; }
+  if(S.stage==="indicator"){ if(id==="mo") return doIndicator(); if(id==="pipette"){ say("The flask already has its 25.0 cm³. Add the indicator next."); return; } say("Add 2–3 drops of methyl orange to the flask."); return; }
+  if(S.stage==="titrate"||S.stage==="report"){
+    if(id==="pipette"&&S.flaskVol<1) return doPipette(); if(id==="mo"&&S.flaskVol>0&&!S.mo) return doIndicator();
+    if(id==="funnel"&&S.funnelIn){ S.funnelIn=false; const s=STAGE.funnel; arc(it.g,[s[0],s[1],s[2]],0.8,()=>say("Funnel removed.")); return; }
+    say(it.name+"."); }
+}
+function pourAcid(){ S.busy=true; const b=ITEMS.acid.g, home=b.position.clone();
+  arc(b,[BUR.x+0.06,1.01,0.03],0.9,()=>{ tween(b,[BUR.x+0.06,1.01,0.03],0.4,()=>{
+    stream.visible=true; stream.position.set(BUR.x+0.01,0.98,0.03); stream.scale.set(1,0.06,1); const target=Math.max(0,Math.round(R(0.15,1.8)*100)/100); let lv=50;
+    const iv=setInterval(()=>{ lv-=2.2; S.level=Math.max(target,lv); if(lv<=target){ clearInterval(iv); stream.visible=false; tween(b,[BUR.x+0.06,1.01,0.03],0.3,()=>arc(b,[home.x,home.y,home.z],0.9,()=>{ S.busy=false;
+      S.startLevel=S.level; say("Burette filled. Remove the funnel before you take the initial reading: drops left in it would run in and change the reading.","good"); },[0,0,0])); } },60); },[0,0,-2.1]); }); }
+function doPipette(){ if(S.flaskVol>0){ say("The flask already holds the alkali."); return; } if(S.funnelIn&&S.stage!=="pipette"){ }
+  S.busy=true; const p=ITEMS.pipette.g, c=ITEMS.carb.g.position, home=p.position.clone(), liq=p.userData.liq;
+  say("Drawing up sodium carbonate with the pipette filler, to the line…");
+  arc(p,[c.x,c.y+0.17,c.z],0.9,()=>{ tween(p,[c.x,c.y+0.06,c.z],0.5,()=>{ liq.visible=true; let h=0; const iv=setInterval(()=>{ h+=0.012; liq.scale.y=h; liq.position.y=0.005+h/2; if(h>=0.36){ clearInterval(iv);
+    tween(p,[c.x,c.y+0.2,c.z],0.5,()=>arc(p,[BUR.x-0.035,0.19,0.03],1.0,()=>{ tween(p,[BUR.x-0.035,0.06,0.03],0.5,()=>{ let k=0; const iv2=setInterval(()=>{ k+=0.03; liq.scale.y=0.36*(1-k); liq.position.y=0.005+liq.scale.y/2; S.flaskVol=25*k; S.Va=0; if(k>=1){ clearInterval(iv2); liq.visible=false; S.flaskVol=25; S.mo=false;
+      tween(p,[BUR.x-0.035,0.2,0.03],0.4,()=>arc(p,[home.x,home.y,home.z],0.9,()=>{ S.busy=false; S.Va=0; S.startLevel=S.level; say("25.0 cm³ of sodium carbonate is in the flask. Now add 2–3 drops of methyl orange.","good"); setStage("indicator"); },[0,0,Math.PI/2])); } },45); }); },[0.25,0,0])); } },35); }); },[0,0,0]); }
+function doIndicator(){ S.busy=true; const b=ITEMS.mo.g, home=b.position.clone();
+  arc(b,[BUR.x-0.03,0.2,0.03],0.8,()=>{ tween(b,[BUR.x-0.03,0.2,0.03],0.3,()=>{ let n=0; const iv=setInterval(()=>{ S.drops.push({y:0.17,v:0,ind:true,x:BUR.x-0.012}); if(++n>=3){ clearInterval(iv); setTimeout(()=>{ S.mo=true; tween(b,[BUR.x-0.03,0.2,0.03],0.3,()=>arc(b,[home.x,home.y,home.z],0.8,()=>{ S.busy=false; say("The solution is yellow: methyl orange in alkali. Read the initial burette reading, then titrate.","good"); setStage("titrate"); setView("meniscus"); },[0,0,0])); },700); } },350); },[0,0,-2.4]); }); }
+function newFlask(){ if(S.running) return; if(S.flaskVol<1){ say("The flask is already empty. Pipette a new 25.0 cm³ portion: tap the pipette."); return; }
+  S.flaskVol=0; S.Va=0; S.mo=false; S.co2=0; S.fizz=0; $("ini").value=""; $("fin").value=""; say("Flask rinsed with distilled water. Tap the pipette to add a fresh 25.0 cm³ of sodium carbonate."); setStage("pipette"); }
+function refill(){ if(S.running) return; S.level=50; S.startLevel=50; S.refilling=true; say("Refill: put the funnel in the burette, pour in acid, then remove the funnel."); setStage("fill"); }
+
+// ---------- recording ----------
+function record(){
+  const ini=parseFloat($("ini").value), fin=parseFloat($("fin").value);
+  if(isNaN(ini)||isNaN(fin)){ say("Type both burette readings first. Use Read the scale to look closely at the meniscus.","warn"); return; }
+  if(fin<=ini){ say("The final reading must be larger: the burette scale reads downwards.","warn"); return; }
+  const trueIni=S.startLevel, trueFin=S.level, w=[];
+  if(Math.abs(ini-trueIni)>0.06){ w.push("the initial reading looks wrong (check the bottom of the meniscus)"); S.errors.read++; }
+  if(Math.abs(fin-trueFin)>0.06){ w.push("the final reading looks wrong"); S.errors.read++; }
+  if(Math.round(ini*100)%5||Math.round(fin*100)%5) w.push("burette readings are written to 2 decimal places, ending in 0 or 5");
+  const over=S.Va-endVol(); let note="";
+  if(over>0.25){ S.errors.over++; note=` You went ${over.toFixed(2)} cm³ past the end point: the colour turned red.`; } else if(over<-0.2) note=" The end point was not reached: the colour had not turned orange.";
+  const label=S.rows.length===0?"Rough":String(S.rows.length);
+  S.rows.push({label,ini,fin,titre:+(fin-ini).toFixed(2),good:!w.length&&!note});
+  say(`Titration ${label} recorded: ${(fin-ini).toFixed(2)} cm³.${w.length?" But "+w.join("; ")+".":""}${note} ${S.rows.length<3?"Rinse the flask and repeat.":""}`, w.length||note?"warn":"good");
+  renderTable(); }
+function concordant(){ const t=S.rows.filter(r=>r.label!=="Rough").map(r=>r.titre); let best=[]; for(const a of t){ const g=t.filter(x=>x>=a&&x-a<=0.1+1e-9); if(g.length>best.length) best=g; } return best.length>=2?best:[]; }
+function renderTable(){ const el=$("tbl"); if(!el) return; const con=concordant(), used=[...con];
+  el.innerHTML=S.rows.length?`<table><thead><tr><th>Titration</th><th>Final</th><th>Initial</th><th>Titre / cm³</th><th></th></tr></thead><tbody>${S.rows.map(r=>{ const k=r.label!=="Rough"?used.indexOf(r.titre):-1; if(k>=0) used.splice(k,1); return `<tr><td>${r.label}</td><td>${r.fin.toFixed(2)}</td><td>${r.ini.toFixed(2)}</td><td>${r.titre.toFixed(2)}</td><td>${k>=0?'<span class="ok">✓</span>':""}</td></tr>`; }).join("")}</tbody></table>`:"";
+  const fr=$("finrow"); if(fr){ fr.innerHTML=con.length?`<button class="navy grow" id="finish">Finish and see the report</button>`:""; if($("finish")) $("finish").onclick=report; }
+  if(con.length&&S.stage==="titrate") setStage("report"); }
+function report(){
+  const con=concordant(), mean=con.reduce((a,b)=>a+b,0)/con.length, nA=C_ACID*mean/1000, nB=nA/2, c=nB/0.025, err=(c-conc)/conc*100;
+  const acc=Math.max(0,40-Math.abs(err)*8), app=Math.max(0,15-S.errors.app*5), set=Math.max(0,15-S.errors.setup*4-S.errors.funnel*5), rd=Math.max(0,15-S.errors.read*4), tech=Math.max(0,15-S.errors.over*5), total=Math.round(acc+app+set+rd+tech);
+  const line=(k,v,ok)=>`<div class="line"><span>${k}</span><span style="color:${ok?"var(--good)":"var(--warn)"}">${v}</span></div>`;
+  const tips=[]; if(S.errors.app) tips.push("Revise which apparatus measures volumes accurately (burette, pipette) and which only roughly (beaker, measuring cylinder).");
+  if(S.errors.setup) tips.push("Practise the set-up order: stand, clamp the burette, tile, flask, then fill through a funnel.");
+  if(S.errors.funnel) tips.push("Always remove the funnel before reading or titrating.");
+  if(S.errors.read) tips.push("Read the bottom of the meniscus with your eye level with it, to 2 decimal places ending in 0 or 5.");
+  if(S.errors.over) tips.push("Near the end point, add the acid one drop at a time and swirl after each drop.");
+  if(Math.abs(err)>2) tips.push("Your concentration is more than 2% out: check your readings and repeat until two titres agree within 0.10 cm³.");
+  $("rbox").innerHTML=`<h2>Practical report</h2><p class="score">${total}<span style="font-size:1rem;color:var(--muted)"> / 100</span></p>
+    <p style="margin:4px 0 10px">Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂. Mean concordant titre ${mean.toFixed(2)} cm³ → moles HCl ${nA.toExponential(3)} → moles Na₂CO₃ ${nB.toExponential(3)} → <b>${c.toFixed(4)} mol/dm³</b>.</p>
+    ${line("Your concentration",c.toFixed(4)+" mol/dm³",Math.abs(err)<=2)}${line("True concentration",conc.toFixed(4)+" mol/dm³",true)}${line("Difference",(err>=0?"+":"")+err.toFixed(1)+"%",Math.abs(err)<=2)}
+    ${line("Apparatus (15)",Math.round(app),!S.errors.app)}${line("Set-up (15)",Math.round(set),!S.errors.setup&&!S.errors.funnel)}${line("Burette readings (15)",Math.round(rd),!S.errors.read)}${line("End-point technique (15)",Math.round(tech),!S.errors.over)}${line("Accuracy (40)",Math.round(acc),Math.abs(err)<=2)}
+    <h2 style="font-size:1rem;margin-top:12px">${tips.length?"What to work on":"Excellent technique"}</h2>${tips.length?`<ul>${tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:"<p>Every stage was carried out correctly.</p>"}
+    <div class="row" style="margin-top:12px"><button class="primary grow" id="again">Start a new titration</button><button class="grow" id="rclose">Back to the bench</button></div>`;
+  $("report").hidden=false; $("again").onclick=()=>location.reload(); $("rclose").onclick=()=>{ $("report").hidden=true; };
+  try{ parent.postMessage({type:"lablink-3d-result",prac:"titration3d",score:total},"*"); }catch(e){} }
+
+// ---------- views ----------
+let camAnim=null;
+function setView(v){ S.view=v; document.querySelectorAll(".views button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+  let pos,tgt; const yL=levelY();
+  const fit=w=>Math.min(innerWidth<560?1.5:2.6,Math.max(0.9,(w/2)/(Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.aspect)));
+  if(v==="shelf"){ const d=fit(1.75); pos=[0,0.45,-0.3+d]; tgt=[0,0.4,-0.3]; }
+  else if(v==="bench"){ const d=Math.max(1.25,fit(0.8)); pos=[0.07+d*0.28,0.6,0.03+d]; tgt=[0.07,0.45,0.03]; }
+  else if(v==="meniscus"){ if(ITEMS.burette.state!=="work"){ say("Clamp the burette in the stand first."); return setView("bench"); } pos=[BUR.x,yL+S.eye,0.03+0.075]; tgt=[BUR.x,yL+S.eye,0.03]; }
+  else { pos=[BUR.x+0.1,0.15,0.36]; tgt=[BUR.x,0.07,0.03]; }
+  camAnim={fp:camera.position.clone(),ft:controls.target.clone(),tp:new THREE.Vector3(...pos),tt:new THREE.Vector3(...tgt),t:0};
+  controls.enableRotate=v!=="meniscus"; controls.enableZoom=v!=="meniscus";
+  const eye=$("eyeRow"); if(eye) eye.remove();
+  if(v==="meniscus"){ const d=document.createElement("div"); d.id="eyeRow"; d.className="row"; d.innerHTML=`<label class="eye" style="flex:1 1 200px">Eye height <input type="range" id="eyeS" min="-8" max="8" step="1" value="${Math.round(S.eye*1000)}"></label><span class="eye">Keep your eye level with the meniscus.</span>`; $("ctrl").prepend(d);
+    $("eyeS").oninput=e=>{ S.eye=+e.target.value/1000; const yl=levelY(); camera.position.y=yl+S.eye; controls.target.y=yl+S.eye; if(Math.abs(S.eye)>0.003) say("Looking from "+(S.eye>0?"above":"below")+" makes the scale appear shifted against the meniscus: this is parallax error. Bring your eye back to the level of the meniscus.","warn"); }; } }
+document.querySelectorAll(".views button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+const levelY=()=>BUR.tipY+(BUR.zeroY-BUR.tipY)-S.level*BUR.perCm3;
+
+// ---------- liquid geometry ----------
+let lastH=-1;
+function updateFlaskLiquid(){ const liq=flask.userData.liq; if(S.flaskVol<0.5){ liq.visible=false; lastH=-1; return; } liq.visible=true;
+  const h=heightFor(S.flaskVol+S.Va); if(Math.abs(h-lastH)<0.0002) return; lastH=h; const pts=[[0,0.0016]]; for(let y=0.0016;y<h;y+=0.001) pts.push([flaskR(y)-0.0018,y]); pts.push([flaskR(h)-0.0018,h],[0,h]);
+  liq.geometry.dispose(); liq.geometry=lathe(pts,48); }
+function updateBurette(){ const g=burette, col=g.userData.col, men=g.userData.men, yTop=(BUR.zeroY-BUR.tipY)-S.level*BUR.perCm3, yBot=0.062;
+  const filled=S.level<50; col.visible=men.visible=g.userData.tip.visible=filled;
+  if(filled){ const h=Math.max(0.0005,yTop-yBot+0.0032); col.scale.y=h; col.position.y=yBot+h/2; men.position.y=yTop; } }
+const stream=new THREE.Mesh(new THREE.CylinderGeometry(0.0009,0.0009,1,8),M.liquid(0xcfe9f2)); stream.visible=false; scene.add(stream);
+const dropGeo=new THREE.SphereGeometry(0.0022,10,8), dropMat=new THREE.MeshPhongMaterial({color:0xcfe9f2,transparent:true,opacity:0.8,shininess:100});
+const indMat=new THREE.MeshPhongMaterial({color:0xe07a1f,transparent:true,opacity:0.9});
+const bubGeo=new THREE.SphereGeometry(0.0014,8,6), bubMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.7});
+
+// ---------- sound ----------
+let AC=null, fizzG=null;
+function audio(){ if(AC){ if(AC.state==="suspended") AC.resume().catch(()=>{}); return; } try{ AC=new (window.AudioContext||window.webkitAudioContext)(); const len=AC.sampleRate*2, buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0); for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(Math.random()<0.08?1:0.25);
+  const src=AC.createBufferSource(); src.buffer=buf; src.loop=true; const bp=AC.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=3200; fizzG=AC.createGain(); fizzG.gain.value=0; src.connect(bp); bp.connect(fizzG); fizzG.connect(AC.destination); src.start(); }catch(e){ AC=null; } }
+function blip(){ if(!AC) return; try{ const o=AC.createOscillator(), g=AC.createGain(); o.frequency.value=650+Math.random()*300; g.gain.setValueAtTime(0.06,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+0.07); o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+0.08); }catch(e){} }
+
+// ---------- add acid ----------
+function addAcid(v){ v=Math.min(v,50-S.level); if(v<=0) return; const before=nAcid(); S.level+=v; S.Va+=v;
+  const nb=nAlk(), co2=n=>Math.min(nb,Math.max(0,n-nb)); S.co2+=co2(nAcid())-co2(before);
+  const frac=(endVol()-S.Va)/endVol(); S.flashDur=frac<=0?99:0.25+3.2*Math.exp(-frac*35); S.flash=1; }
+
+// ---------- loop ----------
+function resize(){ const w=innerWidth, h=Math.max(160,innerHeight-document.querySelector(".sheet").offsetHeight+1); renderer.setSize(w,h,false); renderer.domElement.style.height=h+"px"; camera.aspect=w/h; camera.updateProjectionMatrix(); }
+addEventListener("resize",resize); try{ new ResizeObserver(resize).observe(document.querySelector(".sheet")); }catch(e){} resize();
+let last=performance.now(), drops3=[], bubs3=[], fps=60;
+function frame(now){ const rdt=Math.min((now-last)/1000,0.3), dt=Math.min(rdt,0.05); last=now; fps=fps*0.9+0.1/(rdt||0.016);
+  stepTweens(rdt);
+  if(camAnim){ camAnim.t+=rdt/0.9; const k=Math.min(1,camAnim.t), e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2; camera.position.lerpVectors(camAnim.fp,camAnim.tp,e); controls.target.lerpVectors(camAnim.ft,camAnim.tt,e); if(k>=1) camAnim=null; }
+  else if(S.view==="meniscus"){ const yl=levelY()+S.eye; controls.target.y+=(yl-controls.target.y)*0.2; camera.position.y+=(yl-camera.position.y)*0.2; }
+  controls.update();
+  // titration flow
+  if(S.running){ if(S.level>=50){ S.running=false; renderCtrl(); say("The burette is empty. Refill it.","warn"); } else addAcid(0.9*rdt); }
+  const hd=burette.userData.handle; hd.rotation.x+=((S.running?Math.PI/2:0)-hd.rotation.x)*0.3;
+  const baseY=ITEMS.flask.g.position.y, surfY=baseY+heightFor(S.flaskVol+S.Va);
+  stream.visible=S.running||stream.visible&&S.busy; if(S.running){ const top=BUR.tipY-0.002, bot=surfY; stream.position.set(BUR.x,(top+bot)/2,0.03); stream.scale.set(1,top-bot,1); }
+  // drops
+  S.drops.forEach(d=>{ if(!d.m){ d.m=new THREE.Mesh(dropGeo,d.ind?indMat:dropMat); d.m.position.set(d.x||BUR.x,d.y,0.03); scene.add(d.m); } d.v+=9.8*rdt; d.m.position.y-=d.v*rdt; });
+  S.drops=S.drops.filter(d=>{ if(d.m.position.y<=surfY){ scene.remove(d.m); if(!d.ind){ addAcid(0.05); blip(); } return false; } return true; });
+  // colour
+  const fl=flask.userData.liq, p=pH(), past=S.Va>0&&p<4.0;
+  S.flash=past?0:Math.max(0,S.flash-dt/(S.swirl?S.flashDur:S.flashDur*2.5));
+  if(S.flaskVol>0){ const base=S.mo?moColour(p):[232,238,240]; fl.material.color.copy(toColor(base)); fl.material.opacity=S.mo?0.9:0.45; fl.material.emissive=fl.material.emissive||new THREE.Color(); if(S.mo) fl.material.emissive.copy(toColor(base)).multiplyScalar(0.3); else fl.material.emissive.setRGB(0,0,0); }
+  const fm=flask.userData.flash; fm.position.set(0,surfY-baseY+0.0005,0); fm.material.opacity=S.mo?S.flash*0.85:0; fm.scale.set(1+(1-S.flash)*1.6,0.2,1+(1-S.flash)*1.6);
+  updateFlaskLiquid(); updateBurette();
+  // swirl
+  const fg=ITEMS.flask.g; if(ITEMS.flask.state==="work"&&!tweens.some(t=>t.obj===fg)){ const s=S.swirl&&(S.running||S.drops.length)?1:0.25; fg.rotation.x=Math.sin(now/180)*0.035*s; fg.rotation.z=Math.cos(now/180)*0.035*s; }
+  // fizz
+  const target=Math.min(1,S.co2*2.2e4); S.co2*=Math.exp(-dt*1.5); S.fizz+=(target-S.fizz)*Math.min(1,dt*6);
+  if(S.fizz>0.05&&Math.random()<S.fizz*dt*80){ const r=Math.random()*0.03, a=Math.random()*6.28, m=new THREE.Mesh(bubGeo,bubMat); m.position.set(BUR.x+Math.cos(a)*r,baseY+0.004,0.03+Math.sin(a)*r); m.userData.v=0.02+Math.random()*0.02; scene.add(m); bubs3.push(m); }
+  bubs3=bubs3.filter(m=>{ m.position.y+=m.userData.v*dt; if(m.position.y>surfY){ scene.remove(m); return false; } return true; });
+  if(fizzG&&AC) fizzG.gain.setTargetAtTime(S.fizz*0.2,AC.currentTime,0.05);
+  // pulse highlight
+  if(pulseT>0){ pulseT-=dt; const k=(Math.sin(now/120)+1)/2*(pulseT>0?1:0); ITEMS[pulseId].g.traverse(o=>{ if(o.isMesh&&o.material&&o.material.emissive) o.material.emissive.setRGB(k*0.6,k*0.35,0); }); }
+  if(tagT>0){ tagT-=dt; if(tagT<=0) $("tag").hidden=true; }
+  renderer.render(scene,camera); requestAnimationFrame(frame); }
+
+// ---------- start ----------
+setStage("collect"); setView("shelf"); say("Your teacher has asked you to find the concentration of a sodium carbonate solution by titrating it with 0.100 mol/dm³ hydrochloric acid. Collect the apparatus you need from the shelf.");
+requestAnimationFrame(t=>{ last=t; frame(t); $("loading").hidden=true; });
+window.__lab3d={idle:()=>!S.busy&&!tweens.length,fps:()=>fps,S,ITEMS,tapItem,setView,levelY,pipe:()=>doPipette(),conc};
+})();
+</script></body></html>

@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style></head><body>
+<title>Ohm's Law Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: instrument bench — circuit board left, notebook (table, graph, result) right; stacks on phones */
+:root{
+  --bg:#eef1f0; --panel:#ffffff; --ink:#18262a; --muted:#5b6b6e; --line:#d3dbda;
+  --accent:#a8641a; --accent-soft:#f3e6d6; --steel:#3d5a64; --good:#2f7d4f; --warn:#b4442f; --stage:#f7f9f9;
+  --lcd:#dfe8d6; --lcd-ink:#1d2a17; --glow:#ffcc55;
+  --w1:#c0392b; --w2:#2a3438; --w3:#2563a8; --w4:#2f7d4f; --w5:#8e44ad;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111a1c; --panel:#182427; --ink:#e4ecec; --muted:#93a5a7; --line:#2c3c40;
+  --accent:#e0a35a; --accent-soft:#3a2c1c; --steel:#8fb3bf; --good:#5cc08a; --warn:#ef7a62; --stage:#142023;
+  --lcd:#203024; --lcd-ink:#b9f0a8; --glow:#ffcc55;
+  --w1:#ef6b5b; --w2:#c9d4d6; --w3:#6aa8f0; --w4:#5cc08a; --w5:#c28be0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111a1c; --panel:#182427; --ink:#e4ecec; --muted:#93a5a7; --line:#2c3c40;
+  --accent:#e0a35a; --accent-soft:#3a2c1c; --steel:#8fb3bf; --good:#5cc08a; --warn:#ef7a62; --stage:#142023;
+  --lcd:#203024; --lcd-ink:#b9f0a8; --glow:#ffcc55;
+  --w1:#ef6b5b; --w2:#c9d4d6; --w3:#6aa8f0; --w4:#5cc08a; --w5:#c28be0; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:20px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(1.6rem,4vw,2.3rem);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 4px}
+.aim{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.cols{display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.cols{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}}
+.col{display:grid;gap:20px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+h2{font-family:var(--f-display);font-weight:700;font-size:1.05rem;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h2 small{font-family:var(--f-mono);font-weight:400;font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+#bench{display:block;width:100%;height:420px;touch-action:pan-y}
+@media (max-width:600px){#bench{height:380px}}
+.hint{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.ctrls{display:grid;gap:14px;margin-top:14px}
+.ctl label{display:flex;justify-content:space-between;font-size:.88rem;font-weight:500}
+.ctl label span{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font-family:var(--f-body);font-weight:600;font-size:.92rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:10px 14px;cursor:pointer;min-height:44px}
+button:hover{border-color:var(--steel)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] button.primary{color:#1a1206}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.primary{color:#1a1206}}
+button.grow{flex:1 1 120px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;min-height:40px;padding:6px 14px;font-weight:500}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+.lbl{font-size:.85rem;color:var(--muted)}
+.msg{font-size:.88rem;padding:10px 12px;border-radius:8px;background:var(--accent-soft);color:var(--ink);border-left:3px solid var(--accent)}
+.msg.warn{border-left-color:var(--warn)}
+.msg.good{border-left-color:var(--good)}
+ol.steps{margin:0;padding-left:1.3em;display:grid;gap:6px;font-size:.9rem}
+.diagram{color:var(--ink);margin:0 0 12px;overflow-x:auto}
+.diagram svg{display:block;width:100%;max-width:420px;height:auto}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.88rem}
+th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-family:var(--f-mono);font-weight:500;font-size:.72rem;color:var(--muted);letter-spacing:.03em}
+td{font-family:var(--f-mono)}
+th:first-child,td:first-child{text-align:left}
+td .x{border:0;background:none;color:var(--muted);min-height:28px;padding:2px 6px}
+tr.ex td{color:var(--muted)}
+tr.new td{background:var(--accent-soft)}
+.tag{font-family:var(--f-mono);font-size:.65rem;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:0 4px;margin-left:4px}
+#graph{display:block;width:100%;height:280px;touch-action:pan-y}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:12px}
+.res .k{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.res .v{font-family:var(--f-mono);font-size:1.25rem;font-variant-numeric:tabular-nums}
+.res .v.big{color:var(--accent);font-size:1.5rem}
+.empty{color:var(--muted);font-size:.88rem;padding:10px 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Physics practical · O-Level · Electricity</p>
+    <h1>Ohm's Law and I–V Characteristics</h1>
+    <p class="aim">Aim: measure how the current through a component changes with the potential difference across it, for a fixed resistor and a filament lamp, and find the resistance.</p>
+  </header>
+
+  <div class="cols">
+    <div class="col">
+      <section class="card">
+        <h2>Circuit board <small>tap a terminal, then another, to connect a wire</small></h2>
+        <div class="stage"><canvas id="bench" aria-label="Circuit board with battery, switch, rheostat, ammeter, voltmeter and component"></canvas></div>
+        <p class="hint">Tap the switch to open or close it. Red terminals are positive (+), dark terminals are negative (−).</p>
+
+        <div class="ctrls">
+          <div class="row">
+            <span class="lbl">Component under test</span>
+            <span class="seg" id="compSeg"><button data-c="res" aria-pressed="true">Fixed resistor</button><button data-c="lamp" aria-pressed="false">Filament lamp</button></span>
+          </div>
+          <div class="ctl">
+            <label for="rh">Rheostat resistance <span id="rhV">30.0 Ω</span></label>
+            <input id="rh" type="range" min="0" max="50" step="0.5" value="30">
+          </div>
+          <div class="row">
+            <span class="lbl">Cells in battery</span>
+            <span class="seg" id="cellSeg"><button data-n="1" aria-pressed="false">1</button><button data-n="2" aria-pressed="false">2</button><button data-n="3" aria-pressed="false">3</button><button data-n="4" aria-pressed="true">4</button></span>
+            <span class="lbl" id="emfV">6.0 V</span>
+          </div>
+          <div class="row">
+            <button class="grow" id="undo">Remove last wire</button>
+            <button class="grow" id="clearW">Remove all wires</button>
+            <button class="grow" id="auto">Wire it for me</button>
+          </div>
+          <button id="fuse" hidden>Replace ammeter fuse</button>
+          <button id="record" class="primary">Record meter readings</button>
+          <div class="msg" id="msg" role="status">Build the circuit shown in the diagram below. Close the switch when you are ready.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Circuit diagram and procedure</h2>
+        <div class="diagram" aria-label="Circuit diagram: battery, switch, rheostat and ammeter in series with the component; voltmeter in parallel across the component">
+          <svg viewBox="0 0 320 205" fill="none" stroke="currentColor" stroke-width="1.6" font-family="IBM Plex Mono, monospace" font-size="11">
+            <path d="M20 30 H72 M88 30 H140 M180 30 H300 V58 M300 102 V130 H243 M217 130 H172 M108 130 H20 V30"/>
+            <line x1="74" y1="18" x2="74" y2="42"/><line x1="86" y1="24" x2="86" y2="36" stroke-width="3"/>
+            <text x="68" y="12" fill="currentColor" stroke="none">+</text><text x="88" y="12" fill="currentColor" stroke="none">−</text>
+            <circle cx="142" cy="30" r="2.5" fill="currentColor"/><circle cx="178" cy="30" r="2.5" fill="currentColor"/><line x1="142" y1="30" x2="174" y2="17"/>
+            <text x="148" y="50" fill="currentColor" stroke="none">S</text>
+            <rect x="292" y="58" width="16" height="44"/><line x1="282" y1="98" x2="318" y2="62"/><path d="M314 62 L318 62 L318 66" />
+            <text x="260" y="84" fill="currentColor" stroke="none">Rh</text>
+            <circle cx="230" cy="130" r="13"/><text x="226" y="134" fill="currentColor" stroke="none">A</text>
+            <rect x="110" y="122" width="60" height="16"/><text x="122" y="116" fill="currentColor" stroke="none">R / lamp</text>
+            <path d="M95 130 V180 H127 M153 180 H185 V130"/><circle cx="95" cy="130" r="2.5" fill="currentColor"/><circle cx="185" cy="130" r="2.5" fill="currentColor"/>
+            <circle cx="140" cy="180" r="13"/><text x="136" y="184" fill="currentColor" stroke="none">V</text>
+          </svg>
+        </div>
+        <ol class="steps">
+          <li>Connect the battery, switch, rheostat, ammeter and component in series. Connect + on the ammeter towards + on the battery.</li>
+          <li>Connect the voltmeter in parallel across the component, + to the side nearer the battery's +.</li>
+          <li>Close the switch. Adjust the rheostat (and the number of cells) to get at least 6 different readings.</li>
+          <li>Record V and I each time, then open the switch so the component does not heat up between readings.</li>
+          <li>Plot I against V. For the resistor, R = 1 ÷ gradient. Repeat with the filament lamp and compare the shapes.</li>
+        </ol>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <h2>Results <small id="nRows">0 readings</small></h2>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>#</th><th>V / V</th><th>I / A</th><th>R = V/I / Ω</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="clear">Clear table</button>
+          <button id="sample">Load example readings</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 id="gTitle">I–V graph: fixed resistor <small>current against potential difference</small></h2>
+        <canvas id="graph" aria-label="Graph of current against potential difference"></canvas>
+        <div class="result">
+          <div class="res"><div class="k" id="r1k">Gradient</div><div class="v" id="r1v">–</div></div>
+          <div class="res"><div class="k" id="r2k">R = 1 ÷ gradient</div><div class="v big" id="r2v">–</div></div>
+          <div class="res"><div class="k" id="r3k">Graph shape</div><div class="v" id="r3v">–</div></div>
+        </div>
+        <div class="msg" id="evalMsg" style="margin-top:12px">Record at least 3 readings to draw the graph.</div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- components & terminals ----------
+const COMPS={
+  bat:{label:"Battery", x:.25,y:.13,w:1.05,h:.45, t:{n:[-.5,0,"-"], p:[.5,0,"+"]}},
+  sw: {label:"Switch",  x:.66,y:.13,w:.8, h:.42, t:{a:[-.5,0,""], b:[.5,0,""]}},
+  rh: {label:"Rheostat",x:.87,y:.47,w:.42,h:1.0, t:{a:[0,-.5,""], b:[0,.5,""]}},
+  am: {label:"Ammeter", x:.66,y:.83,w:.85,h:.55, t:{n:[-.5,0,"-"], p:[.5,0,"+"]}},
+  cp: {label:"Component",x:.30,y:.83,w:.8,h:.45, t:{b:[-.5,0,""], a:[.5,0,""]}},
+  vm: {label:"Voltmeter",x:.38,y:.47,w:.85,h:.55, t:{n:[-.5,0,"-"], p:[.5,0,"+"]}}
+};
+const TERMS=[]; for(const c in COMPS) for(const t in COMPS[c].t) TERMS.push(c+"."+t);
+const IX=Object.fromEntries(TERMS.map((t,i)=>[t,i]));
+
+const s={ wires:[], sel:null, sw:false, rh:30, cells:4, comp:"res", Rx:8+Math.random()*7, fuse:true,
+  r:null, dispV:0, dispI:0, data:{res:[],lamp:[]}, newRow:null, flash:null };
+
+// ---------- circuit solver (nodal analysis) ----------
+function lampR(P){ return 2.5*(1+7*Math.pow(Math.max(P,0)/1.8,0.6)); }
+function mna(els,E,rint){
+  const n=TERMS.length, G=Array.from({length:n},()=>new Float64Array(n)), I=new Float64Array(n);
+  const st=(a,b,g)=>{ G[a][a]+=g; G[b][b]+=g; G[a][b]-=g; G[b][a]-=g; };
+  els.forEach(([a,b,R])=>st(IX[a],IX[b],1/R));
+  st(IX["bat.p"],IX["bat.n"],1/rint); I[IX["bat.p"]]+=E/rint; I[IX["bat.n"]]-=E/rint;
+  for(let i=0;i<n;i++) G[i][i]+=1e-9;
+  const gnd=IX["bat.n"]; G[gnd].fill(0); G[gnd][gnd]=1; I[gnd]=0;
+  // Gaussian elimination with partial pivoting
+  for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(G[r][c])>Math.abs(G[p][c])) p=r;
+    [G[c],G[p]]=[G[p],G[c]]; [I[c],I[p]]=[I[p],I[c]];
+    for(let r=c+1;r<n;r++){ const f=G[r][c]/G[c][c]; if(!f) continue; for(let k=c;k<n;k++) G[r][k]-=f*G[c][k]; I[r]-=f*I[c]; } }
+  const V=new Float64Array(n); for(let r=n-1;r>=0;r--){ let sum=I[r]; for(let k=r+1;k<n;k++) sum-=G[r][k]*V[k]; V[r]=sum/G[r][r]; }
+  return V;
+}
+function solve(){
+  const E=1.5*s.cells, rint=0.15*s.cells, lamp=s.comp==="lamp";
+  let Rl=lamp?2.5:s.Rx, V;
+  for(let it=0; it<(lamp?40:1); it++){
+    const els=s.wires.map(([a,b])=>[a,b,0.01]);
+    els.push(["sw.a","sw.b",s.sw?0.005:1e10],["rh.a","rh.b",s.rh+0.2],["am.p","am.n",s.fuse?0.05:1e10],["vm.p","vm.n",1e7],["cp.a","cp.b",Rl]);
+    V=mna(els,E,rint);
+    if(lamp){ const i=(V[IX["cp.a"]]-V[IX["cp.b"]])/Rl; Rl=0.5*Rl+0.5*lampR(i*i*Rl); }
+  }
+  const d=(a,b)=>V[IX[a]]-V[IX[b]];
+  return {E, Ibat:(E-d("bat.p","bat.n"))/rint, Iam:s.fuse?d("am.p","am.n")/0.05:0, Vvm:d("vm.p","vm.n"), Vc:d("cp.a","cp.b"), Ic:d("cp.a","cp.b")/Rl, Rl};
+}
+
+function diagnose(r){
+  const tol=(x)=>0.02*Math.abs(x)+0.002;
+  if(!s.fuse) return ["The ammeter fuse has blown. An ammeter has almost no resistance, so it must never be connected straight across the supply or a component. Fix the wiring, then replace the fuse.","warn",false];
+  if(!s.sw) return ["Switch open. Close it by tapping the switch.","",false];
+  if(Math.abs(r.Ibat)>4) return ["Short circuit: a very large current is flowing straight through the wires. Look for a wire joining the two sides of the battery without passing through the component.","warn",false];
+  if(Math.abs(r.Ic)<1e-4 && Math.abs(r.Vvm)>0.3*r.E) return ["Almost no current flows. The voltmeter seems to be in series. A voltmeter must be connected in parallel, across the component.","warn",false];
+  if(Math.abs(r.Ic)<1e-4) return ["No current flows through the component. The circuit is not complete: check that every component is in the loop.","warn",false];
+  if(Math.abs(r.Iam)<tol(r.Ic)*5 || Math.abs(Math.abs(r.Iam)-Math.abs(r.Ic))>tol(r.Ic)*3) return ["Current flows through the component but the ammeter is not measuring it. The ammeter must be in series with the component, in the same loop.","warn",false];
+  if(Math.abs(Math.abs(r.Vvm)-Math.abs(r.Vc))>tol(r.Vc)*3) return ["The voltmeter is not measuring the p.d. across the component. Connect its two terminals to the two ends of the component.","warn",false];
+  if(r.Iam<0||r.Vvm<0) return ["A meter shows a negative reading: it is connected the wrong way round. Its + terminal should be on the side nearer the battery's +.","warn",true];
+  return ["Circuit correct. Adjust the rheostat and record readings.","good",true];
+}
+
+let status=["","",false];
+function update(){
+  let r=solve();
+  if(s.fuse && Math.abs(r.Iam)>1.5){ s.fuse=false; r=solve(); }
+  s.r=r; status=diagnose(r);
+  $("fuse").hidden=s.fuse;
+  say(status[0],status[1]);
+  refreshMeters();
+}
+function refreshMeters(){
+  const r=s.r; if(!r) return;
+  const nz=(v,a)=>v+(Math.random()-0.5)*a;
+  s.dispV = Math.abs(r.Vvm)<0.005?0:nz(r.Vvm,0.008);
+  s.dispI = Math.abs(r.Iam)<0.0005?0:nz(r.Iam,0.0008);
+}
+setInterval(refreshMeters,500);
+
+// ---------- drawing ----------
+const bc=$("bench"), bx=bc.getContext("2d");
+function sizeCanvas(c){ const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1; c.width=r.width*d; c.height=r.height*d; c.getContext("2d").setTransform(d,0,0,d,0,0); return r; }
+let BR=sizeCanvas(bc);
+function U(){ return Math.max(58,Math.min(110,BR.width/4.3)); }
+function box(c){ const k=COMPS[c],u=U(); return {cx:k.x*BR.width, cy:k.y*BR.height, w:k.w*u, h:k.h*u}; }
+function termPos(id){ const [c,t]=id.split("."), b=box(c), o=COMPS[c].t[t]; return {x:b.cx+o[0]*b.w, y:b.cy+o[1]*b.h, sign:o[2]}; }
+function rrect(x,y,w,h,r){ bx.beginPath(); bx.moveTo(x+r,y); bx.arcTo(x+w,y,x+w,y+h,r); bx.arcTo(x+w,y+h,x,y+h,r); bx.arcTo(x,y+h,x,y,r); bx.arcTo(x,y,x+w,y,r); bx.closePath(); }
+
+function draw(){
+  const W=BR.width,H=BR.height, ink=css("--ink"),muted=css("--muted"),line=css("--line"),panel=css("--panel"),acc=css("--accent"),steel=css("--steel");
+  const wc=["--w1","--w2","--w3","--w4","--w5"].map(css);
+  bx.clearRect(0,0,W,H);
+  bx.font="11px "+css("--f-mono"); bx.textAlign="center";
+  for(const c in COMPS){
+    const b=box(c), x=b.cx-b.w/2, y=b.cy-b.h/2;
+    bx.fillStyle=panel; bx.strokeStyle=line; rrect(x,y,b.w,b.h,6); bx.fill(); bx.stroke();
+    bx.fillStyle=muted; bx.fillText(c==="cp"?(s.comp==="lamp"?"Filament lamp":"Resistor"):COMPS[c].label, b.cx, c==="am"||c==="cp"?y+b.h+14:y-6);
+    if(c==="bat"){ const n=s.cells, cw=(b.w-24)/4; for(let i=0;i<4;i++){ bx.fillStyle=i<n?steel:line; bx.fillRect(x+12+i*cw+2,b.cy-8,cw-4,16);} }
+    if(c==="sw"){ bx.strokeStyle=ink; bx.lineWidth=2.5; bx.beginPath(); const lx=x+12, rx2=x+b.w-12;
+      bx.moveTo(lx,b.cy); if(s.sw) bx.lineTo(rx2,b.cy); else bx.lineTo(rx2-6,b.cy-b.h*0.38); bx.stroke(); bx.lineWidth=1;
+      bx.fillStyle=ink; bx.beginPath(); bx.arc(lx,b.cy,3,0,7); bx.arc(rx2,b.cy,3,0,7); bx.fill();
+      bx.fillStyle=s.sw?css("--good"):muted; bx.fillText(s.sw?"closed":"open",b.cx,y+b.h-4); }
+    if(c==="rh"){ bx.strokeStyle=muted; for(let i=0;i<12;i++){ const yy=y+10+i*(b.h-20)/11; bx.beginPath(); bx.moveTo(x+6,yy); bx.lineTo(x+b.w-6,yy); bx.stroke(); }
+      const sy=y+10+(s.rh/50)*(b.h-20); bx.fillStyle=acc; bx.beginPath(); bx.moveTo(x-2,sy); bx.lineTo(x-12,sy-6); bx.lineTo(x-12,sy+6); bx.fill();
+      bx.fillStyle=muted; bx.fillText(s.rh.toFixed(0)+" Ω",b.cx,y+b.h+14); }
+    if(c==="am"||c==="vm"){ const lw=b.w-16, lh=b.h*0.5; bx.fillStyle=css("--lcd"); rrect(b.cx-lw/2,b.cy-lh/2-3,lw,lh,4); bx.fill();
+      bx.fillStyle=css("--lcd-ink"); bx.font="600 "+Math.round(lh*0.62)+"px "+css("--f-mono");
+      const v=c==="am"?(s.fuse?s.dispI.toFixed(3):"FUSE"):s.dispV.toFixed(2);
+      bx.fillText(v,b.cx,b.cy+lh*0.2-3); bx.font="11px "+css("--f-mono"); bx.fillStyle=muted; bx.fillText(c==="am"?"A":"V",b.cx,y+b.h-3); }
+    if(c==="cp"){
+      if(s.comp==="lamp"){ const P=s.r?Math.abs(s.r.Ic*s.r.Ic*s.r.Rl):0, k=Math.min(1,P/1.6);
+        if(k>0.02){ const gr=bx.createRadialGradient(b.cx,b.cy,2,b.cx,b.cy,b.h*1.3); gr.addColorStop(0,css("--glow")); gr.addColorStop(1,"rgba(255,204,85,0)");
+          bx.globalAlpha=k; bx.fillStyle=gr; bx.beginPath(); bx.arc(b.cx,b.cy,b.h*1.3,0,7); bx.fill(); bx.globalAlpha=1; }
+        bx.strokeStyle=ink; bx.beginPath(); bx.arc(b.cx,b.cy,b.h*0.36,0,7); bx.stroke();
+        bx.beginPath(); bx.moveTo(b.cx-b.h*0.25,b.cy-b.h*0.25); bx.lineTo(b.cx+b.h*0.25,b.cy+b.h*0.25); bx.moveTo(b.cx+b.h*0.25,b.cy-b.h*0.25); bx.lineTo(b.cx-b.h*0.25,b.cy+b.h*0.25); bx.stroke();
+      } else { const bw=b.w*0.6; bx.fillStyle=css("--accent-soft"); bx.fillRect(b.cx-bw/2,b.cy-7,bw,14);
+        [0.25,0.45,0.6].forEach((f,i)=>{ bx.fillStyle=[ "#7a4a1f","#1f1f1f",acc][i]; bx.fillRect(b.cx-bw/2+bw*f,b.cy-7,4,14); }); }
+    }
+  }
+  // wires
+  bx.lineCap="round";
+  s.wires.forEach(([a,b2],i)=>{ const p=termPos(a), q=termPos(b2), mx=(p.x+q.x)/2, my=(p.y+q.y)/2+Math.min(40,Math.hypot(q.x-p.x,q.y-p.y)*0.18);
+    bx.strokeStyle=wc[i%wc.length]; bx.lineWidth=3.2; bx.beginPath(); bx.moveTo(p.x,p.y); bx.quadraticCurveTo(mx,my,q.x,q.y); bx.stroke(); });
+  bx.lineWidth=1;
+  // terminals
+  TERMS.forEach(t=>{ const p=termPos(t);
+    bx.fillStyle=p.sign==="+"?css("--w1"):p.sign==="-"?css("--w2"):steel;
+    bx.beginPath(); bx.arc(p.x,p.y,7,0,7); bx.fill();
+    if(p.sign){ bx.fillStyle=css("--panel"); bx.font="bold 10px "+css("--f-mono"); bx.fillText(p.sign==="+"?"+":"−",p.x,p.y+3.5); bx.font="11px "+css("--f-mono"); }
+    if(s.sel===t){ bx.strokeStyle=acc; bx.lineWidth=2.5; bx.beginPath(); bx.arc(p.x,p.y,13,0,7); bx.stroke(); bx.lineWidth=1; }
+  });
+  requestAnimationFrame(draw);
+}
+
+// ---------- interaction ----------
+bc.addEventListener("click",e=>{
+  const rc=bc.getBoundingClientRect(), x=e.clientX-rc.left, y=e.clientY-rc.top;
+  let best=null,bd=24;
+  TERMS.forEach(t=>{ const p=termPos(t), d=Math.hypot(p.x-x,p.y-y); if(d<bd){bd=d;best=t;} });
+  if(best){
+    if(!s.sel){ s.sel=best; say("Now tap the terminal to connect this wire to."); return; }
+    if(s.sel===best){ s.sel=null; update(); return; }
+    const a=s.sel; s.sel=null;
+    if(!s.wires.some(([p,q])=>(p===a&&q===best)||(p===best&&q===a))) s.wires.push([a,best]);
+    update(); return;
+  }
+  const b=box("sw");
+  if(Math.abs(x-b.cx)<b.w/2+6 && Math.abs(y-b.cy)<b.h/2+6){ s.sw=!s.sw; update(); return; }
+  s.sel=null;
+});
+
+function say(t,kind){ const m=$("msg"); m.textContent=t; m.className="msg"+(kind?" "+kind:""); }
+$("rh").addEventListener("input",e=>{ s.rh=+e.target.value; $("rhV").textContent=s.rh.toFixed(1)+" Ω"; update(); });
+$("cellSeg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; s.cells=+b.dataset.n;
+  $("cellSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); $("emfV").textContent=(1.5*s.cells).toFixed(1)+" V"; update(); });
+$("compSeg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; s.comp=b.dataset.c;
+  $("compSeg").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); s.newRow=null; render(); update(); });
+$("undo").onclick=()=>{ s.wires.pop(); s.sel=null; update(); };
+$("clearW").onclick=()=>{ s.wires=[]; s.sel=null; update(); };
+$("auto").onclick=()=>{ s.wires=[["bat.p","sw.a"],["sw.b","rh.a"],["rh.b","am.p"],["am.n","cp.a"],["cp.b","bat.n"],["vm.p","cp.a"],["vm.n","cp.b"]]; s.sel=null; update(); };
+$("fuse").onclick=()=>{ s.fuse=true; s.sw=false; update(); say("Fuse replaced and switch opened. Check the wiring before closing the switch again."); };
+
+$("record").onclick=()=>{
+  if(!s.sw||!s.r||Math.abs(s.r.Ic)<1e-4){ say("There is nothing to record yet. Complete the circuit and close the switch.","warn"); return; }
+  const rows=s.data[s.comp];
+  if(rows.some(r=>r.ex)) s.data[s.comp]=rows.filter(r=>!r.ex);
+  const row={V:+s.dispV.toFixed(2), I:+s.dispI.toFixed(3), ex:false};
+  s.data[s.comp].push(row); s.data[s.comp].sort((a,b)=>a.V-b.V); s.newRow=row; save(); render();
+  const n=s.data[s.comp].length;
+  if(!status[2]) say("Recorded, but the circuit is not set up correctly, so this reading may be wrong. "+status[0],"warn");
+  else say("Reading "+n+" recorded: V = "+row.V.toFixed(2)+" V, I = "+row.I.toFixed(3)+" A."+(n<3?" Record "+(3-n)+" more to draw the graph.":" Change the rheostat and record again."),"good");
+};
+$("clear").onclick=()=>{ s.data[s.comp]=[]; save(); render(); };
+$("sample").onclick=()=>{
+  s.data.res=[[1.02,0.101],[1.98,0.198],[3.05,0.302],[4.01,0.397],[4.96,0.503],[5.62,0.561]].map(([V,I])=>({V,I,ex:true}));
+  s.data.lamp=[[0.12,0.048],[0.45,0.105],[1.05,0.152],[2.10,0.205],[3.40,0.251],[4.80,0.291],[5.70,0.312]].map(([V,I])=>({V,I,ex:true}));
+  save(); render();
+};
+
+// ---------- storage ----------
+function save(){ try{ localStorage.setItem("ohm-data",JSON.stringify(s.data)); }catch(e){} }
+function load(){ try{ const d=JSON.parse(localStorage.getItem("ohm-data")||"null"); if(d&&Array.isArray(d.res)&&Array.isArray(d.lamp)) return d; }catch(e){} return null; }
+
+// ---------- table ----------
+function render(){
+  const rows=s.data[s.comp], tb=$("tbody"); tb.innerHTML="";
+  if(!rows.length) tb.innerHTML='<tr><td colspan="5" class="empty" style="text-align:left;font-family:inherit">No readings yet for this component.</td></tr>';
+  rows.forEach((r,i)=>{ const tr=document.createElement("tr"); if(r.ex) tr.className="ex"; if(r===s.newRow) tr.className="new";
+    tr.innerHTML=`<td>${i+1}${r.ex?'<span class="tag">example</span>':''}</td><td>${r.V.toFixed(2)}</td><td>${r.I.toFixed(3)}</td><td>${r.I?(r.V/r.I).toFixed(1):"–"}</td><td><button class="x" aria-label="Delete reading" data-i="${i}">✕</button></td>`;
+    tb.appendChild(tr); });
+  tb.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ s.data[s.comp].splice(+b.dataset.i,1); save(); render(); });
+  $("nRows").textContent=rows.length+(rows.length===1?" reading":" readings")+" · "+(s.comp==="lamp"?"lamp":"resistor");
+  $("gTitle").firstChild.textContent="I–V graph: "+(s.comp==="lamp"?"filament lamp ":"fixed resistor ");
+  drawGraph();
+}
+
+// ---------- graph ----------
+const gc=$("graph"), gx=gc.getContext("2d"); let GR=sizeCanvas(gc);
+function fit(p){ const n=p.length,sx=p.reduce((a,q)=>a+q[0],0),sy=p.reduce((a,q)=>a+q[1],0),sxx=p.reduce((a,q)=>a+q[0]*q[0],0),sxy=p.reduce((a,q)=>a+q[0]*q[1],0);
+  const m=(n*sxy-sx*sy)/(n*sxx-sx*sx); return {m,c:(sy-m*sx)/n}; }
+function drawGraph(){
+  const W=GR.width,H=GR.height, ink=css("--ink"),muted=css("--muted"),grid=css("--line"),acc=css("--accent"),steel=css("--steel");
+  gx.clearRect(0,0,W,H);
+  const pts=s.data[s.comp].map(r=>[r.V,r.I]);
+  const xMax=Math.max(2,Math.ceil(Math.max(0,...pts.map(p=>p[0]))+0.5)), yMax=Math.max(0.1,Math.ceil(Math.max(0,...pts.map(p=>p[1]))*1.15*10)/10);
+  const L=46,R=14,T=12,B=40,pw=W-L-R,ph=H-T-B, X=v=>L+v/xMax*pw, Y=v=>T+ph-v/yMax*ph;
+  gx.font="11px "+css("--f-mono"); gx.lineWidth=1;
+  for(let v=0;v<=xMax;v++){ gx.strokeStyle=grid; gx.beginPath(); gx.moveTo(X(v),T); gx.lineTo(X(v),T+ph); gx.stroke(); gx.fillStyle=muted; gx.textAlign="center"; gx.fillText(v,X(v),T+ph+15); }
+  const ys=yMax>0.5?0.1:0.05;
+  for(let v=0;v<=yMax+1e-9;v+=ys){ gx.strokeStyle=grid; gx.beginPath(); gx.moveTo(L,Y(v)); gx.lineTo(L+pw,Y(v)); gx.stroke(); gx.fillStyle=muted; gx.textAlign="right"; gx.fillText(v.toFixed(2),L-6,Y(v)+4); }
+  gx.strokeStyle=ink; gx.beginPath(); gx.moveTo(L,T); gx.lineTo(L,T+ph); gx.lineTo(L+pw,T+ph); gx.stroke();
+  gx.fillStyle=muted; gx.textAlign="center"; gx.fillText("potential difference V / V",L+pw/2,H-6);
+  gx.save(); gx.translate(12,T+ph/2); gx.rotate(-Math.PI/2); gx.fillText("current I / A",0,0); gx.restore();
+
+  const ev=$("evalMsg"), lamp=s.comp==="lamp";
+  $("r1k").textContent=lamp?"R at lowest V":"Gradient"; $("r2k").textContent=lamp?"R at highest V":"R = 1 ÷ gradient"; $("r3k").textContent="Graph shape";
+  if(pts.length>=3){
+    if(!lamp){
+      const f=fit(pts); gx.strokeStyle=steel; gx.lineWidth=2; gx.beginPath(); gx.moveTo(X(0),Y(f.c)); const xe=Math.min(xMax,(yMax-f.c)/f.m); gx.lineTo(X(xe),Y(f.m*xe+f.c)); gx.stroke(); gx.lineWidth=1;
+      $("r1v").textContent=f.m.toFixed(4)+" A/V"; $("r2v").textContent=(1/f.m).toFixed(1)+" Ω";
+      const straight=Math.abs(f.c)<0.01; $("r3v").textContent=straight?"straight, through 0":"straight";
+      ev.className="msg good"; ev.textContent="A straight line through the origin: current is directly proportional to p.d., so the resistor obeys Ohm's law. Its resistance stays constant.";
+    } else {
+      gx.strokeStyle=steel; gx.lineWidth=2; gx.beginPath(); gx.moveTo(X(0),Y(0)); pts.forEach(([x,y])=>gx.lineTo(X(x),Y(y))); gx.stroke(); gx.lineWidth=1;
+      const lo=pts[0], hi=pts[pts.length-1];
+      $("r1v").textContent=(lo[0]/lo[1]).toFixed(1)+" Ω"; $("r2v").textContent=(hi[0]/hi[1]).toFixed(1)+" Ω"; $("r3v").textContent="curve, flattening";
+      ev.className="msg"; ev.textContent="The graph curves and gets flatter as V increases. The filament heats up, so its resistance rises (from "+(lo[0]/lo[1]).toFixed(1)+" Ω to "+(hi[0]/hi[1]).toFixed(1)+" Ω here). A filament lamp does not obey Ohm's law.";
+    }
+  } else { ["r1v","r2v","r3v"].forEach(i=>$(i).textContent="–"); ev.className="msg"; ev.textContent="Record at least 3 readings to draw the graph."; }
+  pts.forEach(([x,y])=>{ gx.strokeStyle=acc; gx.lineWidth=2; const cx=X(x),cy=Y(y); gx.beginPath(); gx.moveTo(cx-5,cy-5); gx.lineTo(cx+5,cy+5); gx.moveTo(cx+5,cy-5); gx.lineTo(cx-5,cy+5); gx.stroke(); });
+  gx.lineWidth=1;
+}
+
+window.addEventListener("resize",()=>{ BR=sizeCanvas(bc); GR=sizeCanvas(gc); drawGraph(); });
+new MutationObserver(drawGraph).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+if(window.matchMedia){ const mq=matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener&&mq.addEventListener("change",drawGraph); }
+
+// ---------- start ----------
+const saved=load(); if(saved && (saved.res.length||saved.lamp.length)) s.data=saved; else $("sample").onclick();
+render(); update(); say("Build the circuit shown in the diagram below, or tap Wire it for me. Then close the switch.");
+requestAnimationFrame(draw);
+})();
+</script>
+
+</body></html>
