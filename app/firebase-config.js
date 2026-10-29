@@ -9,3 +9,6 @@ window.LABLINK_FIREBASE = {
   messagingSenderId: "",
   appId: ""
 };
+
+/* Online payments through Paynow: set to true once the payment server in functions/ is deployed (see README). */
+window.LABLINK_PAYMENTS = false;

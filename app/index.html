@@ -204,7 +204,7 @@ footer{font-size:.8rem;color:var(--muted);text-align:center;padding-top:8px}
 a.btnlink.primary-link{background:var(--accent);border-color:var(--accent);color:var(--panel)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--navy);color:var(--panel);padding:10px 16px;border-radius:999px;font-weight:600;z-index:20;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 footer label{color:var(--ink)}
-input[type=text],input[type=date],textarea{font-family:var(--f-body);font-size:1rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:44px;width:100%}
+input[type=text],input[type=date],input[type=search],input[type=tel],input:not([type]),textarea{box-sizing:border-box;font-family:var(--f-body);font-size:1rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:44px;width:100%}
 textarea{resize:vertical;line-height:1.45}
 #view>*{min-width:0}
 .qctx{white-space:pre-wrap;font-family:var(--f-mono);font-size:.84rem;background:var(--bench);border-radius:8px;padding:10px 12px;margin:0 0 10px;overflow-x:auto;max-height:340px}
@@ -270,24 +270,101 @@ td.nm{font-family:var(--f-body);font-weight:600}
 #mbody h3{font-family:var(--f-display);color:var(--navy);margin:12px 0 8px}
 #mbody hr{border:0;border-top:1px solid var(--line);margin:14px 0}
 
+/* explore, chemicals, tutors, groups, FAQ */
+.explore{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.excard{display:grid;gap:6px;justify-items:start;text-align:left;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
+.excard:hover{border-color:var(--accent)}
+.excard .ic{width:46px;height:46px;border-radius:12px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
+.excard .ic svg{width:30px;height:30px}
+.excard b{font-family:var(--f-display);font-size:1.05rem}
+.excard span:last-child{color:var(--muted);font-size:.86rem;font-weight:400}
+.badge-n{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--orange);color:#fff;font:600 .72rem var(--f-body)}
+.badge-n:empty{display:none}
+.bell{position:relative;min-height:40px;padding:6px 10px;color:var(--navy)}
+.belln{position:absolute;top:2px;right:2px;min-width:18px;height:18px;border-radius:999px;background:var(--orange);color:#fff;font:700 .68rem var(--f-body);display:grid;place-items:center;padding:0 4px}
+.chgh{font-family:var(--f-display);font-size:1.05rem;margin:14px 0 8px;color:var(--chem)}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.chcard{display:grid;gap:4px;justify-items:start;text-align:left;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
+.chcard:hover{border-color:var(--chem)}
+.chf{font-family:var(--f-mono);font-weight:500;color:var(--chem)}
+.chcard .chf{font-size:1.25rem}
+.chf.big{font-size:1.1rem;margin-left:6px;white-space:nowrap}
+.chn{font-weight:700}
+.chm{font-size:.78rem;color:var(--muted)}
+.chdone{font-size:.74rem;color:var(--good);font-weight:600}
+.hazrow{display:inline-flex;flex-wrap:wrap;gap:4px}
+.haz{font:600 .72rem var(--f-body);padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap}
+.haz.sm{font-size:.66rem;padding:1px 6px}
+.haz-corrosive,.haz-toxic{color:#b4442f;border-color:#b4442f;background:#fbe7e3}
+.haz-oxidiser,.haz-flammable{color:#a3590a;border-color:#d07a1a;background:#fdebd6}
+.haz-harmful,.haz-gas{color:#7a5a00;border-color:#c08512;background:#fbf3dc}
+.haz-env{color:#2f6b4f;border-color:#2f7d4f;background:#e3f1e8}
+.haz-low{color:var(--muted);border-color:var(--line);background:var(--panel)}
+.chtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:4px 0 12px}
+.chtile{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:2px;background:var(--bench)}
+.chtile .k{font-family:var(--f-mono);font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chtile .v{font-size:.9rem}
+.chembody h3{font-family:var(--f-display);color:var(--chem);margin:16px 0 6px;font-size:1.05rem}
+.chembody ul{margin:0;padding-left:1.2em} .chembody li{margin:3px 0}
+.rxlist{display:grid;gap:8px}
+.rx{border:1px solid var(--line);border-left:3px solid var(--chem);border-radius:8px;padding:8px 10px;display:grid;gap:4px;justify-items:start}
+.rx .eq{font-family:var(--f-mono);font-size:.92rem;overflow-x:auto;max-width:100%;white-space:nowrap}
+.rx .obs{font-size:.86rem}
+.cq{margin-bottom:12px} .cq p{margin:0 0 6px}
+.chemlink{display:inline;min-height:0;padding:0;border:0;background:none;color:var(--chem);font:inherit;font-weight:inherit;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
+.chemlink:hover{text-decoration-style:solid}
+.tutor{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.tutor .t{font-weight:700} .tutor .d{font-size:.86rem;color:var(--muted)}
+.tav{width:46px;height:46px;border-radius:50%;background:#e8eef8;color:var(--navy);display:grid;place-items:center;font:800 1.2rem var(--f-display);flex:none}
+.ver{font:600 .72rem var(--f-body);color:var(--good);margin-left:4px}
+.tside{display:grid;gap:8px;justify-items:end;margin-left:auto}
+.rate{font-family:var(--f-display);font-weight:800;color:var(--navy);font-size:1.2rem}
+.rate span{font:500 .78rem var(--f-body);color:var(--muted)}
+.chat{display:grid;gap:8px;max-height:52vh;overflow:auto;padding:4px 2px}
+.chat.tall{max-height:62vh}
+.bub{max-width:min(520px,88%);padding:8px 12px;border-radius:12px;background:var(--bench);border:1px solid var(--line);justify-self:start;white-space:pre-wrap;overflow-wrap:anywhere}
+.bub.me{justify-self:end;background:#e8eef8;border-color:#c9d6ec}
+.bub.offer{border-color:var(--navy);border-width:2px}
+.bub .who{font-size:.74rem;color:var(--muted);margin-bottom:2px;white-space:normal}
+.bub .who .linkish{min-height:0;padding:0 0 0 6px;font-size:.74rem;color:var(--muted)}
+.sys{justify-self:center;font-size:.78rem;color:var(--muted);background:var(--panel);border:1px dashed var(--line);border-radius:999px;padding:3px 10px}
+.offer-card{border:2px solid var(--navy);border-radius:12px;padding:12px 14px;display:inline-grid;gap:2px}
+.offer-card .k{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.offer-card .v{font-family:var(--f-display);font-weight:800;font-size:1.6rem;color:var(--navy)}
+.starbtn{font-size:1.5rem;min-height:44px;color:var(--line);padding:4px 10px}
+.starbtn.on{color:var(--orange);border-color:var(--orange)}
+.st-paid,.st-done{border-color:var(--good);color:var(--good)}
+.st-offered,.st-accepted{border-color:var(--orange);color:#a3590a}
+.ckf{border:1px solid var(--line);border-radius:10px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px 16px;margin:0}
+.ckf legend{font-size:.84rem;font-weight:600;padding:0 4px}
+.ckf label{display:flex;gap:6px;align-items:center;font-size:.9rem}
+.ckf input{min-height:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.faqd{border:1px solid var(--line);border-radius:10px;margin:6px 0;background:var(--panel)}
+.faqd summary{padding:10px 12px;cursor:pointer;font-weight:600}
+.faqd[open]{border-color:var(--orange)}
+.faqd .fa{padding:0 12px 12px;line-height:1.5}
+.asklist{margin:0;padding-left:1.2em} .asklist li{margin:4px 0}
+textarea{font:inherit;font-size:1rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);width:100%;resize:vertical}
 
 </style>
 
 <div class="wrap">
   <div class="top">
     <div class="brand"><img src="emblem.jpg" alt=""><span><span class="s">STEM</span><span class="l">Light</span><span class="p">LabLink</span></span></div>
-    <div class="hud2"><div class="hudtxt"><span class="rank" id="hudRank">Lab Novice</span><span class="muted" id="hudXp">0 XP</span></div><span class="xpbar"><i id="hudBar"></i></span></div>
+    <div class="row" style="gap:10px;flex-wrap:nowrap"><button id="bell" class="bell" hidden aria-label="Lesson messages"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span id="belln" class="belln" hidden></span></button><div class="hud2"><div class="hudtxt"><span class="rank" id="hudRank">Lab Novice</span><span class="muted" id="hudXp">0 XP</span></div><span class="xpbar"><i id="hudBar"></i></span></div></div>
   </div>
   <nav class="crumbs" id="crumbs" aria-label="Location"></nav>
   <main id="view" class="wrap" style="gap:16px"></main>
   <footer><div>STEMLight LabLink · a STEMLight Academy product · Empowering Zimbabwe Through STEM</div>
     <div class="row" style="justify-content:center;margin-top:8px"><label class="pill" style="padding:6px 10px"><input type="checkbox" id="demo"> Teacher demo: unlock all levels</label><button id="reset" style="min-height:36px;padding:4px 12px;font-weight:500">Reset progress</button></div>
-    <div style="margin-top:6px">Progress is saved for each person: to their account when signed in, or on this device in demo mode.</div></footer>
+    <div style="margin-top:6px">Progress is saved for each person: to their account when signed in, or on this device in demo mode. <button class="linkish" id="ffaq" style="min-height:0">Help and FAQ</button></div></footer>
 </div>
 <div id="toast" class="toast" role="status" hidden></div>
 <div id="sim" class="sim" hidden><div class="simbar"><div class="brand" style="font-size:1rem"><img src="emblem.jpg" alt=""><span id="simt"></span></div><button class="primary" id="simclose">Close lab</button></div><iframe id="simf" title="Experiment"></iframe></div>
 <div id="modal" class="modal" hidden><div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="mhead"><h3 id="mtitle">Tutorial</h3><button id="mclose">Close</button></div><div id="mbody" class="lp"></div></div></div>
 
+<script src="chemicals.js"></script>
 <script type="text/plain" id="lablink-app">
 (function(){
 const $=id=>document.getElementById(id);
@@ -748,6 +825,10 @@ function crumbs(){
   if(state.view==="sub"||state.view==="qedit") add("Teacher dashboard",()=>{ ED=null; go("teacher"); });
   else if(state.view==="task") add("Class work",()=>go("classwork"));
   else if(state.lab&&state.view!=="lab") add(LABS[state.lab].name,()=>go("lab",state.lab));
+  if(state.view==="chem"&&state.arg) add("Chemicals library",()=>go("chem","chemistry"));
+  if(state.view==="req"||state.view==="tprof"||state.view==="lessons") add("Find a tutor",()=>go("tutors"));
+  if(state.view==="req") add("My lessons",()=>go("lessons"));
+  if(state.view==="group") add("Study groups",()=>go("groups"));
 }
 function stopCurrent(){ if(current&&current.destroy) current.destroy(); current=null; stopSound(); }
 function go(view,lab,arg){
@@ -757,6 +838,8 @@ function go(view,lab,arg){
   closeHelp(); closeSim();
   if(view==="home") home(); else if(view==="lab") labView(lab); else if(view==="level") levelView(lab,arg);
   else if(view==="classwork") classworkView(); else if(view==="task") taskView(lab,arg); else if(view==="teacher") teacherView(); else if(view==="sub") subView(arg); else if(view==="bank") bankView(lab,arg); else if(view==="qedit") qeditView(arg);
+  else if(view==="chem") chemView(arg); else if(view==="tutors") tutorsView(); else if(view==="lessons") lessonsView(); else if(view==="req") reqView(arg); else if(view==="tprof") tutorProfileView();
+  else if(view==="groups") groupsView(); else if(view==="group") groupView(arg); else if(view==="faq") faqView(); else if(view==="admin") adminView();
   else practical(lab,arg);
   window.scrollTo({top:0});
 }
@@ -769,14 +852,15 @@ function home(){
   <div class="card prog"><div><div class="tag2">Your rank</div><div class="rank">${r.name}</div><div class="muted">${x} XP${r.next?` · ${r.next[0]-x} XP to ${r.next[1]}`:" · top rank reached"}</div></div>
     <div class="badges">${Object.entries(LABS).map(([k,L])=>`<span class="badge ${badges.includes(k)?"on":""}" style="--accent:var(${L.accent});--soft:var(${L.soft})" title="${L.name} master">${svgI(L.icon)}<span>${L.name.replace(" Lab","").replace(" (TVET)","")}</span></span>`).join("")}</div></div>
   <div class="labs">${Object.entries(LABS).map(([k,L])=>{ const n=L.levels.filter((_,i)=>passed(k,i)).length; return `<button class="labcard" data-lab="${k}" style="--accent:var(${L.accent});--soft:var(${L.soft})"><span class="ic">${svgI(L.icon)}</span><h3>${L.name}</h3><p>${L.blurb}</p><span class="lbar"><i style="width:${n/L.levels.length*100}%"></i></span><span class="meta">${n} of ${L.levels.length} levels passed · ${APP[k].length} apparatus</span></button>`; }).join("")}</div>`;
+  $("view").insertAdjacentHTML("beforeend",`<div id="explore"></div>`);
   document.querySelectorAll(".labcard").forEach(b=>b.onclick=()=>{ state.tab="levels"; go("lab",b.dataset.lab); });
-  renderClassBox();
+  renderClassBox(); renderExplore();
 }
 function labView(lab){
   const L=LABS[lab];
   $("view").innerHTML=`<section><p class="eyebrow">${L.name}</p><h1>${L.name}</h1><p class="lead">${L.blurb}</p></section>
-  <div class="tabs" role="tablist">${[["levels","Levels"],["bank","Question bank"],["apparatus","Apparatus"],["practice","Free practice"]].map(([k,t])=>`<button role="tab" data-t="${k}" aria-pressed="${state.tab===k}">${t}</button>`).join("")}</div><div id="tabbody"></div>`;
-  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ state.tab=b.dataset.t; labView(lab); });
+  <div class="tabs" role="tablist">${[["levels","Levels"],["bank","Question bank"],["apparatus","Apparatus"],["practice","Free practice"]].concat(lab==="chemistry"?[["chemicals","Chemicals library"]]:[]).map(([k,t])=>`<button role="tab" data-t="${k}" aria-pressed="${state.tab===k}">${t}</button>`).join("")}</div><div id="tabbody"></div>`;
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="chemicals"){ go("chem","chemistry"); return; } state.tab=b.dataset.t; labView(lab); });
   const body=$("tabbody");
   if(state.tab==="levels"){
     body.innerHTML=`<div class="path">${L.levels.map((lv,i)=>{ const st=stars(lab,i), un=unlocked(lab,i);
@@ -2274,7 +2358,492 @@ $("reset").onclick=()=>{ const b=$("reset"); if(Date.now()-resetArm<4000){ P={le
 $("mclose").onclick=closeHelp; $("simclose").onclick=closeSim;
 $("modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeHelp(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ if(!$("modal").hidden) closeHelp(); else closeSim(); } });
+// =====================================================================
+// CHEMICALS LIBRARY, TUTORS, STUDY GROUPS, FAQ, ADMIN
+// =====================================================================
+const CHEM=window.LABLINK_CHEM||{list:[],cats:{},haz:{},fmt:s=>esc(s)};
+const CH={}; CHEM.list.forEach(c=>{ CH[c.id]=c; });
+const cf=s=>CHEM.fmt(s); // our own chemical text only, never user text
+const APP_URL="https://innocent-mapindu.github.io/stemlight-lablink/";
+const SUBJECTS=["Combined Science","Physics","Chemistry","Biology","Mathematics"];
+const T_LEVELS=["Forms 1–2","O Level","A Level"];
+const PROVINCES=["Bulawayo","Harare","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
+const FEE=0.10; // LabLink's share of each paid lesson
+let NET=null, NETME=null, INBOX={l:[],t:[]}, inboxUnsub=[];
+const money=n=>"US$"+(+n||0).toFixed(2);
+const ago=iso=>{ const d=(Date.now()-new Date(iso))/1000; if(!(d>=0)) return ""; if(d<60) return "just now"; if(d<3600) return Math.floor(d/60)+" min ago"; if(d<86400) return Math.floor(d/3600)+" h ago"; if(d<86400*7) return Math.floor(d/86400)+" d ago"; return fmtWhen(iso); };
+function contactCheck(t){
+  for(const m of (t.match(/\+?\d[\d\s-]{7,}\d/g)||[])) if((m.match(/\d/g)||[]).length>=9) return "phone number";
+  if(/[\w.+-]+@[\w-]+\.[a-z]{2,}/i.test(t)) return "email address";
+  if(/(https?:\/\/|www\.|wa\.me|t\.me|chat\.whatsapp)/i.test(t)) return "link";
+  return null;
+}
+const SAFE_MSG=k=>`For everyone's safety, a ${k} can't be shared in LabLink chats. Keep lessons, messages and payments in LabLink so they are protected.`;
+async function initNet(){
+  try{ const c=window.claude; if(c&&typeof c.use==="function") NET=await Promise.resolve(c.use("net")).catch(()=>null); }catch(e){ NET=null; }
+  NETME=NET?NET.me:null;
+  if(NET) watchInbox();
+  if(["tutors","lessons","req","groups","group","faq","admin","tprof"].includes(state.view)) go(state.view,state.lab,state.arg);
+  else if(state.view==="home") renderExplore();
+  const h=(location.hash||"").slice(1); if(NET&&h.startsWith("g=")) go("group",null,h.slice(2));
+}
+function needNet(title){
+  if(NET) return true;
+  $("view").innerHTML=`<section><h1>${esc(title)}</h1><p class="lead">This part of LabLink connects learners, teachers and tutors, so it needs a LabLink account.</p></section><div class="card"><p style="margin:0 0 10px">Open the LabLink app to sign in or create an account. Labs, lessons and the chemicals library work without one.</p><a class="btnlink primary" href="${APP_URL}" target="_blank" rel="noopener" style="background:var(--navy);color:#fff;border-color:var(--navy)">Open the LabLink app</a></div>`;
+  return false;
+}
+
+// ---------- home: explore ----------
+function renderExplore(){
+  const el=$("explore"); if(!el) return;
+  const n=unreadCount();
+  el.innerHTML=`<h2 style="font-family:var(--f-display);margin:6px 0 10px">More in LabLink</h2><div class="explore">
+    <button class="excard" data-go="chem" style="--accent:var(--chem);--soft:var(--chem-soft)"><span class="ic">${svgI("flask")}</span><b>Chemicals library</b><span>${CHEM.list.length} chemicals: properties, reactions, tests and safety</span></button>
+    <button class="excard" data-go="tutors" style="--accent:var(--navy);--soft:#e8eef8"><span class="ic">${ICONX.tutor}</span><b>Find a tutor${n?` <span class="badge-n">${n}</span>`:""}</b><span>Book lessons with verified science teachers near you or online</span></button>
+    <button class="excard" data-go="groups" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${ICONX.group}</span><b>Study groups</b><span>Revise and discuss science with other learners</span></button>
+    <button class="excard" data-go="faq" style="--accent:var(--orange);--soft:#fdebd6"><span class="ic">${ICONX.help}</span><b>Help and FAQ</b><span>Answers that grow from the questions learners ask</span></button>
+    ${NETME&&NETME.admin?`<button class="excard" data-go="admin" style="--accent:var(--good);--soft:#e3f1e8"><span class="ic">${ICONX.shield}</span><b>Admin</b><span>Verify tutors, payments, reports and FAQ answers</span></button>`:""}</div>`;
+  el.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,b.dataset.go==="chem"?"chemistry":null));
+}
+const ICONX={
+  tutor:`<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 4h6v6h-6zM16.5 7.5l1.2 1.2 2-2.4"/></svg>`,
+  group:`<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 20c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/><path d="M14 14.8c.8-.5 1.6-.8 2.5-.8 2.6 0 4.5 2.1 4.5 4.8"/></svg>`,
+  help:`<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>`,
+  shield:`<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>`,
+  bell:`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>`};
+
+// ---------- chemicals library ----------
+function hazHTML(c,small){ return `<span class="hazrow">${c.haz.map(h=>`<span class="haz haz-${h}${small?" sm":""}">${esc(CHEM.haz[h]||h)}</span>`).join("")}</span>`; }
+function chemBody(c){
+  const tiles=[["Formula",cf(c.f)],["Relative formula mass",`M<sub>r</sub> = ${c.mr}`],["At room temperature",esc(c.state)],["Appearance",esc(c.look)],c.mp&&["Melting point",esc(c.mp)],c.bp&&["Boiling point",esc(c.bp)],["In water",esc(c.sol)],c.ph&&["pH",esc(c.ph)]].filter(Boolean);
+  return `<div class="chtiles">${tiles.map(([k,v])=>`<div class="chtile"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}</div>
+  <p>${esc(c.about)}</p><p>${hazHTML(c)}</p>
+  <h3>Physical properties</h3><ul>${c.phys.map(x=>`<li>${cf(x)}</li>`).join("")}</ul>
+  <h3>Chemical properties</h3><ul>${c.chem.map(x=>`<li>${cf(x)}</li>`).join("")}</ul>
+  <h3>Common reactions</h3><div class="rxlist">${c.rx.map(r=>`<div class="rx"><span class="pill">${esc(r.t)}</span><div class="eq">${cf(r.e)}</div><div class="obs"><b>What you see:</b> ${esc(r.o)}</div></div>`).join("")}</div>
+  <h3>How to test for it</h3><p>${cf(c.test)}</p>
+  <div class="msg caution" style="margin:12px 0"><b>Safety:</b> ${esc(c.safety)}</div>
+  <h3>Uses</h3><ul>${c.uses.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`;
+}
+function chemView(id){
+  if(id&&CH[id]) return chemItem(id);
+  $("view").innerHTML=`<section><p class="eyebrow">Chemistry Lab · reference</p><h1>Chemicals library</h1><p class="lead">${CHEM.list.length} common laboratory chemicals. Each lesson covers what the chemical looks like, its physical and chemical properties, its key reactions with balanced equations, how to test for it and how to handle it safely, with a short quiz.</p></section>
+  <div class="card"><div class="row" style="align-items:end"><div class="field" style="flex:2 1 220px"><label for="chq">Search</label><input id="chq" type="search" placeholder="Name or formula, for example sulfuric acid or NaOH" value="${esc(state.chemq||"")}"></div><div class="field"><label for="chc">Group</label><select id="chc"><option value="all">All groups</option>${Object.entries(CHEM.cats).map(([k,v])=>`<option value="${k}" ${state.chemc===k?"selected":""}>${v}</option>`).join("")}</select></div></div></div>
+  <div id="chlist"></div>`;
+  const draw=()=>{ const t=$("chq").value.trim().toLowerCase(), cat=$("chc").value; state.chemq=t; state.chemc=cat;
+    const items=CHEM.list.filter(x=>(cat==="all"||x.cat===cat)&&(!t||x.name.toLowerCase().includes(t)||x.f.toLowerCase().includes(t.replace(/\s/g,""))||x.aka.some(a=>a.includes(t))));
+    const groups=Object.keys(CHEM.cats).filter(k=>items.some(x=>x.cat===k));
+    $("chlist").innerHTML=items.length?groups.map(k=>`<h2 class="chgh">${CHEM.cats[k]}</h2><div class="chgrid">${items.filter(x=>x.cat===k).map(x=>`<button class="chcard" data-chem="${x.id}"><span class="chf">${cf(x.f)}</span><span class="chn">${esc(x.name)}</span><span class="chm">M<sub>r</sub> ${x.mr} · ${esc(x.state.split(";")[0])}</span>${hazHTML(x,true)}${P.acts["chem-"+x.id]?'<span class="chdone">✓ Quiz passed</span>':""}</button>`).join("")}</div>`).join(""):`<p class="empty">No chemical matches "${esc(t)}". Try another name or a formula.</p>`;
+    $("chlist").querySelectorAll("[data-chem]").forEach(b=>b.onclick=()=>go("chem","chemistry",b.dataset.chem)); };
+  $("chq").oninput=draw; $("chc").onchange=draw; draw();
+}
+function chemItem(id){
+  const c=CH[id], i=CHEM.list.indexOf(c), prev=CHEM.list[i-1], next=CHEM.list[i+1];
+  const other=c.aka.filter(a=>a!==c.name.toLowerCase()&&!c.name.toLowerCase().includes(a)&&!a.startsWith("dilute ")&&!a.startsWith(c.name.toLowerCase().split(" ")[0]+" gas"));
+  $("view").innerHTML=`<section><p class="eyebrow">Chemicals library · ${esc(CHEM.cats[c.cat])}</p><h1>${esc(c.name)} <span class="chf big">${cf(c.f)}</span></h1>${other.length?`<p class="lead">Also called ${other.map(esc).join(", ")}.</p>`:""}</section>
+  <div class="card lp chembody">${chemBody(c)}</div>
+  ${c.prac.length?`<div class="card"><h2>Use it in LabLink</h2><div class="row">${c.prac.map(p=>p.href?`<button class="primary" data-sim="${LINK[p.href]}" data-simt="${esc(p.t)}">${esc(p.t)}</button>`:`<button class="primary" data-gop="${p.lab}|${p.p}">${esc(p.t)}</button>`).join("")}</div></div>`:""}
+  <div class="card"><h2>Check your understanding</h2><div id="chquiz"></div></div>
+  <div class="row" style="justify-content:space-between">${prev?`<button data-chem="${prev.id}">← ${esc(prev.name)}</button>`:"<span></span>"}${next?`<button data-chem="${next.id}">${esc(next.name)} →</button>`:""}</div>`;
+  $("view").querySelectorAll("[data-chem]").forEach(b=>b.onclick=()=>go("chem","chemistry",b.dataset.chem));
+  $("view").querySelectorAll("[data-gop]").forEach(b=>b.onclick=()=>{ const [l,p]=b.dataset.gop.split("|"); go("prac",l,p); });
+  chemQuiz($("chquiz"),c);
+}
+function chemQuiz(host,c){
+  const ans={};
+  const draw=()=>{ host.innerHTML=c.quiz.map((q,qi)=>`<div class="cq"><p><b>${qi+1}.</b> ${cf(q.q)}</p><div class="opts">${q.o.map((o,oi)=>`<button data-q="${qi}" data-o="${oi}" ${ans[qi]!=null?"disabled":""} class="${ans[qi]!=null?(oi===q.a?"right":oi===ans[qi]?"wrong":""):""}">${cf(o)}</button>`).join("")}</div>${ans[qi]!=null?`<p class="${ans[qi]===q.a?"p-good":"p-warn"}" style="margin:6px 0 0"><b>${ans[qi]===q.a?"Correct.":"Not quite."}</b> ${cf(q.w)}</p>`:""}</div>`).join("")+
+    (Object.keys(ans).length===c.quiz.length?(c.quiz.every((q,qi)=>ans[qi]===q.a)?`<div class="msg good" style="margin-top:10px">All correct. ${P.acts["chem-"+c.id]?"":"+30 XP"}</div>`:`<button id="cqagain" style="margin-top:10px">Try again</button>`):"");
+    host.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{ ans[+b.dataset.q]=+b.dataset.o; draw(); if(Object.keys(ans).length===c.quiz.length&&c.quiz.every((q,qi)=>ans[qi]===q.a)) activityDone("chem-"+c.id); });
+    if($("cqagain")) $("cqagain").onclick=()=>{ for(const k in ans) delete ans[k]; draw(); }; };
+  draw();
+}
+function openChem(id){
+  const c=CH[id]; if(!c) return;
+  $("mtitle").innerHTML=`${esc(c.name)} <span class="chf">${cf(c.f)}</span>`;
+  $("mbody").innerHTML=`<div class="chembody" data-nochem>${chemBody(c)}</div><p style="margin-top:14px"><button class="primary" id="mchemfull" style="--accent:var(--chem)">Open the full lesson and quiz</button></p>`;
+  $("modal").hidden=false; $("mbody").scrollTop=0; $("mclose").focus();
+  $("mchemfull").onclick=()=>{ closeHelp(); go("chem","chemistry",id); };
+}
+// chemical names in chemistry pages become links to their lesson
+const CHEM_SKIP="button,a,input,textarea,select,label,option,script,style,svg,canvas,h1,h2,.chemlink,[data-nochem],.opts,.eq,.chf,.prow .t,.tabs,.crumbs";
+const CHEM_RE=(()=>{ const map={}, names=[]; CHEM.list.forEach(c=>c.aka.forEach(a=>{ if(["water","alcohol","chalk","marble","brine","distilled water","deionised water"].includes(a)) return; map[a.toLowerCase()]=c.id; names.push(a); }));
+  names.sort((a,b)=>b.length-a.length); if(!names.length) return null;
+  return {map,re:new RegExp("(?<![A-Za-z])("+names.map(n=>n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")(?![A-Za-z])","gi")}; })();
+function linkChems(root){
+  if(!CHEM_RE||!root) return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{ const p=n.parentElement; if(!p||!n.nodeValue.trim()||p.closest(CHEM_SKIP)) return NodeFilter.FILTER_REJECT; CHEM_RE.re.lastIndex=0; return CHEM_RE.re.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP; }});
+  const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n=>{ const t=n.nodeValue, frag=document.createDocumentFragment(); let last=0, m; CHEM_RE.re.lastIndex=0;
+    while((m=CHEM_RE.re.exec(t))){ frag.appendChild(document.createTextNode(t.slice(last,m.index))); const b=document.createElement("button"); b.type="button"; b.className="chemlink"; b.dataset.chemlink=CHEM_RE.map[m[1].toLowerCase()]; b.textContent=m[1]; b.title="Open the lesson on "+CH[b.dataset.chemlink].name; frag.appendChild(b); last=m.index+m[1].length; }
+    frag.appendChild(document.createTextNode(t.slice(last))); n.parentNode.replaceChild(frag,n); });
+}
+let linking=false;
+const chemObs=new MutationObserver(()=>{ if(linking) return; if(state.lab!=="chemistry"||state.view==="chem") return; linking=true; requestAnimationFrame(()=>{ try{ linkChems($("view")); }finally{ chemObs.takeRecords(); linking=false; } }); });
+chemObs.observe($("view"),{childList:true,subtree:true});
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-chemlink]"); if(b){ e.preventDefault(); openChem(b.dataset.chemlink); } });
+
+// ---------- notifications (lesson requests and messages) ----------
+function watchInbox(){
+  inboxUnsub.forEach(u=>u()); inboxUnsub=[];
+  const me=NETME.uid; let first=true;
+  const upd=()=>{ const n=unreadCount(); const b=$("bell"); if(b){ b.hidden=false; $("belln").textContent=n||""; $("belln").hidden=!n; b.setAttribute("aria-label",n?`${n} unread lesson message${n>1?"s":""}`:"Lesson messages"); }
+    if(state.view==="home") renderExplore(); if(state.view==="lessons") renderLessons(); const t=$("tmineN"); if(t) t.textContent=n||""; };
+  const prevN={};
+  const on=(k,role)=>s=>{ const rows=s.docs.map(d=>Object.assign({id:d.id},d.data()));
+    if(!first) rows.forEach(r=>{ const n=(r.unread||{})[role]||0; if(n>(prevN[r.id]||0)&&!(state.view==="req"&&state.arg===r.id)) toast(role==="tutor"?`New message from ${r.learnerName||"a learner"}`:`New message from ${r.tutorName||"your tutor"}`); });
+    rows.forEach(r=>{ prevN[r.id]=(r.unread||{})[role]||0; }); INBOX[k]=rows; upd(); };
+  inboxUnsub.push(NET.col("requests").where("learner","==",me).onSnapshot(on("l","learner"),()=>{}));
+  inboxUnsub.push(NET.col("requests").where("tutor","==",me).onSnapshot(on("t","tutor"),()=>{}));
+  setTimeout(()=>{ first=false; },1500);
+  $("bell").onclick=()=>go("lessons");
+}
+function unreadCount(){ return INBOX.l.reduce((a,r)=>a+((r.unread||{}).learner||0),0)+INBOX.t.reduce((a,r)=>a+((r.unread||{}).tutor||0),0); }
+
+// ---------- tutors ----------
+async function tutorsView(){
+  if(!needNet("Find a science tutor")) return;
+  const me=NETME;
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--navy)">Tutors</p><h1>Find a science tutor</h1><p class="lead">Book lessons with verified science teachers near you or online. Agree the lesson in LabLink and pay through LabLink. The tutor is paid once the lesson is done.</p></section>
+  <div class="row"><button class="primary" id="tmine" style="--accent:var(--navy)">My lessons <span class="badge-n" id="tmineN">${unreadCount()||""}</span></button>${me.teacher?`<button id="tbecome">Tutor profile</button>`:""}</div>
+  <div class="card"><div class="row" style="align-items:end">
+    <div class="field"><label for="fsub">Subject</label><select id="fsub"><option value="">Any subject</option>${SUBJECTS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+    <div class="field"><label for="flev">Level</label><select id="flev"><option value="">Any level</option>${T_LEVELS.map(x=>`<option>${x}</option>`).join("")}</select></div>
+    <div class="field"><label for="fmode">Lessons</label><select id="fmode"><option value="">Online or in person</option><option>Online</option><option>In person</option></select></div>
+    <div class="field"><label for="fprov">Near</label><select id="fprov"><option value="">Anywhere</option>${PROVINCES.map(x=>`<option ${x===me.province?"selected":""}>${x}</option>`).join("")}</select></div></div></div>
+  <div id="tlistx" class="plist"><p class="muted">Loading tutors…</p></div>
+  <div class="msg" style="--accent:var(--navy)"><b>Staying safe.</b> LabLink checks every tutor's qualifications and identity before listing them. Keep all messages and payments in LabLink. Phone numbers and emails can't be shared in chats. Meet in-person tutors at school, a library, or at home with a parent or guardian present. Use <i>Report a problem</i> if anything worries you.</div>`;
+  $("tmine").onclick=()=>go("lessons"); if($("tbecome")) $("tbecome").onclick=()=>go("tprof");
+  let tutors=[];
+  try{ const s=await NET.col("tutors").where("verified","==",true).get(); tutors=s.docs.map(d=>Object.assign({id:d.id},d.data()));
+    await Promise.all(tutors.map(async t=>{ try{ const r=await NET.col(`tutors/${t.id}/ratings`).get(); const st=r.docs.map(d=>d.data().stars||0); t.rn=st.length; t.ravg=st.length?st.reduce((a,b)=>a+b,0)/st.length:0; }catch(e){ t.rn=0; } })); }
+  catch(e){ $("tlistx").innerHTML=`<div class="msg warn">Could not load tutors. Check your connection and try again.</div>`; return; }
+  const draw=()=>{ const sub=$("fsub").value, lev=$("flev").value, mode=$("fmode").value, prov=$("fprov").value;
+    const list=tutors.filter(t=>(!sub||(t.subjects||[]).includes(sub))&&(!lev||(t.levels||[]).includes(lev))&&(!mode||(t.modes||[]).includes(mode))&&(!prov||t.province===prov||(t.modes||[]).includes("Online")))
+      .sort((a,b)=>((b.town===me.town)-(a.town===me.town))||((b.province===me.province)-(a.province===me.province))||(b.ravg-a.ravg));
+    $("tlistx").innerHTML=list.length?list.map(t=>`<div class="tutor"><div class="tav">${esc((t.name||"?").replace(/^(Mr|Mrs|Ms|Dr)\.?\s+/,"").slice(0,1))}</div><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(t.name)} <span class="ver">✓ Verified</span></div>
+      <div class="d">${esc((t.subjects||[]).join(", "))} · ${esc((t.levels||[]).join(", "))}</div>
+      <div class="d">${esc((t.modes||[]).join(" and "))}${(t.modes||[]).includes("In person")?` · ${esc(t.town||"")}, ${esc(t.province||"")}`:""}${prov&&t.province!==prov&&(t.modes||[]).includes("Online")?" · online only for you":""}</div>
+      <div class="d">${t.rn?`<span class="stars">${"★".repeat(Math.round(t.ravg))}<span class="off">${"★".repeat(5-Math.round(t.ravg))}</span></span> ${t.ravg.toFixed(1)} (${t.rn} review${t.rn>1?"s":""})`:"New tutor"}</div>
+      <p style="margin:6px 0 0;font-size:.9rem">${esc(t.bio||"")}</p></div>
+      <div class="tside"><div class="rate">${money(t.rate)}<span> per hour</span></div>${t.id===me.uid?`<span class="muted">This is you</span>`:`<button class="primary" data-req="${t.id}" style="--accent:var(--navy)">Request a lesson</button>`}</div></div>`).join(""):`<p class="empty">No verified tutor matches these choices yet. Try "Anywhere" or online lessons.</p>`;
+    $("tlistx").querySelectorAll("[data-req]").forEach(b=>b.onclick=()=>requestForm(tutors.find(t=>t.id===b.dataset.req))); };
+  ["fsub","flev","fmode","fprov"].forEach(id=>$(id).onchange=draw); draw();
+}
+function requestForm(t){
+  const me=NETME;
+  $("mtitle").textContent="Request a lesson with "+t.name;
+  $("mbody").innerHTML=`<form id="rqf" class="col" style="gap:10px;padding-top:10px">
+    <div class="row"><div class="field"><label for="rsub">Subject</label><select id="rsub">${(t.subjects||[]).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div><div class="field"><label for="rlev">Level</label><select id="rlev">${(t.levels||[]).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div><div class="field"><label for="rmode">Lesson</label><select id="rmode">${(t.modes||[]).map(x=>`<option>${esc(x)}</option>`).join("")}</select></div></div>
+    <div class="field"><label for="rtopic">Topic</label><input id="rtopic" maxlength="120" placeholder="e.g. titration calculations, moles, electricity"></div>
+    <div class="field"><label for="rwhen">Days and times that suit you</label><input id="rwhen" maxlength="120" placeholder="e.g. weekdays after 4 pm, or Saturday morning"></div>
+    <div class="field"><label for="rmsg">Message to the tutor</label><textarea id="rmsg" rows="3" maxlength="600" placeholder="What do you need help with?"></textarea></div>
+    ${me.minor?`<div class="msg" style="--accent:var(--navy)">You told us you are under 18, so a parent or guardian pays for lessons. LabLink sends the payment request to their phone.</div>
+    <div class="field"><label for="rgp">Parent or guardian's mobile number (for EcoCash or OneMoney)</label><input id="rgp" inputmode="tel" maxlength="20" value="${esc(me.guardianPhone||"")}" placeholder="07xx xxx xxx"></div>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:.9rem"><input type="checkbox" id="rgok" style="min-height:0;margin-top:3px"> My parent or guardian knows I am asking for this lesson.</label>`:""}
+    <div id="rqm"></div><div class="row"><button class="primary" type="submit" style="--accent:var(--navy)">Send request</button><button type="button" id="rqcancel">Cancel</button></div>
+    <p class="muted" style="font-size:.82rem;margin:0">The tutor replies in LabLink with a price and time. Nothing is paid until you accept their offer.</p></form>`;
+  $("modal").hidden=false; $("rqcancel").onclick=closeHelp;
+  $("rqf").onsubmit=async e=>{ e.preventDefault(); const m=$("rqm"), btn=$("rqf").querySelector("[type=submit]");
+    const topic=$("rtopic").value.trim(), text=$("rmsg").value.trim();
+    if(!topic){ m.innerHTML=`<div class="msg warn">Say which topic you need help with.</div>`; return; }
+    const bad=contactCheck(topic+" "+text+" "+$("rwhen").value); if(bad){ m.innerHTML=`<div class="msg warn">${SAFE_MSG(bad)}</div>`; return; }
+    if(me.minor){ const gp=$("rgp").value.replace(/[^\d+]/g,""); if(gp.length<9){ m.innerHTML=`<div class="msg warn">Enter your parent or guardian's mobile number.</div>`; return; } if(!$("rgok").checked){ m.innerHTML=`<div class="msg warn">Please tell your parent or guardian before you ask for a paid lesson, then tick the box.</div>`; return; } if(gp!==me.guardianPhone) try{ await NET.updateMe({guardianPhone:gp}); }catch(_){ } }
+    btn.disabled=true;
+    try{ const now=NET.now();
+      const r=await NET.col("requests").add({learner:me.uid,learnerName:me.name,tutor:t.id,tutorName:t.name,subject:$("rsub").value,level:$("rlev").value,mode:$("rmode").value,topic,when:$("rwhen").value.trim(),status:"open",minor:!!me.minor,created:now,updated:now,unread:{tutor:1,learner:0},offer:null});
+      if(text) await NET.col(`requests/${r.id}/msgs`).add({by:me.uid,name:me.name,text,at:now,kind:"msg"});
+      closeHelp(); toast("Request sent to "+t.name); go("req",null,r.id);
+    }catch(err){ btn.disabled=false; m.innerHTML=`<div class="msg warn">Could not send the request. ${esc(err&&err.code||"")}</div>`; } };
+}
+function lessonsView(){
+  if(!needNet("My lessons")) return;
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--navy)">Tutors</p><h1>My lessons</h1><p class="lead">Lesson requests, offers and messages${NETME.teacher?", including requests from learners if you tutor":""}.</p></section><div class="row"><button id="lfind" class="primary" style="--accent:var(--navy)">Find a tutor</button></div><div id="llist" class="plist"></div>`;
+  $("lfind").onclick=()=>go("tutors"); renderLessons();
+}
+const RSTAT={open:"Requested",offered:"Offer made",accepted:"Offer accepted, awaiting payment",paid:"Paid, lesson booked",done:"Lesson done",declined:"Declined",cancelled:"Cancelled"};
+function renderLessons(){
+  const el=$("llist"); if(!el) return;
+  const rows=[...INBOX.l.map(r=>Object.assign({as:"learner"},r)),...INBOX.t.map(r=>Object.assign({as:"tutor"},r))].sort((a,b)=>String(b.updated).localeCompare(String(a.updated)));
+  el.innerHTML=rows.length?rows.map(r=>{ const n=(r.unread||{})[r.as]||0; return `<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${r.as==="tutor"?`Request from ${esc(r.learnerName)}`:`${esc(r.subject)} with ${esc(r.tutorName)}`} ${n?`<span class="badge-n">${n} new</span>`:""}</div><div class="d">${esc(r.subject)} · ${esc(r.level)} · ${esc(r.topic)} · ${ago(r.updated)}</div></div><div class="row"><span class="pill st-${r.status}">${RSTAT[r.status]||r.status}</span><button class="primary" data-r="${r.id}" style="--accent:var(--navy)">Open</button></div></div>`; }).join(""):`<p class="empty">No lessons yet. Find a tutor to send your first request.</p>`;
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>go("req",null,b.dataset.r));
+}
+function reqView(rid){
+  if(!needNet("Lesson")) return;
+  const me=NETME; let R=null, MS=[], sent=false;
+  $("view").innerHTML=`<div id="rhead"><p class="muted">Loading…</p></div><div class="card"><h2>Messages</h2><div id="rmsgs" class="chat"></div>
+    <form id="rform" class="row" style="margin-top:10px;align-items:end"><div class="field" style="flex:1 1 240px"><label for="rtext" class="sr">Message</label><textarea id="rtext" rows="2" maxlength="1500" placeholder="Write a message"></textarea></div><button class="primary" type="submit" style="--accent:var(--navy)">Send</button></form><div id="rfm"></div>
+    <p class="muted" style="font-size:.8rem;margin:8px 0 0">Messages stay in LabLink and may be checked by LabLink if a problem is reported. <button class="linkish" id="rrep">Report a problem</button></p></div>`;
+  const u1=NET.doc("requests/"+rid).onSnapshot(s=>{ if(!s.exists){ $("rhead").innerHTML=`<div class="msg warn">This lesson request no longer exists.</div>`; return; } R=Object.assign({id:rid},s.data()); drawHead(); const role=R.tutor===me.uid?"tutor":"learner"; if(((R.unread||{})[role]||0)>0) NET.doc("requests/"+rid).update({["unread."+role]:0}).catch(()=>{}); },()=>{ $("rhead").innerHTML=`<div class="msg warn">You can't open this lesson.</div>`; });
+  const u2=NET.col(`requests/${rid}/msgs`).onSnapshot(s=>{ MS=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>String(a.at).localeCompare(String(b.at))); drawMsgs(); },()=>{});
+  current={destroy(){ u1(); u2(); }};
+  const say=async(text,kind)=>{ const role=R.tutor===me.uid?"tutor":"learner", other=role==="tutor"?"learner":"tutor", now=NET.now();
+    await NET.col(`requests/${rid}/msgs`).add({by:me.uid,name:me.name,text,at:now,kind:kind||"msg"});
+    await NET.doc("requests/"+rid).update({updated:now}); await NET.inc("requests/"+rid,"unread."+other,1); };
+  const setStatus=async(status,extra,note)=>{ await NET.doc("requests/"+rid).update(Object.assign({status,updated:NET.now()},extra||{})); if(note) await say(note,"system"); };
+  $("rform").onsubmit=async e=>{ e.preventDefault(); const t=$("rtext").value.trim(); if(!t||!R) return; const bad=contactCheck(t); if(bad){ $("rfm").innerHTML=`<div class="msg warn" style="margin-top:8px">${SAFE_MSG(bad)}</div>`; return; } $("rfm").innerHTML=""; $("rtext").value=""; try{ await say(t); }catch(err){ $("rtext").value=t; $("rfm").innerHTML=`<div class="msg warn" style="margin-top:8px">Not sent. Check your connection.</div>`; } };
+  $("rrep").onclick=()=>reportForm("lesson",rid);
+  function drawMsgs(){ const el=$("rmsgs"); if(!el) return;
+    el.innerHTML=MS.length?MS.map(m=>m.kind==="system"?`<div class="sys">${esc(m.text)} · ${ago(m.at)}</div>`:`<div class="bub ${m.by===me.uid?"me":""} ${m.kind==="offer"?"offer":""}"><div class="who">${esc(m.by===me.uid?"You":m.name)} · ${ago(m.at)}</div>${esc(m.text)}</div>`).join(""):`<p class="empty">No messages yet.</p>`;
+    el.scrollTop=el.scrollHeight; }
+  function drawHead(){
+    const role=R.tutor===me.uid?"tutor":"learner", st=R.status, o=R.offer, steps=["open","offered","accepted","paid","done"], si=steps.indexOf(st);
+    let act="";
+    if(role==="tutor"&&(st==="open"||st==="offered")) act=`<h3>${st==="open"?"Make an offer":"Change your offer"}</h3><form id="offf" class="row" style="align-items:end"><div class="field"><label for="oamt">Price for all sessions (US$)</label><input id="oamt" type="number" min="1" step="0.5" value="${o?o.amount:""}" inputmode="decimal"></div><div class="field"><label for="ohrs">Hours per session</label><input id="ohrs" type="number" min="0.5" step="0.5" value="${o?o.hours:1}"></div><div class="field"><label for="oses">Sessions</label><input id="oses" type="number" min="1" step="1" value="${o?o.sessions:1}"></div><div class="field" style="flex:2 1 220px"><label for="owhen">When</label><input id="owhen" maxlength="120" value="${esc(o?o.when:R.when||"")}" placeholder="e.g. Saturday 9 am, online"></div><button class="primary" type="submit" style="--accent:var(--navy)">Send offer</button></form><div id="offm"></div><p class="muted" style="font-size:.84rem">You receive the price minus LabLink's ${FEE*100}% fee after the lesson is marked done.</p><button id="rdecl">Decline this request</button>`;
+    else if(role==="learner"&&st==="open") act=`<p>Waiting for ${esc(R.tutorName)} to reply with an offer.</p><button id="rcanc">Cancel request</button>`;
+    else if(role==="learner"&&st==="offered") act=`<div class="offer-card"><div class="k">Offer from ${esc(R.tutorName)}</div><div class="v">${money(o.amount)}</div><div>${o.sessions} session${o.sessions>1?"s":""} of ${o.hours} hour${o.hours!=1?"s":""} · ${esc(o.when||"")}</div></div><div class="row" style="margin-top:10px"><button class="primary" id="racc" style="--accent:var(--navy)">Accept and pay</button><button id="rcanc">Cancel</button></div><p class="muted" style="font-size:.84rem">Questions first? Use the messages below. You can still cancel before paying.</p>`;
+    else if(st==="accepted"&&role==="learner") act=payPanel();
+    else if(st==="accepted") act=`<p>${esc(R.learnerName)} accepted your offer of ${money(o.amount)}. Waiting for payment.</p>`;
+    else if(st==="paid") act=`<div class="msg good">Payment of ${money((R.payment||{}).amount||o.amount)} received and held by LabLink${R.payment&&R.payment.ref?` (reference ${esc(R.payment.ref)})`:""}. ${role==="tutor"?`You will receive ${money(o.amount*(1-FEE))} once the lesson is marked done.`:"The tutor is paid after the lesson."}</div><p>${esc(o.when||"")}</p><button class="primary" id="rdone" style="--accent:var(--navy)">The lesson has happened</button>`;
+    else if(st==="done") act=role==="learner"?(R.rated?`<div class="msg good">Thank you for rating this lesson.</div>`:`<h3>How was the lesson?</h3><div class="row" id="rstars">${[1,2,3,4,5].map(n=>`<button data-s="${n}" class="starbtn" aria-label="${n} star${n>1?"s":""}">★</button>`).join("")}</div><div class="field" style="margin-top:8px"><label for="rcom">Comment (optional)</label><input id="rcom" maxlength="200"></div><button class="primary" id="rrate" disabled style="--accent:var(--navy);margin-top:8px">Send rating</button>`):`<div class="msg good">Lesson done. ${R.payout?`${money(R.payout.amount)} paid to you on ${fmtWhen(R.payout.at)}.`:`Your payment of ${money(o.amount*(1-FEE))} is being processed by LabLink.`}</div>`;
+    else act=`<p class="muted">This request was ${esc(st)}.</p>`;
+    $("rhead").innerHTML=`<section><p class="eyebrow" style="color:var(--navy)">Lesson</p><h1>${role==="tutor"?`Request from ${esc(R.learnerName)}`:`${esc(R.subject)} with ${esc(R.tutorName)}`}</h1><p class="lead">${esc(R.subject)} · ${esc(R.level)} · ${esc(R.mode)} · ${esc(R.topic)}${R.when?` · ${esc(R.when)}`:""}${role==="tutor"&&R.minor?" · learner under 18: a parent or guardian pays":""}</p></section>
+      ${si>=0?`<div class="stepper" style="grid-template-columns:repeat(5,minmax(0,1fr));margin:10px 0">${["Requested","Offer made","Accepted","Paid","Done"].map((t,i)=>`<div class="step ${i<si?"done":i===si?"on":""}" style="--accent:var(--navy)">${t}</div>`).join("")}</div>`:""}
+      <div class="card">${act}</div>`;
+    const b=id=>$(id);
+    if(b("offf")) b("offf").onsubmit=async e=>{ e.preventDefault(); const amount=Math.round(+$("oamt").value*100)/100, hours=+$("ohrs").value, sessions=Math.round(+$("oses").value), when=$("owhen").value.trim();
+      if(!(amount>=1)||!(hours>0)||!(sessions>=1)){ $("offm").innerHTML=`<div class="msg warn">Enter the price, hours and number of sessions.</div>`; return; }
+      const bad=contactCheck(when); if(bad){ $("offm").innerHTML=`<div class="msg warn">${SAFE_MSG(bad)}</div>`; return; }
+      await setStatus("offered",{offer:{amount,hours,sessions,when,at:NET.now()}}); await say(`Offer: ${money(amount)} for ${sessions} session${sessions>1?"s":""} of ${hours} hour${hours!=1?"s":""}. ${when}`,"offer"); };
+    if(b("rdecl")) b("rdecl").onclick=async()=>{ await setStatus("declined",null,`${me.name} declined the request.`); await NET.inc("requests/"+rid,"unread.learner",1); };
+    if(b("rcanc")) b("rcanc").onclick=async()=>{ await setStatus("cancelled",null,`${me.name} cancelled the request.`); await NET.inc("requests/"+rid,"unread.tutor",1); };
+    if(b("racc")) b("racc").onclick=async()=>{ await setStatus("accepted",null,`${me.name} accepted the offer of ${money(o.amount)}.`); await NET.inc("requests/"+rid,"unread.tutor",1); };
+    if(b("rdone")) b("rdone").onclick=async()=>{ await setStatus("done",null,`${me.name} confirmed the lesson happened.`); await NET.inc("requests/"+rid,"unread."+(role==="tutor"?"learner":"tutor"),1); };
+    if(b("rstars")){ let stars=0; b("rstars").querySelectorAll("[data-s]").forEach(x=>x.onclick=()=>{ stars=+x.dataset.s; b("rstars").querySelectorAll("[data-s]").forEach(y=>y.classList.toggle("on",+y.dataset.s<=stars)); $("rrate").disabled=false; });
+      $("rrate").onclick=async()=>{ const text=$("rcom").value.trim(); if(contactCheck(text)) return; try{ await NET.doc(`tutors/${R.tutor}/ratings/${rid}`).set({stars,text,name:me.name.split(" ")[0],at:NET.now()}); await NET.doc("requests/"+rid).update({rated:true}); toast("Thank you for your rating"); }catch(e){ toast("Could not save the rating"); } }; }
+    if(b("ppay")) wirePay();
+  }
+  function payPanel(){
+    const o=R.offer, phone=me.minor?(me.guardianPhone||""):"";
+    return `<h3>Pay ${money(o.amount)}</h3><p class="muted" style="margin-top:0">${o.sessions} session${o.sessions>1?"s":""} of ${o.hours} hour${o.hours!=1?"s":""} with ${esc(R.tutorName)}. LabLink holds the money and pays the tutor after the lesson.</p>
+    <div class="row" style="align-items:end"><div class="field"><label for="pmeth">Pay with</label><select id="pmeth"><option value="ecocash">EcoCash</option><option value="onemoney">OneMoney</option></select></div><div class="field"><label for="pphone">${me.minor?"Parent or guardian's mobile number":"Mobile number to pay from"}</label><input id="pphone" inputmode="tel" maxlength="20" value="${esc(phone)}" placeholder="07xx xxx xxx"></div><button class="primary" id="ppay" style="--accent:var(--navy)">Send payment request</button></div><div id="pmsg"></div>`;
+  }
+  function wirePay(){
+    $("ppay").onclick=async()=>{ const phone=$("pphone").value.replace(/[^\d+]/g,""), method=$("pmeth").value; if(phone.length<9){ $("pmsg").innerHTML=`<div class="msg warn">Enter the mobile number that will pay.</div>`; return; }
+      $("ppay").disabled=true; $("pmsg").innerHTML=`<p class="muted">Sending the payment request…</p>`;
+      try{ const r=await NET.pay(rid,{method,phone});
+        if(r.manual){ $("pmsg").innerHTML=`<div class="msg">Online payment is being switched on for the pilot. LabLink will contact ${me.minor?"your parent or guardian":"you"} to collect the payment, then confirm it here. Your booking is saved.</div>`; return; }
+        $("pmsg").innerHTML=`<div class="msg">${esc(r.instructions||"Check the phone and approve the payment.")}</div>`;
+        if(NET.checkPay){ let n=0; const iv=setInterval(async()=>{ n++; if(!R||R.status!=="accepted"||n>24){ clearInterval(iv); return; } try{ await NET.checkPay(rid); }catch(e){} },5000); }
+      }catch(e){ $("ppay").disabled=false; $("pmsg").innerHTML=`<div class="msg warn">The payment request could not be sent. ${esc((e&&e.message)||"")}</div>`; } };
+  }
+}
+function tutorProfileView(){
+  if(!needNet("Tutor profile")) return;
+  const me=NETME;
+  if(!me.teacher){ $("view").innerHTML=`<section><h1>Tutor profile</h1><p class="lead">Only teacher accounts can offer tutoring.</p></section>`; return; }
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--navy)">Tutors</p><h1>Your tutor profile</h1><p class="lead">Learners see this profile once LabLink has checked your qualifications and identity. Your exact address and phone number are never shown.</p></section><div class="card" id="tpbox"><p class="muted">Loading…</p></div>`;
+  NET.doc("tutors/"+me.uid).get().then(s=>{ const t=s.exists?s.data():{}; const has=s.exists;
+    const checks=(name,opts,sel)=>`<fieldset class="ckf"><legend>${name}</legend>${opts.map(o=>`<label><input type="checkbox" value="${esc(o)}" ${(sel||[]).includes(o)?"checked":""}> ${esc(o)}</label>`).join("")}</fieldset>`;
+    $("tpbox").innerHTML=`${has?`<div class="msg ${t.verified?"good":""}" style="margin-bottom:10px">${t.verified?"✓ Verified: learners can find and book you.":"Waiting for LabLink to check your details. You'll be listed once verified."}</div>`:""}
+    <form id="tpf" class="col" style="gap:12px">${checks("Subjects",SUBJECTS,t.subjects)}${checks("Levels",T_LEVELS,t.levels)}${checks("Lessons",["Online","In person"],t.modes)}
+    <div class="row"><div class="field"><label for="tpprov">Province</label><select id="tpprov">${PROVINCES.map(x=>`<option ${x===(t.province||me.province)?"selected":""}>${x}</option>`).join("")}</select></div><div class="field"><label for="tptown">Town or area</label><input id="tptown" maxlength="60" value="${esc(t.town||me.town||"")}"></div><div class="field"><label for="tprate">Rate per hour (US$)</label><input id="tprate" type="number" min="1" step="0.5" value="${t.rate||""}"></div></div>
+    <div class="field"><label for="tpbio">About you and how you teach (shown to learners)</label><textarea id="tpbio" rows="3" maxlength="400">${esc(t.bio||"")}</textarea></div>
+    <div class="field"><label for="tpq">Qualifications (checked by LabLink)</label><input id="tpq" maxlength="160" value="${esc(t.quals||"")}" placeholder="e.g. BSc Chemistry, PGDE; registered teacher"></div>
+    ${has?"":`<label style="display:flex;gap:8px;align-items:flex-start;font-size:.9rem"><input type="checkbox" id="tpok" style="min-height:0;margin-top:3px"> I agree to LabLink checking my identity and qualifications, to keep all lessons, messages and payments in LabLink, and to follow LabLink's child-safety rules.</label>`}
+    <div id="tpm"></div><div class="row"><button class="primary" type="submit" style="--accent:var(--navy)">${has?"Save changes":"Submit for checking"}</button><button type="button" id="tpback">Back to tutors</button></div></form>`;
+    $("tpback").onclick=()=>go("tutors");
+    $("tpf").onsubmit=async e=>{ e.preventDefault(); const get=n=>[...$("tpf").querySelectorAll(`fieldset legend`)].find(l=>l.textContent===n).parentElement.querySelectorAll("input:checked");
+      const d={name:me.name,subjects:[...get("Subjects")].map(x=>x.value),levels:[...get("Levels")].map(x=>x.value),modes:[...get("Lessons")].map(x=>x.value),province:$("tpprov").value,town:$("tptown").value.trim(),rate:Math.round(+$("tprate").value*100)/100,bio:$("tpbio").value.trim(),quals:$("tpq").value.trim(),updated:NET.now()};
+      const m=$("tpm"); if(!d.subjects.length||!d.levels.length||!d.modes.length||!(d.rate>=1)||!d.bio){ m.innerHTML=`<div class="msg warn">Choose at least one subject, level and lesson type, and fill in your rate and a short description.</div>`; return; }
+      const bad=contactCheck(d.bio+" "+d.quals+" "+d.town); if(bad){ m.innerHTML=`<div class="msg warn">Please remove the ${bad}: learners contact you through LabLink.</div>`; return; }
+      if(!has&&!$("tpok").checked){ m.innerHTML=`<div class="msg warn">Tick the box to agree to the checks and safety rules.</div>`; return; }
+      try{ if(has) await NET.doc("tutors/"+me.uid).update(d); else await NET.doc("tutors/"+me.uid).set(Object.assign(d,{verified:false,created:NET.now()})); toast(has?"Profile saved":"Submitted. LabLink will check your details."); tutorProfileView(); }
+      catch(err){ m.innerHTML=`<div class="msg warn">Could not save. ${esc(err&&err.code||"")}</div>`; } };
+  }).catch(()=>{ $("tpbox").innerHTML=`<div class="msg warn">Could not load your profile.</div>`; });
+}
+function reportForm(kind,ref){
+  $("mtitle").textContent="Report a problem";
+  $("mbody").innerHTML=`<p>Tell LabLink what happened. Reports go to the LabLink safety team, not to the other person.</p><div class="field"><label for="reptext">What happened?</label><textarea id="reptext" rows="4" maxlength="1000"></textarea></div><div id="repm"></div><p><button class="primary" id="repgo" style="--accent:var(--warn)">Send report</button></p><p class="muted" style="font-size:.84rem">If someone is in immediate danger, contact the police or a trusted adult straight away.</p>`;
+  $("modal").hidden=false;
+  $("repgo").onclick=async()=>{ const t=$("reptext").value.trim(); if(!t) return; try{ await NET.col("reports").add({kind,ref,by:NETME.uid,name:NETME.name,text:t,at:NET.now(),status:"open"}); $("mbody").innerHTML=`<div class="msg good" style="margin-top:12px">Thank you. The LabLink safety team will look at this.</div>`; }catch(e){ $("repm").innerHTML=`<div class="msg warn">Could not send. Try again.</div>`; } };
+}
+
+// ---------- study groups ----------
+async function groupsView(){
+  if(!needNet("Study groups")) return;
+  const me=NETME;
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--bio)">Study groups</p><h1>Study groups</h1><p class="lead">Revise with other learners: share questions, explain answers to each other and plan revision. Be kind, stay on science, and report anything that isn't.</p></section>
+  <div class="row"><button class="primary" id="gnew" style="--accent:var(--bio)">Start a group</button></div>
+  <div class="card"><h2>Your groups</h2><div id="gmine" class="plist"><p class="muted">Loading…</p></div></div>
+  <div class="card"><h2>Find a group</h2><div class="row" style="margin-bottom:10px"><div class="field"><label for="gsub">Subject</label><select id="gsub"><option value="">Any subject</option>${SUBJECTS.map(x=>`<option>${x}</option>`).join("")}</select></div><div class="field"><label for="glev">Level</label><select id="glev"><option value="">Any level</option>${T_LEVELS.map(x=>`<option>${x}</option>`).join("")}</select></div></div><div id="gall" class="plist"><p class="muted">Loading…</p></div></div>`;
+  $("gnew").onclick=groupForm;
+  let all=[];
+  const row=(g,mem)=>{ const n=Object.values(g.members||{}).filter(Boolean).length; return `<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(g.name)}</div><div class="d">${esc(g.subject)} · ${esc(g.level)} · ${n} member${n!==1?"s":""}${g.listed?"":" · private"}</div><div class="d">${esc(g.about||"")}</div></div><button class="${mem?"primary":""}" data-g="${g.id}" style="--accent:var(--bio)">${mem?"Open":"View and join"}</button></div>`; };
+  try{ const s=await NET.col("groups").where("listed","==",true).get(); all=s.docs.map(d=>Object.assign({id:d.id},d.data())); }catch(e){ $("gall").innerHTML=`<div class="msg warn">Could not load groups.</div>`; }
+  const mineIds=Object.keys(me.groups||{}).filter(k=>me.groups[k]);
+  const mine=[]; for(const id of mineIds){ const g=all.find(x=>x.id===id); if(g) mine.push(g); else try{ const s=await NET.doc("groups/"+id).get(); if(s.exists) mine.push(Object.assign({id},s.data())); }catch(e){} }
+  all.forEach(g=>{ if((g.members||{})[me.uid]&&!mine.some(x=>x.id===g.id)) mine.push(g); });
+  $("gmine").innerHTML=mine.length?mine.map(g=>row(g,true)).join(""):`<p class="empty">You haven't joined a group yet.</p>`;
+  const draw=()=>{ const sub=$("gsub").value, lev=$("glev").value; const list=all.filter(g=>!(g.members||{})[me.uid]&&(!sub||g.subject===sub)&&(!lev||g.level===lev));
+    $("gall").innerHTML=list.length?list.map(g=>row(g,false)).join(""):`<p class="empty">No other groups match. Start one!</p>`; wire(); };
+  const wire=()=>$("view").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>go("group",null,b.dataset.g));
+  $("gsub").onchange=draw; $("glev").onchange=draw; draw();
+}
+function groupForm(){
+  $("mtitle").textContent="Start a study group";
+  $("mbody").innerHTML=`<form id="gf" class="col" style="gap:10px;padding-top:10px"><div class="field"><label for="gname">Group name</label><input id="gname" maxlength="60" placeholder="e.g. Form 4 Physics revision"></div>
+  <div class="row"><div class="field"><label for="gsubj">Subject</label><select id="gsubj">${SUBJECTS.map(x=>`<option>${x}</option>`).join("")}</select></div><div class="field"><label for="glevl">Level</label><select id="glevl">${T_LEVELS.map(x=>`<option ${x==="O Level"?"selected":""}>${x}</option>`).join("")}</select></div></div>
+  <div class="field"><label for="gabout">What the group is for</label><input id="gabout" maxlength="160"></div>
+  <fieldset class="ckf"><legend>Who can join</legend><label><input type="radio" name="gvis" value="public" checked> Anyone can find and join it</label><label><input type="radio" name="gvis" value="private"> Private: only people you send the invite link to</label></fieldset>
+  <div id="gfm"></div><div class="row"><button class="primary" type="submit" style="--accent:var(--bio)">Create group</button><button type="button" id="gfc">Cancel</button></div></form>`;
+  $("modal").hidden=false; $("gfc").onclick=closeHelp;
+  $("gf").onsubmit=async e=>{ e.preventDefault(); const name=$("gname").value.trim(), about=$("gabout").value.trim(); if(!name){ $("gfm").innerHTML=`<div class="msg warn">Give the group a name.</div>`; return; } const bad=contactCheck(name+" "+about); if(bad){ $("gfm").innerHTML=`<div class="msg warn">${SAFE_MSG(bad)}</div>`; return; }
+    try{ const me=NETME, r=await NET.col("groups").add({name,about,subject:$("gsubj").value,level:$("glevl").value,listed:$("gf").querySelector("input[name=gvis]:checked").value==="public",owner:me.uid,ownerName:me.name,created:NET.now(),members:{[me.uid]:true},names:{[me.uid]:me.name}});
+      await NET.updateMe({["groups."+r.id]:true}).catch(()=>{}); me.groups=Object.assign({},me.groups,{[r.id]:true}); closeHelp(); toast("Group created"); go("group",null,r.id); }
+    catch(err){ $("gfm").innerHTML=`<div class="msg warn">Could not create the group. ${esc(err&&err.code||"")}</div>`; } };
+}
+function groupView(gid){
+  if(!needNet("Study group")) return;
+  const me=NETME; let G=null, unsubP=null;
+  $("view").innerHTML=`<div id="ghead"><p class="muted">Loading…</p></div><div id="gbody"></div>`;
+  const u1=NET.doc("groups/"+gid).onSnapshot(s=>{ if(!s.exists){ $("ghead").innerHTML=`<div class="msg warn">This group no longer exists.</div>`; $("gbody").innerHTML=""; return; } const was=G&&(G.members||{})[me.uid]; G=Object.assign({id:gid},s.data()); draw(); const now=(G.members||{})[me.uid]; if(now&&!unsubP) listenPosts(); if(!now&&unsubP){ unsubP(); unsubP=null; } if(was!==now) drawBody(); },()=>{ $("ghead").innerHTML=`<div class="msg warn">You can't open this group.</div>`; });
+  current={destroy(){ u1(); if(unsubP) unsubP(); }};
+  let POSTS=[];
+  function listenPosts(){ unsubP=NET.col(`groups/${gid}/posts`).onSnapshot(s=>{ POSTS=s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>String(a.at).localeCompare(String(b.at))).slice(-150); drawPosts(); },()=>{}); }
+  function draw(){ const n=Object.values(G.members||{}).filter(Boolean).length, mem=(G.members||{})[me.uid], own=G.owner===me.uid;
+    $("ghead").innerHTML=`<section><p class="eyebrow" style="color:var(--bio)">Study group · ${esc(G.subject)} · ${esc(G.level)}</p><h1>${esc(G.name)}</h1><p class="lead">${esc(G.about||"")}</p><p class="muted" style="margin:6px 0 0">${n} member${n!==1?"s":""} · started by ${esc(G.ownerName||"")}${G.listed?"":" · private group"}</p></section>
+      <div class="row">${mem?`<button id="ginv">Copy invite link</button>${own?`<button id="gdel">Delete group</button>`:`<button id="gleave">Leave group</button>`}`:`<button class="primary" id="gjoin" style="--accent:var(--bio)">Join this group</button>`}</div><div id="ghm"></div>`;
+    if($("gjoin")) $("gjoin").onclick=async()=>{ try{ await NET.doc("groups/"+gid).update({["members."+me.uid]:true,["names."+me.uid]:me.name}); await NET.updateMe({["groups."+gid]:true}).catch(()=>{}); me.groups=Object.assign({},me.groups,{[gid]:true}); toast("You joined "+G.name); }catch(e){ $("ghm").innerHTML=`<div class="msg warn">Could not join. The group may be full.</div>`; } };
+    if($("gleave")) $("gleave").onclick=async()=>{ await NET.doc("groups/"+gid).update({["members."+me.uid]:false}); await NET.updateMe({["groups."+gid]:false}).catch(()=>{}); me.groups=Object.assign({},me.groups,{[gid]:false}); toast("You left the group"); go("groups"); };
+    if($("gdel")) $("gdel").onclick=async()=>{ const b=$("gdel"); if(!b.dataset.arm){ b.dataset.arm=1; b.textContent="Tap again to delete for everyone"; return; } await NET.doc("groups/"+gid).delete(); toast("Group deleted"); go("groups"); };
+    if($("ginv")) $("ginv").onclick=()=>{ const url=location.href.split("#")[0]+"#g="+gid; try{ navigator.clipboard.writeText(url); toast("Invite link copied"); }catch(e){ $("ghm").innerHTML=`<p class="muted">Invite link: ${esc(url)}</p>`; } };
+  }
+  function drawBody(){ const mem=(G.members||{})[me.uid];
+    $("gbody").innerHTML=mem?`<div class="card"><div id="gposts" class="chat tall"></div><form id="gpf" class="row" style="margin-top:10px;align-items:end"><div class="field" style="flex:1 1 240px"><label for="gptext" class="sr">Post</label><textarea id="gptext" rows="2" maxlength="1000" placeholder="Ask a question or share an explanation"></textarea></div><button class="primary" type="submit" style="--accent:var(--bio)">Post</button></form><div id="gpm"></div>
+      <p class="muted" style="font-size:.8rem;margin:8px 0 0">Group rules: be respectful, stay on school work, no phone numbers, emails or links, and no meeting up with people you only know from LabLink. Chemical names become links to their lessons.</p></div>`:`<div class="card"><p style="margin:0">Join the group to read and post.</p></div>`;
+    if(!mem) return;
+    $("gpf").onsubmit=async e=>{ e.preventDefault(); const t=$("gptext").value.trim(); if(!t) return; const bad=contactCheck(t); if(bad){ $("gpm").innerHTML=`<div class="msg warn" style="margin-top:8px">${SAFE_MSG(bad)}</div>`; return; } $("gpm").innerHTML=""; $("gptext").value="";
+      try{ await NET.col(`groups/${gid}/posts`).add({author:me.uid,name:me.name,text:t,at:NET.now()}); }catch(err){ $("gptext").value=t; $("gpm").innerHTML=`<div class="msg warn" style="margin-top:8px">Not posted. Check your connection.</div>`; } };
+    drawPosts();
+  }
+  function drawPosts(){ const el=$("gposts"); if(!el) return;
+    el.innerHTML=POSTS.length?POSTS.map(p=>`<div class="bub ${p.author===me.uid?"me":""}"><div class="who">${esc(p.author===me.uid?"You":p.name)} · ${ago(p.at)} ${p.author===me.uid||G.owner===me.uid||me.admin?`<button class="linkish" data-pdel="${p.id}">Delete</button>`:`<button class="linkish" data-prep="${p.id}">Report</button>`}</div><div class="ptext">${esc(p.text)}</div></div>`).join(""):`<p class="empty">No posts yet. Start the discussion.</p>`;
+    linkChems(el); el.scrollTop=el.scrollHeight;
+    el.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>NET.doc(`groups/${gid}/posts/${b.dataset.pdel}`).delete().catch(()=>toast("Could not delete")));
+    el.querySelectorAll("[data-prep]").forEach(b=>b.onclick=()=>reportForm("group-post",`groups/${gid}/posts/${b.dataset.prep}`)); }
+}
+
+// ---------- FAQ that learns from questions ----------
+const FAQ_SEED=[
+ {id:"s-offline",cat:"Using LabLink",q:"Can I use LabLink without internet or data?",a:"Yes. Open LabLink once while connected and it saves the labs, lessons and chemicals library on your device. After that they work offline. Class work, tutors and study groups need a connection to send and receive messages. The 3D lab and the PDF and Word import are saved the first time you use them.",tags:"offline data internet bundle airtime no network"},
+ {id:"s-install",cat:"Using LabLink",q:"How do I install LabLink on my phone?",a:"Android: download the LabLink app from the LabLink download page and open it, allowing installs from your browser if asked. Any phone: open the LabLink website in Chrome, open the menu and choose Add to Home screen or Install app.",tags:"install download app android apk home screen phone"},
+ {id:"s-levels",cat:"Using LabLink",q:"How do levels and XP work?",a:"Each lab has levels. Study the lesson, then pass the quiz or lab challenge to unlock the next level. You earn XP for stars, activities and quizzes, and your rank rises from Lab Novice to Lab Master.",tags:"level xp unlock rank stars points badge"},
+ {id:"s-class",cat:"Accounts and classes",q:"How do I join my teacher's class?",a:"Ask your teacher for the 6-character class code. Enter it when you create your account, or later: tap Account at the top of the page and choose Join class.",tags:"join class code teacher classroom"},
+ {id:"s-password",cat:"Accounts and classes",q:"I forgot my password. What do I do?",a:"On the sign-in screen tap Forgot password?, enter your email and follow the link LabLink sends you. Check your spam folder if it doesn't arrive.",tags:"forgot password reset login sign in email"},
+ {id:"s-share",cat:"Accounts and classes",q:"Can two learners share one phone?",a:"Yes. Each learner has their own account, and their progress is saved to it. Sign out from the Account button when you finish, so the next person signs in to their own account.",tags:"share phone device sibling account sign out"},
+ {id:"s-tutor-book",cat:"Tutors and payments",q:"How do I book a tutor?",a:"Open Find a tutor, choose a verified tutor and send a lesson request. The tutor replies with a price and time. When you accept, pay through LabLink with EcoCash or OneMoney. Learners under 18 need a parent or guardian to pay.",tags:"book tutor lesson request teacher private lessons"},
+ {id:"s-tutor-pay",cat:"Tutors and payments",q:"How do payments to tutors work?",a:"You pay LabLink, and LabLink holds the money until the lesson is marked as done. Then the tutor is paid, minus LabLink's 10% fee. This protects both learners and tutors. Never pay a tutor outside LabLink.",tags:"payment pay money ecocash onemoney fee refund tutor paid"},
+ {id:"s-tutor-become",cat:"Tutors and payments",q:"How do I become a LabLink tutor?",a:"Create a teacher account, open Find a tutor and choose Tutor profile. Fill in your subjects, levels, rate and qualifications. LabLink checks your identity and qualifications before learners can see you.",tags:"become tutor teacher earn verified apply"},
+ {id:"s-safety",cat:"Tutors and payments",q:"How does LabLink keep learners safe?",a:"Tutors are checked before they are listed, all messages stay in LabLink, phone numbers and emails can't be shared in chats, learners under 18 need a parent or guardian for paid lessons, and anyone can report a problem. In-person lessons should be at school, a library, or at home with a parent or guardian present.",tags:"safe safety child protection report abuse"},
+ {id:"s-meniscus",cat:"Practicals",q:"Why do we read the bottom of the meniscus?",a:"Water and most solutions curve down in the middle of a burette or measuring cylinder. The scale is calibrated to the bottom of that curve, so read it there with your eye level with the meniscus. Looking from above or below gives a parallax error.",tags:"meniscus burette read reading parallax eye level measuring cylinder"},
+ {id:"s-concordant",cat:"Practicals",q:"What are concordant titres?",a:"Titres (volumes of acid added) that agree with each other within 0.10 cm³. Do a rough titration first, then repeat accurately until you have at least two concordant results, and use their mean in your calculation.",tags:"concordant titre titration agree repeat mean average 0.10"},
+ {id:"s-strong",cat:"Practicals",q:"What is the difference between a strong acid and a concentrated acid?",a:"Strong describes how completely the acid ionises in water: hydrochloric acid is strong because it ionises completely, and ethanoic acid is weak because only a little ionises. Concentrated describes how much acid is dissolved in a given volume. A dilute solution of a strong acid is still strong.",tags:"strong weak concentrated dilute acid ionise ionisation difference"},
+ {id:"s-endpoint",cat:"Practicals",q:"How do I know when to stop adding acid in a titration?",a:"Stop at the end point: the first permanent colour change of the indicator. With methyl orange that is the first permanent orange. Near the end point add the acid one drop at a time and swirl after each drop.",tags:"end point stop titration indicator colour change methyl orange phenolphthalein drop"},
+ {id:"s-repeat",cat:"Practicals",q:"Why should we repeat readings?",a:"Repeating lets you spot and discard anomalous results and average out random errors, so the final value is more reliable.",tags:"repeat readings reliable average anomalous random error"},
+ {id:"s-graph",cat:"Practicals",q:"How do I find the gradient of a graph?",a:"Draw a large triangle on the line of best fit, using at least half of the line. Gradient = change in y ÷ change in x, read from the triangle's corners. Show the triangle and the values you read, with units.",tags:"gradient graph slope triangle best fit line"},
+ {id:"s-hot",cat:"Science",q:"Why do reactions go faster when the temperature is higher?",a:"Particles move faster, so they collide more often, and a greater fraction of the collisions have at least the activation energy. Both effects increase the rate of reaction.",tags:"temperature rate reaction faster hot heat collision activation energy"},
+ {id:"s-moles",cat:"Science",q:"How do I calculate moles from a titration?",a:"Moles = concentration (mol/dm³) × volume (dm³). Convert cm³ to dm³ by dividing by 1000. Use the balanced equation to change moles of one substance into moles of the other.",tags:"moles calculate calculation concentration volume titration mol dm3"}];
+const FAQ_STOP=new Set("a an and are as at be but by can do does for from get got how i if in into is it its me my of on or our so that the their them then there these this to was we what when where which who why will with you your about should would could".split(" "));
+const FAQ_SYN={sulphuric:"sulfuric",titre:"titration",titrate:"titration",titrating:"titration",burette:"burette",ecocash:"payment",onemoney:"payment",pay:"payment",paid:"payment",money:"payment",fee:"payment",login:"password",signin:"password",download:"install",apk:"install",data:"offline",internet:"offline",network:"offline",tutors:"tutor",lessons:"lesson",quicker:"faster",speed:"faster",rate:"faster"};
+function ftok(s){ return [...new Set(String(s).toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(w=>w.length>2&&!FAQ_STOP.has(w)).map(w=>{ if(FAQ_SYN[w]) return FAQ_SYN[w]; if(w.length>5&&w.endsWith("ing")) w=w.slice(0,-3); else if(w.length>4&&w.endsWith("es")) w=w.slice(0,-2); else if(w.length>3&&w.endsWith("s")) w=w.slice(0,-1); return FAQ_SYN[w]||w; }))]; }
+function fsim(a,b){ if(!a.length||!b.length) return 0; const B=new Set(b); const n=a.filter(x=>B.has(x)).length; return 0.7*n/a.length+0.3*n/Math.sqrt(a.length*b.length); } // mostly: how much of the question the answer covers
+const FLOCAL="lablink-faq-local";
+function faqLocal(){ try{ return JSON.parse(localStorage.getItem(FLOCAL)||"{}"); }catch(e){ return {}; } }
+function faqLocalSave(o){ try{ localStorage.setItem(FLOCAL,JSON.stringify(o)); }catch(e){} }
+let FAQ={items:[],stats:{},asks:[],viewed:new Set()};
+async function faqLoad(){
+  const items=FAQ_SEED.map(x=>Object.assign({},x)); let stats={}, asks=[];
+  if(NET){ try{ const [a,b,c]=await Promise.all([NET.col("faq").where("approved","==",true).get(),NET.col("faqStats").get(),NET.col("faqAsks").get()]);
+      a.docs.forEach(d=>items.push(Object.assign({id:d.id},d.data()))); b.docs.forEach(d=>{ stats[d.id]=d.data(); }); asks=c.docs.map(d=>Object.assign({id:d.id},d.data())); }catch(e){} }
+  else { const L=faqLocal(); stats=L.stats||{}; asks=L.asks||[]; (L.items||[]).forEach(x=>items.push(x)); }
+  items.forEach(x=>{ x.tok=ftok(x.q+" "+x.q+" "+(x.tags||"")+" "+x.a.split(".")[0]); });
+  FAQ.items=items; FAQ.stats=stats; FAQ.asks=asks;
+}
+function faqScore(x,qt){ const st=FAQ.stats[x.id]||{}; const s=fsim(qt,x.tok); const pop=Math.log1p(st.views||0)*0.04+((st.helpful||0)-(st.notHelpful||0))*0.01; return s>0?s+Math.min(0.25,Math.max(-0.1,pop)):0; }
+async function faqBump(id,field){
+  FAQ.stats[id]=FAQ.stats[id]||{}; FAQ.stats[id][field]=(FAQ.stats[id][field]||0)+1;
+  if(NET){ try{ await NET.inc("faqStats/"+id,field,1); }catch(e){} } else { const L=faqLocal(); L.stats=FAQ.stats; faqLocalSave(L); }
+}
+async function faqAsk(text){
+  const t=ftok(text); if(!t.length) return;
+  const hit=FAQ.asks.map(a=>({a,s:fsim(t,ftok(a.text))})).sort((x,y)=>y.s-x.s)[0];
+  if(hit&&hit.s>=0.6){ hit.a.count=(hit.a.count||1)+1; if(NET){ try{ await NET.inc("faqAsks/"+hit.a.id,"count",1); await NET.doc("faqAsks/"+hit.a.id).update({last:NET.now()}); }catch(e){} } }
+  else { const rec={text:text.slice(0,300),count:1,answered:false,faq:null,at:new Date().toISOString(),last:new Date().toISOString()};
+    if(NET){ try{ const r=await NET.col("faqAsks").add(rec); FAQ.asks.push(Object.assign({id:r.id},rec)); }catch(e){} } else { rec.id="l"+Date.now(); FAQ.asks.push(rec); } }
+  if(!NET){ const L=faqLocal(); L.asks=FAQ.asks; faqLocalSave(L); }
+}
+async function faqView(){
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--orange)">Help</p><h1>Help and FAQ</h1><p class="lead">Ask anything about LabLink or your science practicals. The answers improve as learners ask: questions asked often rise to the top, helpful answers are ranked higher, and new questions go to teachers to answer.</p></section>
+  <div class="card"><form id="faqf" class="row" style="align-items:end"><div class="field" style="flex:1 1 260px"><label for="faqq">Your question</label><input id="faqq" type="search" maxlength="300" placeholder="e.g. why read the bottom of the meniscus?" autocomplete="off"></div><button class="primary" type="submit" style="--accent:var(--orange)">Ask</button></form><div id="faqhits"></div></div>
+  <div id="faqtrend"></div><div id="faqcats"><p class="muted">Loading…</p></div><div id="faqteach"></div>`;
+  await faqLoad();
+  const live=()=>{ const v=$("faqq").value.trim(); const qt=ftok(v); if(!qt.length){ $("faqhits").innerHTML=""; return; }
+    const hits=FAQ.items.map(x=>({x,s:faqScore(x,qt)})).filter(h=>h.s>=0.4).sort((a,b)=>b.s-a.s).slice(0,4);
+    $("faqhits").innerHTML=hits.length?`<p class="tag2" style="margin:12px 0 6px">Matching answers</p>${hits.map(h=>faqItem(h.x)).join("")}`:""; wireItems($("faqhits")); };
+  $("faqq").oninput=live;
+  $("faqf").onsubmit=async e=>{ e.preventDefault(); const v=$("faqq").value.trim(); if(ftok(v).length<1) return; const qt=ftok(v);
+    const best=FAQ.items.map(x=>({x,s:faqScore(x,qt)})).sort((a,b)=>b.s-a.s)[0];
+    if(best&&best.s>=0.5){ $("faqhits").innerHTML=`<p class="tag2" style="margin:12px 0 6px">Best answer</p>${faqItem(best.x,true)}<div class="row" style="margin-top:8px"><span>Did this answer your question?</span><button id="fyes">Yes</button><button id="fno">No, send it to a teacher</button></div><div id="fres"></div>`;
+      wireItems($("faqhits")); $("fyes").onclick=()=>{ faqBump(best.x.id,"helpful"); $("fres").innerHTML=`<div class="msg good" style="margin-top:8px">Great. Your vote helps other learners find this answer.</div>`; };
+      $("fno").onclick=async()=>{ faqBump(best.x.id,"notHelpful"); await faqAsk(v); $("fres").innerHTML=`<div class="msg" style="margin-top:8px">Thanks. Your question has been added for teachers to answer. Questions asked by many learners are answered first.</div>`; drawTrend(); }; }
+    else { await faqAsk(v); $("faqhits").innerHTML=`<div class="msg" style="margin-top:10px">There's no answer for this yet, so your question has been added for teachers to answer. Questions asked by many learners are answered first.${typeof SAMPLE!=="undefined"&&SAMPLE&&!SAMPLE_OFF?` <button id="faqai" style="margin-left:6px">Get an AI answer now</button>`:""}</div><div id="faqaiout"></div>`;
+      if($("faqai")) $("faqai").onclick=async()=>{ $("faqai").disabled=true; $("faqaiout").innerHTML=`<p class="muted">Thinking…</p>`; try{ const r=await SAMPLE(`You are a friendly science teacher for Zimbabwean O and A Level learners using the STEMLight LabLink virtual lab. Answer this question in at most 120 words, in plain English, accurately. If it is not about science, school or LabLink, say you can only help with those. Question: ${v}`); $("faqaiout").innerHTML=`<div class="card" style="margin-top:8px"><p class="tag2">AI answer · check with your teacher</p><p>${esc((r&&r.text)||"")}</p></div>`; }catch(e){ $("faqaiout").innerHTML=`<p class="muted">The AI answer isn't available right now.</p>`; } };
+      drawTrend(); } };
+  const drawTrend=()=>{ const top=FAQ.items.slice().sort((a,b)=>((FAQ.stats[b.id]||{}).views||0)-((FAQ.stats[a.id]||{}).views||0)).filter(x=>(FAQ.stats[x.id]||{}).views).slice(0,5);
+    const asks=FAQ.asks.filter(a=>!faqCovered(a)).sort((a,b)=>(b.count||1)-(a.count||1)).slice(0,6);
+    $("faqtrend").innerHTML=(top.length||asks.length)?`<div class="card"><h2>Most asked</h2>${top.map(x=>faqItem(x)).join("")}${asks.filter(a=>!a.answered).length?`<p class="tag2" style="margin:12px 0 6px">Waiting for an answer</p><ul class="asklist">${asks.filter(a=>!a.answered).map(a=>`<li>${esc(a.text)} <span class="muted">· asked ${a.count||1} time${(a.count||1)>1?"s":""}</span></li>`).join("")}</ul>`:""}</div>`:"";
+    wireItems($("faqtrend")); };
+  const cats=[...new Set(FAQ.items.map(x=>x.cat||"More answers"))];
+  $("faqcats").innerHTML=cats.map(c=>`<div class="card"><h2>${esc(c)}</h2>${FAQ.items.filter(x=>(x.cat||"More answers")===c).sort((a,b)=>faqScore(b,b.tok)-faqScore(a,a.tok)).map(x=>faqItem(x)).join("")}</div>`).join("");
+  wireItems($("faqcats")); drawTrend(); faqTeach();
+}
+function faqCovered(a){ const t=ftok(a.text); return FAQ.items.some(x=>fsim(t,x.tok)>=0.5); } // already answered by an FAQ entry
+function faqItem(x,open){ const st=FAQ.stats[x.id]||{}; return `<details class="faqd" data-fid="${esc(x.id)}" ${open?"open":""}><summary>${esc(x.q)}</summary><div class="fa">${esc(x.a)}${st.helpful?`<p class="muted" style="font-size:.8rem;margin:6px 0 0">${st.helpful} learner${st.helpful>1?"s":""} found this helpful</p>`:""}</div></details>`; }
+function wireItems(root){ if(!root) return; root.querySelectorAll("details.faqd").forEach(d=>{ const go1=()=>{ if(d.open&&!FAQ.viewed.has(d.dataset.fid)){ FAQ.viewed.add(d.dataset.fid); faqBump(d.dataset.fid,"views"); } }; d.addEventListener("toggle",go1); if(d.open) go1(); linkChems(d.querySelector(".fa")); }); }
+function faqTeach(){
+  const el=$("faqteach"); if(!el||!NETME||!(NETME.teacher||NETME.admin)) return;
+  const open=FAQ.asks.filter(a=>!a.answered&&!faqCovered(a)).sort((a,b)=>(b.count||1)-(a.count||1));
+  el.innerHTML=`<div class="card" style="border-color:var(--orange)"><h2>For teachers: questions waiting for an answer</h2><p class="muted" style="margin-top:0">Most-asked first. ${NETME.admin?"Your answers are published straight away.":"LabLink checks answers before they are published."}</p>${open.length?open.map(a=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(a.text)}</div><div class="d">Asked ${a.count||1} time${(a.count||1)>1?"s":""} · ${ago(a.last||a.at)}</div></div><button data-ans="${a.id}" style="--accent:var(--orange)">Answer</button></div>`).join(""):`<p class="empty">No questions waiting. Well done.</p>`}</div>`;
+  el.querySelectorAll("[data-ans]").forEach(b=>b.onclick=()=>answerForm(FAQ.asks.find(a=>a.id===b.dataset.ans)));
+}
+function answerForm(ask){
+  $("mtitle").textContent="Answer a question";
+  $("mbody").innerHTML=`<div class="col" style="gap:10px;padding-top:10px"><div class="field"><label for="aq">Question (tidy the wording if needed)</label><input id="aq" maxlength="200" value="${esc(ask.text.charAt(0).toUpperCase()+ask.text.slice(1).replace(/\s*\??$/,"?"))}"></div><div class="field"><label for="aa">Answer</label><textarea id="aa" rows="5" maxlength="1200"></textarea></div><div class="row"><div class="field"><label for="acat">Section</label><select id="acat">${["Using LabLink","Accounts and classes","Tutors and payments","Practicals","Science"].map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label for="atags">Keywords (help matching)</label><input id="atags" maxlength="120"></div></div><div id="am"></div><p><button class="primary" id="ago" style="--accent:var(--orange)">Publish answer</button></p></div>`;
+  $("modal").hidden=false;
+  $("ago").onclick=async()=>{ const q=$("aq").value.trim(), a=$("aa").value.trim(); if(!q||a.length<10){ $("am").innerHTML=`<div class="msg warn">Write an answer of at least a sentence.</div>`; return; }
+    try{ const r=await NET.col("faq").add({q,a,cat:$("acat").value,tags:$("atags").value.trim(),approved:!!NETME.admin,by:NETME.uid,byName:NETME.name,at:NET.now(),fromAsk:ask.id});
+      await NET.doc("faqAsks/"+ask.id).update({answered:true,faq:r.id}); ask.answered=true; closeHelp(); toast(NETME.admin?"Answer published":"Answer sent for checking"); faqView(); }
+    catch(e){ $("am").innerHTML=`<div class="msg warn">Could not save. ${esc(e&&e.code||"")}</div>`; } };
+}
+
+// ---------- admin ----------
+async function adminView(){
+  if(!needNet("Admin")) return;
+  if(!NETME.admin){ $("view").innerHTML=`<section><h1>Admin</h1><p class="lead">This page is for LabLink administrators.</p></section>`; return; }
+  $("view").innerHTML=`<section><p class="eyebrow" style="color:var(--good)">LabLink admin</p><h1>Admin</h1><p class="lead">Check tutors before learners see them, confirm payments, pay tutors, handle reports and publish FAQ answers.</p></section><div id="adm"><p class="muted">Loading…</p></div>`;
+  const [tu,rq1,rq2,rp,fq]=await Promise.all([NET.col("tutors").where("verified","==",false).get(),NET.col("requests").where("status","==","accepted").get(),NET.col("requests").where("status","==","done").get(),NET.col("reports").get(),NET.col("faq").where("approved","==",false).get()].map(p=>p.catch(()=>({docs:[]}))));
+  const A=s=>s.docs.map(d=>Object.assign({id:d.id},d.data()));
+  const tutors=A(tu), toPay=A(rq1), done=A(rq2).filter(r=>!r.payout), reps=A(rp).filter(r=>r.status!=="closed"), faqs=A(fq);
+  const sec=(t,n,body)=>`<div class="card"><h2>${t} <span class="badge-n">${n||""}</span></h2>${body}</div>`;
+  $("adm").innerHTML=
+   sec("Tutors to check",tutors.length,tutors.length?tutors.map(t=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(t.name)}</div><div class="d">${esc((t.subjects||[]).join(", "))} · ${esc((t.levels||[]).join(", "))} · ${esc(t.town||"")}, ${esc(t.province||"")} · ${money(t.rate)}/h</div><div class="d"><b>Qualifications:</b> ${esc(t.quals||"")}</div><div class="d">${esc(t.bio||"")}</div></div><div class="row"><button class="primary" data-ver="${t.id}" style="--accent:var(--good)">Verified: list them</button><button data-rej="${t.id}">Reject</button></div></div>`).join("")+`<p class="muted" style="font-size:.84rem">Check a national ID and teaching certificates, and confirm the person in a short video call, before verifying.</p>`:`<p class="empty">No tutors waiting.</p>`)+
+   sec("Payments to confirm",toPay.length,toPay.length?toPay.map(r=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(r.learnerName)} → ${esc(r.tutorName)} · ${money(r.offer&&r.offer.amount)}</div><div class="d">${esc(r.subject)} · ${esc(r.topic)} · accepted ${ago(r.updated)}${r.minor?" · learner under 18":""}</div></div><button data-paid="${r.id}" style="--accent:var(--good)">Payment received</button></div>`).join(""):`<p class="empty">Nothing to confirm. With online payments switched on, payments confirm automatically.</p>`)+
+   sec("Tutor payouts",done.length,done.length?done.map(r=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">Pay ${esc(r.tutorName)} ${money(r.offer.amount*(1-FEE))}</div><div class="d">Lesson with ${esc(r.learnerName)} · learner paid ${money(r.offer.amount)} · LabLink fee ${money(r.offer.amount*FEE)}</div></div><button data-out="${r.id}" style="--accent:var(--good)">Mark as paid out</button></div>`).join(""):`<p class="empty">No payouts due.</p>`)+
+   sec("Reports",reps.length,reps.length?reps.map(r=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(r.kind)} · from ${esc(r.name||"")} · ${ago(r.at)}</div><div class="d">${esc(r.text)}</div><div class="d">Reference: ${esc(r.ref||"")}</div></div><button data-close="${r.id}">Mark handled</button></div>`).join(""):`<p class="empty">No open reports.</p>`)+
+   sec("FAQ answers to check",faqs.length,faqs.length?faqs.map(f=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(f.q)}</div><div class="d">${esc(f.a)}</div><div class="d">By ${esc(f.byName||"")}</div></div><div class="row"><button class="primary" data-fok="${f.id}" style="--accent:var(--good)">Publish</button><button data-fno="${f.id}">Delete</button></div></div>`).join(""):`<p class="empty">No answers waiting.</p>`);
+  const act=(sel,fn)=>$("adm").querySelectorAll(sel).forEach(b=>b.onclick=async()=>{ b.disabled=true; try{ await fn(b); toast("Done"); adminView(); }catch(e){ b.disabled=false; toast("Could not save"); } });
+  act("[data-ver]",b=>NET.doc("tutors/"+b.dataset.ver).update({verified:true,verifiedAt:NET.now()}));
+  act("[data-rej]",b=>NET.doc("tutors/"+b.dataset.rej).delete());
+  act("[data-paid]",async b=>{ const r=toPay.find(x=>x.id===b.dataset.paid); await NET.doc("requests/"+r.id).update({status:"paid",updated:NET.now(),payment:{amount:r.offer.amount,method:"confirmed by LabLink",ref:"MAN-"+r.id.slice(0,6).toUpperCase(),at:NET.now()}}); await NET.inc("requests/"+r.id,"unread.learner",1); await NET.inc("requests/"+r.id,"unread.tutor",1); });
+  act("[data-out]",b=>{ const r=done.find(x=>x.id===b.dataset.out); return NET.doc("requests/"+r.id).update({payout:{amount:Math.round(r.offer.amount*(1-FEE)*100)/100,at:NET.now()}}); });
+  act("[data-close]",b=>NET.doc("reports/"+b.dataset.close).update({status:"closed"}));
+  act("[data-fok]",b=>NET.doc("faq/"+b.dataset.fok).update({approved:true}));
+  act("[data-fno]",b=>NET.doc("faq/"+b.dataset.fno).delete());
+}
+
+$("ffaq").onclick=()=>go("faq");
 initClass();
+initNet();
 const h0=(location.hash||"").slice(1);
 if(LABS[h0]) go("lab",h0); else go("home");
 })();
@@ -2284,6 +2853,7 @@ if(LABS[h0]) go("lab",h0); else go("home");
 <script src="vendor/firebase-app-compat.js"></script>
 <script src="vendor/firebase-auth-compat.js"></script>
 <script src="vendor/firebase-firestore-compat.js"></script>
+<script src="vendor/firebase-functions-compat.js"></script>
 <script src="accounts.js"></script>
 <script>if("serviceWorker" in navigator&&!window.Capacitor&&location.protocol==="https:") addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
 </body></html>

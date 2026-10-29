@@ -61,7 +61,13 @@ function strip(html){ let el=$("acct-strip"); if(!el){ el=document.createElement
 function demoMode(){
   addCss();
   const DB="lablink-demo-db", RK="lablink-demo-role";
-  const PEOPLE={u_teacher:"Mr Moyo (teacher)",u_rudo:"Rudo Ncube",u_tendai:"Tendai Dube",u_chipo:"Chipo Sibanda"};
+  const PEOPLE={u_teacher:"Mr Moyo (teacher)",u_rudo:"Rudo Ncube (learner)",u_tendai:"Tendai Dube (learner)",u_chipo:"Chipo Sibanda (learner)",u_tutor:"Mrs Ndlovu (tutor)",u_admin:"LabLink admin"};
+  const PROF={u_teacher:{name:"Mr T. Moyo",role:"teacher",school:"Mzilikazi High School",province:"Bulawayo",town:"Bulawayo"},
+    u_rudo:{name:"Rudo Ncube",role:"learner",school:"Mzilikazi High School",province:"Bulawayo",town:"Nkulumane",minor:true,guardianPhone:"0772 000 111"},
+    u_tendai:{name:"Tendai Dube",role:"learner",school:"Gwanda High School",province:"Matabeleland South",town:"Gwanda",minor:true},
+    u_chipo:{name:"Chipo Sibanda",role:"learner",school:"Mzilikazi High School",province:"Bulawayo",town:"Bulawayo",minor:false},
+    u_tutor:{name:"Mrs N. Ndlovu",role:"teacher",school:"Founders High School",province:"Bulawayo",town:"Bulawayo"},
+    u_admin:{name:"LabLink admin",role:"teacher",school:"STEMLight Academy",province:"Bulawayo",town:"Bulawayo",admin:true}};
   let ME=localStorage.getItem(RK)||"u_teacher"; if(!PEOPLE[ME]) ME="u_teacher";
   const load=()=>{ try{ return JSON.parse(localStorage.getItem(DB)||"{}"); }catch(e){ return {}; } };
   const save=s=>localStorage.setItem(DB,JSON.stringify(s));
@@ -83,7 +89,25 @@ function demoMode(){
   const teacher=ME==="u_teacher";
   const user={id:async()=>ME,canEdit:async()=>teacher,isOwner:async()=>teacher,can:async()=>true,
     profiles:async ids=>Object.fromEntries([].concat(ids).map(i=>[i,{id:i,name:(PEOPLE[i]||"Learner").replace(" (teacher)",""),avatarUrl:"",color:"#888",email:null,isMe:i===ME,guest:false}]))};
-  window.claude={use:async n=>n==="db"?{doc,collection:col}:n==="user"?user:null};
+  // ---- network data (tutors, lessons, groups, FAQ): one shared store on this device ----
+  const getPath=(o,f)=>f.split(".").reduce((a,k)=>a==null?undefined:a[k],o);
+  const setPath=(o,f,v)=>{ const ks=f.split("."); let t=o; for(let i=0;i<ks.length-1;i++){ if(!t[ks[i]]||typeof t[ks[i]]!=="object") t[ks[i]]={}; t=t[ks[i]]; } t[ks.at(-1)]=v; };
+  const kids=(s,p)=>Object.keys(s).filter(k=>k.startsWith(p+"/")&&k.split("/").length===p.split("/").length+1);
+  const nDoc=p=>Object.assign(doc(p),{
+    set:async(d,o)=>{ const s=load(); s[p]=o&&o.merge&&s[p]?merge(s[p],JSON.parse(JSON.stringify(d))):JSON.parse(JSON.stringify(d)); save(s); notify(); },
+    update:async d=>{ const s=load(); if(!s[p]) throw {code:"not-found"}; const x=JSON.parse(JSON.stringify(s[p])); for(const k in d) setPath(x,k,d[k]===undefined?null:JSON.parse(JSON.stringify(d[k]))); s[p]=x; save(s); notify(); }});
+  const nQuery=(p,conds)=>{ const run=()=>{ const s=load(); const docs=kids(s,p).filter(k=>conds.every(([f,op,v])=>{ const x=getPath(s[k],f); return op==="=="?x===v:op==="array-contains"?Array.isArray(x)&&x.includes(v):op==="in"?v.includes(x):false; })).map(snap); return {docs,size:docs.length,empty:!docs.length}; };
+    return {where:(f,op,v)=>nQuery(p,conds.concat([[f,op,v]])),get:async()=>run(),onSnapshot:(n)=>{ const f=()=>n(run()); subs.push(f); setTimeout(f,0); return ()=>{ const i=subs.indexOf(f); if(i>=0) subs.splice(i,1); }; },
+      doc:id=>nDoc(p+"/"+(id||Math.random().toString(36).slice(2,12))),add:async d=>{ const id=Math.random().toString(36).slice(2,12); await nDoc(p+"/"+id).set(d); return {id}; }}; };
+  const me=Object.assign({uid:ME},PROF[ME]); me.teacher=me.role==="teacher"; me.admin=!!me.admin;
+  const NET={mode:"demo",payMode:"demo",me,now:()=>new Date().toISOString(),doc:nDoc,col:p=>nQuery(p,[]),
+    inc:async(p,f,n)=>{ const s=load(); const x=s[p]?JSON.parse(JSON.stringify(s[p])):{}; setPath(x,f,(getPath(x,f)||0)+n); s[p]=x; save(s); notify(); },
+    updateMe:async d=>{ Object.assign(me,d); },
+    pay:async(rid,o)=>{ const r=load()["requests/"+rid]; if(!r||r.status!=="accepted") throw {code:"failed-precondition"};
+      setTimeout(async()=>{ await nDoc("requests/"+rid).update({status:"paid",updated:new Date().toISOString(),payment:{amount:r.offer.amount,method:o.method,ref:"DEMO-"+Math.random().toString(36).slice(2,8).toUpperCase(),at:new Date().toISOString()}}); },2500);
+      return {instructions:`Demo: a payment request for US$${(+r.offer.amount).toFixed(2)} was sent to ${o.phone}. On a real phone the payer now enters their ${o.method==="onemoney"?"OneMoney":"EcoCash"} PIN. This demo confirms it in a few seconds.`}; }};
+  seedDemo(load,save,nDoc);
+  window.claude={use:async n=>n==="db"?{doc,collection:col}:n==="user"?user:n==="net"?NET:null};
   // per-person progress on the shared demo device
   const pk=KEY+"::"+ME, cur=localStorage.getItem(pk);
   if(cur!=null) localStorage.setItem(KEY,cur); else localStorage.removeItem(KEY);
@@ -92,9 +116,40 @@ function demoMode(){
     <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><label for="acct-as" style="font-weight:500">Viewing as</label>
     <select id="acct-as">${Object.entries(PEOPLE).map(([k,v])=>`<option value="${k}" ${k===ME?"selected":""}>${esc(v)}</option>`).join("")}</select>
     <button id="acct-reset" title="Clear the demo class data on this device">Reset demo</button></span>`);
+  if(me.admin) $("acct-strip").querySelector("span").insertAdjacentHTML("beforeend",' <span class="tag" style="background:#2f7d4f">admin</span>');
   $("acct-as").onchange=e=>{ localStorage.setItem(RK,e.target.value); location.reload(); };
-  $("acct-reset").onclick=()=>{ if(!confirm("Clear all demo class work and progress on this device?")) return; Object.keys(localStorage).filter(k=>k===DB||k.startsWith(KEY)).forEach(k=>localStorage.removeItem(k)); location.reload(); };
+  $("acct-reset").onclick=()=>{ if(!confirm("Clear all demo class work and progress on this device?")) return; Object.keys(localStorage).filter(k=>k===DB||k===SEEDK||k.startsWith(KEY)).forEach(k=>localStorage.removeItem(k)); location.reload(); };
   bootApp();
+}
+
+// demo content so tutors, groups and the FAQ have something to show (fictional people)
+const SEEDK="lablink-demo-seed-v2";
+function seedDemo(load,save){
+  if(localStorage.getItem(SEEDK)) return;
+  const s=load(), t=d=>new Date(Date.now()-d*864e5).toISOString();
+  const tutor=(id,o)=>{ s["tutors/"+id]=Object.assign({verified:true,created:t(40),updated:t(5)},o); };
+  tutor("u_tutor",{name:"Mrs N. Ndlovu",subjects:["Chemistry","Combined Science"],levels:["O Level","A Level"],modes:["In person","Online"],province:"Bulawayo",town:"Bulawayo",rate:8,bio:"Chemistry teacher with 12 years' experience. I focus on practical skills: titration, salt preparation and qualitative analysis.",quals:"BSc Chemistry, Grad CE"});
+  tutor("t_chikore",{name:"Mr B. Chikore",subjects:["Physics","Mathematics"],levels:["O Level","A Level"],modes:["Online"],province:"Harare",town:"Harare",rate:10,bio:"A Level Physics teacher. Mechanics, electricity and practical write-ups made simple.",quals:"BSc Physics, PGDE"});
+  tutor("t_sibanda",{name:"Ms R. Sibanda",subjects:["Biology","Combined Science"],levels:["Forms 1–2","O Level"],modes:["In person"],province:"Matabeleland North",town:"Hwange",rate:5,bio:"Biology and Combined Science for Forms 1 to 4, with lots of diagrams and past-paper practice.",quals:"Diploma in Education (Science)"});
+  tutor("t_mlambo",{name:"Dr P. Mlambo",subjects:["Chemistry"],levels:["A Level"],modes:["Online"],province:"Midlands",town:"Gweru",rate:12,bio:"A Level Chemistry: organic mechanisms, kinetics and redox titrations.",quals:"PhD Chemistry"});
+  tutor("t_banda",{name:"Mr K. Banda",subjects:["Physics"],levels:["O Level"],modes:["In person"],province:"Bulawayo",town:"Bulawayo",rate:6,bio:"Physics teacher, Bulawayo.",quals:"BEd Physics",verified:false});
+  s["tutors/u_tutor/ratings/r1"]={stars:5,text:"Explained the titration calculation step by step.",name:"Chipo",at:t(9)};
+  s["tutors/u_tutor/ratings/r2"]={stars:4,text:"Very helpful before my practical exam.",name:"Learner",at:t(20)};
+  s["tutors/t_chikore/ratings/r3"]={stars:5,text:"Clear and patient.",name:"Learner",at:t(15)};
+  s["groups/g_chem4"]={name:"Form 4 Chemistry revision",subject:"Chemistry",level:"O Level",about:"Past-paper practice and practical tips before the November exams.",listed:true,owner:"u_chipo",ownerName:"Chipo Sibanda",created:t(12),members:{u_chipo:true,u_tendai:true},names:{u_chipo:"Chipo Sibanda",u_tendai:"Tendai Dube"}};
+  s["groups/g_chem4/posts/p1"]={author:"u_chipo",name:"Chipo Sibanda",text:"Does anyone understand why we use methyl orange and not phenolphthalein when titrating sodium carbonate with hydrochloric acid?",at:t(2)};
+  s["groups/g_chem4/posts/p2"]={author:"u_tendai",name:"Tendai Dube",text:"I think it is because the second end point is around pH 4, and methyl orange changes colour there. The LabLink titration lesson explains it.",at:t(1.8)};
+  s["groups/g_phys6"]={name:"A Level Physics problem solvers",subject:"Physics",level:"A Level",about:"Share tricky mechanics and electricity questions and work through them together.",listed:true,owner:"u_tendai",ownerName:"Tendai Dube",created:t(20),members:{u_tendai:true},names:{u_tendai:"Tendai Dube"}};
+  const ask=(id,text,count,ans)=>{ s["faqAsks/"+id]={text,count,answered:!!ans,faq:ans||null,at:t(30),last:t(1)}; };
+  ask("a1","what is the difference between a strong acid and a concentrated acid",9,null);
+  ask("a2","how do i know when to stop adding acid in a titration",7,null);
+  ask("a3","can i use lablink without data",6,"s-offline");
+  ask("a4","why does magnesium react faster with hot acid",4,null);
+  ask("a5","how do tutors get paid",3,null);
+  s["faqStats/s-offline"]={views:41,helpful:18,notHelpful:1};
+  s["faqStats/s-meniscus"]={views:35,helpful:22,notHelpful:2};
+  s["faqStats/s-concordant"]={views:28,helpful:15,notHelpful:1};
+  save(s); localStorage.setItem(SEEDK,"1");
 }
 
 // progress hook: mirror the app's progress key somewhere else (per-person store or the account)
@@ -107,6 +162,7 @@ function hookProgress(cb){
 // =====================================================================
 // FIREBASE MODE: real accounts
 // =====================================================================
+const PROVINCES=["Bulawayo","Harare","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
 function firebaseMode(){
   addCss();
   firebase.initializeApp(CFG);
@@ -158,6 +214,9 @@ function firebaseMode(){
       <div class="acct-f"><label for="a-email">Email</label><input id="a-email" type="email" autocomplete="email" required></div>
       <div class="acct-f"><label for="a-pw">Password${up?" (at least 6 characters)":""}</label><input id="a-pw" type="password" autocomplete="${up?"new-password":"current-password"}" minlength="6" required></div>
       ${up?`<div class="acct-f"><label for="a-school">School</label><input id="a-school" maxlength="80" autocomplete="organization" placeholder="e.g. Mzilikazi High School"></div>
+      <div class="acct-f"><label for="a-prov">Province</label><select id="a-prov" required><option value="">Choose your province</option>${PROVINCES.map(p=>`<option>${p}</option>`).join("")}</select></div>
+      <div class="acct-f"><label for="a-town">Town or area</label><input id="a-town" maxlength="60" placeholder="e.g. Nkulumane, Bulawayo"></div>
+      <fieldset class="acct-f" id="f-age" style="border:0;padding:0;margin:0 0 10px"><legend style="font-size:.82rem;font-weight:600;color:#5a6966;margin-bottom:4px">Are you under 18?</legend><div style="display:flex;gap:14px"><label style="font-weight:500;display:flex;gap:6px;align-items:center"><input type="radio" name="minor" value="yes" style="min-height:0;width:auto"> Yes</label><label style="font-weight:500;display:flex;gap:6px;align-items:center"><input type="radio" name="minor" value="no" style="min-height:0;width:auto"> No</label></div></fieldset>
       <div class="acct-f" id="f-code"><label for="a-code">Class code from your teacher (optional)</label><input id="a-code" maxlength="8" autocapitalize="characters" placeholder="e.g. K7Q2MX" style="text-transform:uppercase;letter-spacing:.1em"></div>
       <div class="acct-f" id="f-class" hidden><label for="a-class">Class name</label><input id="a-class" maxlength="60" placeholder="e.g. Form 4B Physics"></div>`:""}
       <div id="acct-m" role="status"></div>
@@ -166,11 +225,13 @@ function firebaseMode(){
       <p class="acct-note">Your progress and class work are saved to your account, so you can use any phone or computer.</p></form>`;
     $("t-in").onclick=()=>gate("in"); $("t-up").onclick=()=>gate("up");
     if($("a-forgot")) $("a-forgot").onclick=()=>gate("reset");
-    if(up) g.querySelectorAll("input[name=role]").forEach(r=>r.onchange=()=>{ const t=g.querySelector("input[name=role]:checked").value==="teacher"; $("f-code").hidden=t; $("f-class").hidden=!t; });
+    if(up) g.querySelectorAll("input[name=role]").forEach(r=>r.onchange=()=>{ const t=g.querySelector("input[name=role]:checked").value==="teacher"; $("f-code").hidden=t; $("f-class").hidden=!t; $("f-age").hidden=t; });
     $("acct-form").onsubmit=async e=>{
       e.preventDefault(); const btn=$("acct-form").querySelector("[type=submit]"), m=$("acct-m"); m.innerHTML="";
       const email=$("a-email").value.trim(), pw=$("a-pw").value;
       if(up&&!$("a-name").value.trim()){ m.innerHTML=`<div class="acct-msg">Enter your full name.</div>`; return; }
+      if(up&&!$("a-prov").value){ m.innerHTML=`<div class="acct-msg">Choose your province. It helps learners find tutors near them.</div>`; return; }
+      if(up&&g.querySelector("input[name=role]:checked").value==="learner"&&!g.querySelector("input[name=minor]:checked")){ m.innerHTML=`<div class="acct-msg">Tell us whether you are under 18. Learners under 18 need a parent or guardian to agree to paid lessons.</div>`; return; }
       btn.disabled=true; btn.textContent=up?"Creating your account…":"Signing in…";
       try{
         if(!up){ await auth.signInWithEmailAndPassword(email,pw); return; }
@@ -181,7 +242,8 @@ function firebaseMode(){
         let classCode="", note="";
         if(role==="teacher") classCode=await createClass(uid,info);
         else if($("a-code").value.trim()){ try{ classCode=await joinClass(uid,$("a-code").value,info); }catch(err){ note=err.code==="no-class"?"Your account is ready, but no class has that code. You can join a class later: tap Account at the top of the page.":""; } }
-        await fs.doc("users/"+uid).set({name:info.name,email,role,school:info.school,classCode,progress:"",created:new Date().toISOString()});
+        const minorEl=g.querySelector("input[name=minor]:checked");
+        await fs.doc("users/"+uid).set({name:info.name,email,role,school:info.school,province:$("a-prov").value,town:$("a-town").value.trim().slice(0,60),minor:role==="learner"?(minorEl?minorEl.value==="yes":true):false,classCode,progress:"",created:new Date().toISOString()});
         try{ await cred.user.sendEmailVerification(); }catch(_){}
         signingUp=false;
         if(note){ m.innerHTML=`<div class="acct-msg">${esc(note)}</div>`; btn.disabled=false; btn.textContent="Continue"; btn.type="button"; btn.onclick=()=>enter(cred.user); return; }
@@ -216,7 +278,20 @@ function firebaseMode(){
     const db=prefix?{doc:p=>wrapDoc(fs.doc(prefix+p),p),collection:p=>{ const c=fs.collection(prefix+p); return {path:c.path,doc:id=>{ const r=id?c.doc(id):c.doc(); return wrapDoc(r,p+"/"+r.id); },add:async d=>{ const r=await c.add(d); return wrapDoc(r,p+"/"+r.id); },get:()=>c.get(),onSnapshot:(n,e)=>c.onSnapshot(n,e||(()=>{}))}; }}:null;
     const user={id:async()=>u.uid,canEdit:async()=>current.teacher,isOwner:async()=>current.teacher,can:async()=>true,
       profiles:async ids=>{ const out={}; await Promise.all([].concat(ids).map(async i=>{ let name=""; try{ const s=await fs.doc(`classes/${prof.classCode}/members/${i}`).get(); if(s.exists) name=s.data().name||""; }catch(e){} out[i]={id:i,name,avatarUrl:"",color:"#888",email:null,isMe:i===u.uid,guest:false}; })); return out; }};
-    window.claude={use:async n=>n==="db"?db:n==="user"?user:null};
+    // network data: tutors, lessons, study groups, FAQ (not tied to one class)
+    let admin=false; try{ admin=(await fs.doc("admins/"+u.uid).get()).exists; }catch(e){}
+    const FV=firebase.firestore.FieldValue;
+    const nDoc=p=>{ const r=fs.doc(p); return {id:r.id,get:()=>r.get(),set:(d,o)=>r.set(d,o||{}),update:d=>r.update(d),delete:()=>r.delete(),onSnapshot:(n,e)=>r.onSnapshot(n,e||(()=>{}))}; };
+    const nQ=q=>({where:(f,op,v)=>nQ(q.where(f,op,v)),get:()=>q.get(),onSnapshot:(n,e)=>q.onSnapshot(n,e||(()=>{})),doc:id=>nDoc((id?q.doc(id):q.doc()).path),add:async d=>{ const r=await q.add(d); return {id:r.id}; }});
+    const nest=(f,v)=>f.split(".").reduceRight((acc,k)=>({[k]:acc}),v);
+    const me={uid:u.uid,name:prof.name,email:prof.email,role:prof.role,teacher:prof.role==="teacher",school:prof.school||"",province:prof.province||"",town:prof.town||"",minor:!!prof.minor,guardianPhone:prof.guardianPhone||"",groups:prof.groups||{},admin};
+    const live=!!(window.LABLINK_PAYMENTS&&firebase.functions);
+    const NET={mode:"firebase",payMode:live?"live":"manual",me,now:()=>new Date().toISOString(),doc:nDoc,col:p=>nQ(fs.collection(p)),
+      inc:(p,f,n)=>fs.doc(p).update({[f]:FV.increment(n)}).catch(e=>{ if(e&&e.code==="not-found") return fs.doc(p).set(nest(f,FV.increment(n)),{merge:true}); throw e; }),
+      updateMe:async d=>{ await fs.doc("users/"+u.uid).update(d); Object.assign(me,d); Object.assign(prof,d); },
+      pay:async(rid,o)=>{ if(!live) return {manual:true}; const r=await firebase.functions().httpsCallable("startPayment")({rid,method:o.method,phone:o.phone}); return r.data||{}; },
+      checkPay:async rid=>{ if(!live) return null; const r=await firebase.functions().httpsCallable("checkPayment")({rid}); return r.data||{}; }};
+    window.claude={use:async n=>n==="db"?db:n==="user"?user:n==="net"?NET:null};
     closeGate(); renderStrip(); bootApp();
   }
   function renderStrip(){
@@ -232,12 +307,16 @@ function firebaseMode(){
       <div style="margin:10px 0"><div class="acct-row"><span>Name</span><span>${esc(p.name)}</span></div><div class="acct-row"><span>Email</span><span style="word-break:break-all">${esc(p.email)}</span></div><div class="acct-row"><span>Role</span><span>${teacher?"Teacher":"Learner"}</span></div>${p.school?`<div class="acct-row"><span>School</span><span>${esc(p.school)}</span></div>`:""}</div>
       ${teacher?`<p style="margin:8px 0 0;font-size:.9rem"><b>Class code</b> for ${esc((current.cls&&current.cls.name)||"your class")}. Learners enter it when they create their account, or from Account → Join a class.</p><div class="acct-code">${esc(p.classCode)}</div><button class="acct-btn alt" id="acct-copy">Copy class code</button>`
       :`<div class="acct-f" style="margin-top:6px"><label for="acct-jc">${p.classCode?"Move to another class: enter its code":"Join a class: enter the code from your teacher"}</label><input id="acct-jc" maxlength="8" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.1em"></div><button class="acct-btn alt" id="acct-join">Join class</button>`}
+      <div class="acct-f" style="margin-top:12px"><label for="acct-prov">Province</label><select id="acct-prov"><option value="">Not set</option>${PROVINCES.map(x=>`<option ${x===p.province?"selected":""}>${x}</option>`).join("")}</select></div>
+      <div class="acct-f"><label for="acct-town">Town or area</label><input id="acct-town" maxlength="60" value="${esc(p.town||"")}"></div>
+      <button class="acct-btn alt" id="acct-save">Save location</button>
       <div id="acct-dm" role="status"></div>
       <button class="acct-btn" id="acct-out" style="margin-top:14px;background:#b4442f">Sign out</button>
       <p style="text-align:center;margin:6px 0 0"><button class="acct-link" id="acct-close">Close</button></p></div>`;
     document.body.appendChild(d);
     const close=()=>d.remove(); $("acct-close").onclick=close; d.onclick=e=>{ if(e.target===d) close(); }; d.addEventListener("keydown",e=>{ if(e.key==="Escape") close(); });
     $("acct-out").onclick=async()=>{ origRemove.call(localStorage,KEY); await auth.signOut(); location.reload(); };
+    $("acct-save").onclick=async()=>{ try{ const d={province:$("acct-prov").value,town:$("acct-town").value.trim().slice(0,60)}; await fs.doc("users/"+current.uid).update(d); Object.assign(p,d); $("acct-dm").innerHTML=`<div class="acct-msg ok">Saved. Reload to see tutors near your new location.</div>`; }catch(e){ $("acct-dm").innerHTML=`<div class="acct-msg">${errText(e)}</div>`; } };
     if($("acct-copy")) $("acct-copy").onclick=()=>{ try{ navigator.clipboard.writeText(p.classCode); $("acct-dm").innerHTML=`<div class="acct-msg ok">Class code copied.</div>`; }catch(e){} };
     if($("acct-join")) $("acct-join").onclick=async()=>{ const b=$("acct-join"); b.disabled=true;
       try{ const code=await joinClass(current.uid,$("acct-jc").value,{name:p.name,email:p.email}); await fs.doc("users/"+current.uid).update({classCode:code}); location.reload(); }
