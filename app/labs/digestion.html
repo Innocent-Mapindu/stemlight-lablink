@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Body Systems: Digestion</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: view tabs on top; stage (live SVG) left, control and explanation panel right; stacks on phones */
+:root{--navy:#023d84;--orange:#f58300;--bio:#2f7d4f;--bio-soft:#e3f1e8;--ink:#17221f;--muted:#5a6966;--line:#d3dbd8;--bg:#eef1f0;--panel:#fff;
+ --deoxy:#2f4ea0;--oxy:#d4232f;--muscle:#d9726a;--muscle-d:#a94a43;--cav-r:#d9def3;--cav-l:#f7d3d0;--warn:#b4442f;--good:#2f7d4f;
+ --f-display:"Montserrat",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{font-family:var(--f-display);font-size:1.15rem;margin:0;color:var(--navy)}
+.top .sub{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--bio)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:var(--f-body);font-weight:600;font-size:.88rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--bio)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button[aria-pressed=true]{background:var(--bio-soft);border-color:var(--bio);color:var(--bio)}
+button.primary{background:var(--bio);border-color:var(--bio);color:#fff}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px max(14px,env(safe-area-inset-right,0px)) 24px max(14px,env(safe-area-inset-left,0px));max-width:1280px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:0;position:relative}
+.stage svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.side{display:grid;gap:12px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h2{font-family:var(--f-display);font-size:.98rem;margin:0 0 8px;color:var(--navy)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--panel);cursor:pointer;min-height:34px}
+.chip input{margin:0;accent-color:var(--bio);width:16px;height:16px}
+.chip .sw{width:10px;height:10px;border-radius:50%}
+.phase{font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--bio)}
+.phasebar{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;height:10px;border-radius:99px;overflow:hidden;margin:6px 0 2px;position:relative;background:var(--line)}
+.phasebar i{display:block} .phasebar i:nth-child(1){background:#f1b36b} .phasebar i:nth-child(2){background:#e0645c} .phasebar i:nth-child(3){background:#9cc7ad}
+.phasebar b{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.plabels{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;font-size:.68rem;color:var(--muted);font-family:var(--f-mono)}
+.vstate{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.86rem;margin-top:8px}
+.op{font-family:var(--f-mono);font-weight:500;color:var(--good)} .cl{font-family:var(--f-mono);font-weight:500;color:var(--warn)}
+.ctl{display:grid;gap:4px;margin-top:8px}
+.ctl label{display:flex;justify-content:space-between;font-size:.84rem;font-weight:500}
+.ctl label span{font-family:var(--f-mono);color:var(--bio)}
+input[type=range]{width:100%;accent-color:var(--bio)}
+.info h3{font-family:var(--f-display);margin:0 0 4px;font-size:1rem}
+.info p{margin:4px 0;font-size:.9rem}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.68rem;border-radius:99px;padding:1px 8px;border:1px solid}
+.tag.o{color:var(--oxy);border-color:var(--oxy)} .tag.d{color:var(--deoxy);border-color:var(--deoxy)}
+.follow{font-size:.9rem;background:#fff7ec;border-left:3px solid var(--orange);padding:8px 10px;border-radius:6px;margin-top:8px}
+.note{font-size:.78rem;color:var(--muted)}
+.part{cursor:pointer}
+.part:focus{outline:none}
+.lbl{font-family:var(--f-body);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.lbl.small{font-weight:500}
+.dim{opacity:.28;transition:opacity .2s}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-weight:500;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tbl{overflow-x:auto}
+.q p{margin:4px 0 8px}
+.opts{display:grid;gap:6px}
+.opts button{text-align:left;font-weight:500;justify-content:flex-start}
+.opts .right{border-color:var(--good);box-shadow:inset 0 0 0 2px var(--good)} .opts .wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.msg{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bio-soft);border-left:3px solid var(--bio);margin-top:8px}
+.msg.warn{background:#fbe7e3;border-left-color:var(--warn)}
+@media (max-width:600px){svg .cz{font-size:21px} svg .cz-h{font-size:22px} svg .cz-s{font-size:17px} svg .vz-h{font-size:25px} svg .vz,svg .vz-s{font-size:15px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted);padding:4px 8px 6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.nb{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;font-size:.86rem}
+.nbar{display:block;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.nbar i{display:block;height:100%;width:0;transition:width .3s}
+select{font:inherit;min-height:40px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;width:100%;color:var(--ink)}
+</style></head><body>
+<div class="top"><div><div class="sub">STEMLight LabLink · Biology Lab · live demonstration</div><h1>Body systems: digestion</h1></div>
+<div class="tabs" role="tablist" aria-label="Views"><button data-view="journey" aria-pressed="true">The journey of food</button><button data-view="enz" aria-pressed="false">Enzymes at work</button><button data-view="villus" aria-pressed="false">Absorption in a villus</button></div></div>
+<div class="wrap">
+ <div><div class="stage" id="stage"></div>
+  <div class="legend" id="legend"></div>
+  <div class="card" id="below" hidden></div></div>
+ <div class="side" id="side"></div>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), f1=n=>n.toFixed(1);
+const RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const svgEl=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; };
+function smooth(P,closed){ const n=P.length, g=i=>closed?P[(i+n)%n]:P[clamp(i,0,n-1)]; let d=`M${f1(P[0][0])} ${f1(P[0][1])}`;
+  for(let i=0;i<(closed?n:n-1);i++){ const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);
+    d+=` C${f1(p1[0]+(p2[0]-p0[0])/6)} ${f1(p1[1]+(p2[1]-p0[1])/6)} ${f1(p2[0]-(p3[0]-p1[0])/6)} ${f1(p2[1]-(p3[1]-p1[1])/6)} ${f1(p2[0])} ${f1(p2[1])}`; }
+  return d+(closed?" Z":""); }
+// route through waypoints with arc length; a waypoint may carry a mark name as its third value
+function mkRoute(pts){ const P=[], marks={}; for(let i=0;i<pts.length-1;i++){ const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)]; if(p1[2]) marks[p1[2]]=P.length;
+    for(let k=0;k<12;k++){ const t=k/12,t2=t*t,t3=t2*t, f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3); P.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])]); } }
+  const last=pts.at(-1); if(last[2]) marks[last[2]]=P.length; P.push([last[0],last[1]]); const cum=[0]; for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+  const M={}; for(const k in marks) M[k]=cum[marks[k]];
+  return {P,cum,L:cum.at(-1),marks:M,at(s){ s=clamp(s,0,this.L-0.01); let lo=1,hi=P.length-1; while(lo<hi){ const m=(lo+hi)>>1; if(cum[m]<s) lo=m+1; else hi=m; }
+    const a=P[lo-1],b=P[lo],t=(s-cum[lo-1])/((cum[lo]-cum[lo-1])||1); return {x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,ang:Math.atan2(b[1]-a[1],b[0]-a[0])}; },
+    seg(s1,s2){ s1=clamp(s1,0,this.L); s2=clamp(s2,0,this.L); const out=[]; for(let s=s1;s<s2;s+=4){ const p=this.at(s); out.push([p.x,p.y]); } const p=this.at(s2); out.push([p.x,p.y]); return out; }}; }
+const pathOf=P=>P.length<2?"M0 0":"M"+P.map(p=>f1(p[0])+" "+f1(p[1])).join("L");
+let seed=5; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+
+const S={view:"journey",playing:!RM,rate:1,t:0,labels:true,stepTo:null,quiz:null,selected:null,frameN:0,
+  show:{peri:true,juice:true,nutr:true},meal:"sadza",
+  enz:{kind:"amylase",T:37,pH:7,den:false,hot:0},
+  vil:{coeliac:false,flow:true,micro:false}};
+
+const PARTS={
+ mouth:{n:"Mouth",t:"Ingestion: food enters here. The teeth chew it into smaller pieces (mechanical digestion), giving enzymes a larger surface area to work on. The tongue rolls the food into a ball, a bolus, for swallowing."},
+ teeth:{n:"Teeth",t:"Incisors cut and bite, canines tear, premolars and molars grind. Chewing is mechanical digestion: it breaks food into smaller pieces but does not change the chemicals in it."},
+ tongue:{n:"Tongue",t:"Mixes food with saliva, rolls it into a bolus and pushes it to the back of the mouth for swallowing. It also carries the taste buds."},
+ saliv:{n:"Salivary glands",t:"Make saliva, which moistens food and contains the enzyme salivary amylase. Amylase starts breaking starch down into maltose."},
+ oes:{n:"Oesophagus (gullet)",t:"A muscular tube that carries food from the mouth to the stomach. Waves of muscle contraction, called peristalsis, squeeze the bolus along, so you could even swallow upside down."},
+ stomach:{n:"Stomach",t:"A muscular bag. Its walls churn food with gastric juice for several hours. Gastric juice contains the enzyme pepsin, which starts the digestion of protein, and hydrochloric acid, which kills bacteria and gives pepsin the acidic conditions (about pH 2) it works best in. Sphincter muscles at each end control what goes in and out."},
+ liver:{n:"Liver",t:"Makes bile, which is stored in the gall bladder. It also receives the absorbed food from the small intestine through the hepatic portal vein, stores glucose as glycogen, and breaks down excess amino acids, making urea."},
+ gall:{n:"Gall bladder",t:"Stores bile made by the liver and squeezes it into the duodenum through the bile duct. Bile is not an enzyme: it neutralises stomach acid and emulsifies fats, breaking big fat drops into many tiny droplets so lipase can work faster."},
+ pancreas:{n:"Pancreas",t:"Makes pancreatic juice containing three enzymes: amylase (starch), trypsin, a protease (protein), and lipase (fats). The juice flows into the duodenum. The pancreas also makes the hormones insulin and glucagon."},
+ duod:{n:"Duodenum",t:"The first part of the small intestine. Bile and pancreatic juice are added here, and the conditions become slightly alkaline so the intestinal enzymes work well."},
+ ileum:{n:"Small intestine (ileum)",t:"About 6 metres long. Digestion is completed here and the small, soluble products, glucose, amino acids, fatty acids and glycerol, are absorbed into the blood and lymph through millions of villi. See the Absorption tab."},
+ colon:{n:"Large intestine (colon)",t:"Absorbs most of the remaining water (and some salts) from the undigested food, so the waste becomes semi-solid faeces. Bacteria living here make some vitamins."},
+ appendix:{n:"Appendix",t:"A small dead-end tube attached to the start of the large intestine. In humans it has little function in digestion; if it becomes infected (appendicitis) it may have to be removed."},
+ rectum:{n:"Rectum",t:"Stores faeces until they are passed out."},
+ anus:{n:"Anus",t:"Egestion: faeces, made of undigested food (mostly fibre), bacteria and dead cells, are passed out through the anus. A ring of sphincter muscle controls this."},
+ enzyme:{n:"Enzyme",t:"A protein that speeds up a chemical reaction without being used up: a biological catalyst. Each enzyme has an active site with a particular shape that fits only one kind of substrate, like a key in a lock."},
+ substrate:{n:"Substrate",t:"The molecule an enzyme acts on. It fits into the active site, the bonds inside it are broken, and the products leave. The enzyme is free to work again."},
+ villus:{n:"Villus",t:"A tiny finger-like fold of the small intestine wall, about 1 mm long. Millions of them give the ileum an enormous surface area for absorption."},
+ epith:{n:"Epithelium with microvilli",t:"The villus is covered by a single layer of cells, so food molecules have only a short distance to travel. Each cell has its own tiny folds, microvilli, which increase the surface area even more."},
+ capil:{n:"Blood capillaries",t:"A dense network under the epithelium. Glucose and amino acids are absorbed into the blood here and carried to the liver in the hepatic portal vein. Flowing blood keeps the concentration gradient steep."},
+ lacteal:{n:"Lacteal",t:"A lymph vessel in the centre of each villus. Fatty acids and glycerol are absorbed into it, combined into fats, and carried away in the lymph, which later empties into the blood."},
+ wall:{n:"Muscle layers",t:"Circular and longitudinal muscle in the intestine wall make the waves of peristalsis that push food along, and move the villi."}};
+
+// ============================================================
+// THE JOURNEY OF FOOD
+// ============================================================
+const MEALS={sadza:{n:"Sadza with beef stew and covo",c:{starch:11,protein:6,fat:3,fibre:4}},bread:{n:"Bread with peanut butter",c:{starch:10,protein:5,fat:6,fibre:3}},rice:{n:"Rice and beans",c:{starch:11,protein:6,fat:1,fibre:6}}};
+const NCOL={starch:"#f2cf55",protein:"#d6474a",fat:"#f08c1a",fibre:"#4f8f3a"};
+// stages of the journey: route marks, share of the cycle, and what happens
+const STG=[{k:"mouth",n:"Mouth",a:"m0",b:"ph",d:0.12},{k:"oes",n:"Oesophagus",a:"ph",b:"st",d:0.07},{k:"stomach",n:"Stomach",a:"st",b:"py",d:0.19},{k:"duod",n:"Duodenum",a:"py",b:"je",d:0.1},{k:"ileum",n:"Small intestine (ileum)",a:"je",b:"ca",d:0.22},{k:"colon",n:"Large intestine",a:"ca",b:"re",d:0.18},{k:"rectum",n:"Rectum and anus",a:"re",b:"an",d:0.12}];
+let acc=0; STG.forEach(s=>{ s.t0=acc; acc+=s.d; s.t1=acc; });
+const stageOf=t=>STG.find(s=>t>=s.t0&&t<s.t1)||STG.at(-1);
+const STXT={mouth:"Ingestion. The teeth chew the food into small pieces and the tongue mixes it with saliva. Salivary amylase starts to break starch down into maltose. The food is rolled into a bolus and swallowed.",
+ oes:"Peristalsis: rings of muscle contract behind the bolus and relax in front of it, squeezing it down the oesophagus to the stomach in a few seconds.",
+ stomach:"The stomach walls churn the food with gastric juice for 2 to 4 hours. Pepsin starts digesting protein into polypeptides. Hydrochloric acid kills bacteria and makes the conditions acidic (pH 2), which stops salivary amylase working. The food becomes a thick liquid called chyme.",
+ duod:"The pyloric sphincter lets chyme into the duodenum a little at a time. Bile from the gall bladder neutralises the acid and emulsifies fats. Pancreatic juice adds amylase, trypsin and lipase.",
+ ileum:"Enzymes on the walls finish digestion: maltose to glucose, peptides to amino acids, fats to fatty acids and glycerol. These small soluble molecules are absorbed through the villi into the blood and lymph. This takes several hours.",
+ colon:"Only undigested food, mostly fibre, is left. The large intestine absorbs most of the remaining water, so the waste becomes semi-solid faeces.",
+ rectum:"Faeces are stored in the rectum, then egested through the anus. The whole journey usually takes between 24 and 72 hours."};
+// how much of each nutrient is left (and absorbed) at time t
+function nutr(t){ const st=k=>STG.find(s=>s.k===k), p=(k)=>{ const s=st(k); return clamp((t-s.t0)/(s.t1-s.t0),0,1); };
+  const starch=1-0.2*p("mouth")-0.4*p("duod")-0.4*p("ileum"), protein=1-0.4*p("stomach")-0.3*p("duod")-0.3*p("ileum"), fat=1-0.35*p("duod")-0.65*p("ileum");
+  const water=lerp(lerp(0.7,1,p("stomach")),0.18,p("colon")*0.85+p("rectum")*0.15);
+  return {starch,protein,fat,fibre:1,water,glucose:p("ileum")*(1-0.0),amino:p("ileum"),fatAbs:p("ileum"),stage:stageOf(t)}; }
+let J=null;
+function buildJourney(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 730",role:"img","aria-label":"Live diagram of the digestive system with food moving through it"});
+  svgEl("defs",{},svg).innerHTML=`
+   <linearGradient id="skinD" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9bea2"/><stop offset=".2" stop-color="#f6dcc8"/><stop offset=".8" stop-color="#f6dcc8"/><stop offset="1" stop-color="#e9bea2"/></linearGradient>
+   <radialGradient id="liverD" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#a95343"/><stop offset="1" stop-color="#6a2a20"/></radialGradient>
+   <radialGradient id="stomD" cx=".45" cy=".35" r=".8"><stop offset="0" stop-color="#f5c3b9"/><stop offset="1" stop-color="#d98a80"/></radialGradient>
+   <radialGradient id="pancD" cx=".4" cy=".4" r=".8"><stop offset="0" stop-color="#f7d9a8"/><stop offset="1" stop-color="#d9a868"/></radialGradient>
+   <radialGradient id="gallD" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#9cc46a"/><stop offset="1" stop-color="#4f7d2e"/></radialGradient>
+   <radialGradient id="bolusG" cx=".38" cy=".35" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent,extra)=>svgEl("g",Object.assign({class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},extra||{}),parent||g);
+  // body: head in side view, torso from the front (as in textbook diagrams)
+  svgEl("path",{d:"M190 740 L194 300 C196 230, 214 190, 270 178 L364 166 C376 160, 380 150, 380 140 L386 130 C372 128, 356 124, 350 112 C344 104, 348 98, 344 92 C336 90, 334 84, 340 80 C334 74, 330 66, 336 60 C326 52, 322 44, 330 34 C330 14, 352 -6, 380 -10 L470 -10 C484 20, 488 60, 478 96 C470 120, 452 132, 440 140 L440 150 C444 160, 452 166, 466 168 L530 178 C586 190, 604 230, 606 300 L610 740 Z",fill:"url(#skinD)",stroke:"#bf8f71","stroke-width":2},g);
+  // mouth cavity, teeth and tongue
+  const mo=part("mouth"); svgEl("path",{d:"M344 80 C360 76, 392 78, 412 90 C420 98, 420 112, 414 122 L410 110 C396 104, 370 100, 344 96 Z",fill:"#b8505a",stroke:"#7d2d35","stroke-width":1.5},mo);
+  const th=part("teeth"); [[352,78,358,86],[362,78,368,86],[372,79,378,87],[352,96,358,89],[362,97,368,90],[372,98,378,91]].forEach(([x1,y1,x2,y2])=>svgEl("rect",{x:Math.min(x1,x2)-1,y:Math.min(y1,y2),width:7,height:Math.abs(y2-y1)+1,rx:2,fill:"#fffdf5",stroke:"#bfb49a","stroke-width":1},th));
+  const tg=part("tongue"); svgEl("path",{d:"M360 99 C376 92, 400 94, 410 108 C400 112, 378 110, 360 104 Z",fill:"#e07f86",stroke:"#a8505a","stroke-width":1.2},tg);
+  const sg=part("saliv"); svgEl("ellipse",{cx:452,cy:84,rx:15,ry:20,fill:"#f2c9a8",stroke:"#b98a62","stroke-width":1.5},sg); svgEl("ellipse",{cx:404,cy:128,rx:13,ry:8,fill:"#f2c9a8",stroke:"#b98a62","stroke-width":1.5},sg);
+  const ducts=[svgEl("path",{d:"M440 86 C420 84, 400 84, 386 86",fill:"none",stroke:"#7aa7c7","stroke-width":2.5},sg),svgEl("path",{d:"M396 124 C386 116, 380 110, 376 104",fill:"none",stroke:"#7aa7c7","stroke-width":2.5},sg)];
+  // the route of food through the alimentary canal
+  const RP=[[338,88,"m0"],[352,88],[378,94],[406,104,"ph"],[414,130],[414,170],[412,230],[416,270],[428,298,"st"],[462,312],[500,330],[518,362],[506,392],[476,406],[444,410],[420,408,"py"],[402,416],[388,436],[390,458],[402,474],[414,494],[430,510,"je"],[500,516],[514,532],[496,546],[330,548],[314,562],[330,576],[505,576],[520,590],[505,604],[330,604],[314,618],[330,632],[312,644],[290,646,"ca"],[276,620],[272,570],[272,520],[280,494],[300,484],[380,490],[460,492],[530,486],[560,494],[566,540],[566,600],[556,642],[520,664],[470,668],[438,672,"re"],[430,692],[426,712,"an"]];
+  const R=mkRoute(RP);
+  const tubeD=(s1,s2)=>smooth(R.seg(s1,s2).filter((p,i,a)=>i%3===0||i===a.length-1),false);
+  // organs drawn behind the gut tube
+  const lv=part("liver"); svgEl("path",{d:"M232 262 C250 226, 330 218, 420 232 C460 238, 486 246, 500 262 C480 276, 452 284, 430 288 C400 294, 380 306, 352 318 C320 330, 270 340, 246 334 C226 316, 222 290, 232 262 Z",fill:"url(#liverD)",stroke:"#4f1d16","stroke-width":1.6},lv);
+  const gb=part("gall"); svgEl("path",{d:"M352 316 C366 312, 376 326, 372 342 C368 356, 352 358, 346 346 C340 334, 342 320, 352 316 Z",fill:"url(#gallD)",stroke:"#3a5e22","stroke-width":1.4},gb);
+  const bileD=svgEl("path",{d:"M362 352 C370 380, 376 410, 386 438",fill:"none",stroke:"#5f9a35","stroke-width":3},gb);
+  const pc=part("pancreas"); svgEl("path",{d:"M396 444 C420 430, 470 428, 520 418 C536 416, 546 424, 540 434 C520 448, 470 452, 430 462 C412 466, 398 460, 396 444 Z",fill:"url(#pancD)",stroke:"#a77b44","stroke-width":1.4},pc);
+  const pancD=svgEl("path",{d:"M520 428 C480 438, 440 444, 394 450",fill:"none",stroke:"#c89a5a","stroke-width":2.5},pc);
+  // the gut: each region a tube; colon wider and pouched
+  const tube=(id,a,b,w,col,lum)=>{ const gp=part(id); const d=tubeD(R.marks[a]??0,R.marks[b]??R.L); svgEl("path",{d,fill:"none",stroke:"#7a3b34","stroke-width":w+3,"stroke-linecap":"round","stroke-linejoin":"round"},gp); svgEl("path",{d,fill:"none",stroke:col,"stroke-width":w,"stroke-linecap":"round","stroke-linejoin":"round"},gp); svgEl("path",{d,fill:"none",stroke:lum,"stroke-width":w*0.45,"stroke-linecap":"round","stroke-linejoin":"round",opacity:.9},gp); return {gp,d}; };
+  const col=tube("colon","ca","re",34,"#d9a48c","#f3d6c6");
+  svgEl("path",{d:col.d,fill:"none",stroke:"#a8705c","stroke-width":34,"stroke-dasharray":"2 16",opacity:.55,"pointer-events":"none"},col.gp);
+  const app=part("appendix"); svgEl("path",{d:"M282 660 C276 676, 284 690, 296 694",fill:"none",stroke:"#7a3b34","stroke-width":10,"stroke-linecap":"round"},app); svgEl("path",{d:"M282 660 C276 676, 284 690, 296 694",fill:"none",stroke:"#d9a48c","stroke-width":7,"stroke-linecap":"round"},app);
+  tube("ileum","je","ca",22,"#e9a3a0","#fbe0dc");
+  tube("rectum","re","an",26,"#d9a48c","#f3d6c6");
+  tube("duod","py","je",22,"#e3958f","#fbe0dc");
+  tube("oes","ph","st",18,"#e3958f","#fbe0dc");
+  // stomach: a J-shaped muscular bag (drawn as a bag, not a tube) that churns
+  const stG=part("stomach"); const stomach=svgEl("path",{d:"M424 298 C428 276, 456 262, 488 266 C530 272, 556 312, 556 356 C556 398, 528 426, 486 432 C460 436, 432 430, 416 418 L420 402 C438 406, 456 400, 466 386 C474 370, 470 350, 458 336 C446 322, 434 314, 428 312 Z",fill:"url(#stomD)",stroke:"#7a3b34","stroke-width":2.4},stG);
+  const rugae=svgEl("path",{d:"M448 296 C476 292, 506 304, 524 326 M470 280 C504 284, 532 308, 542 342 M536 392 C516 412, 486 420, 456 418 M500 340 C512 360, 512 384, 500 400",fill:"none",stroke:"#c8766e","stroke-width":1.5,opacity:.7},stG);
+  // sphincters
+  const sph=svgEl("g",{"pointer-events":"none"},g); [["st"],["py"],["an"]].forEach(([m])=>{ const p=R.at(R.marks[m]); svgEl("ellipse",{cx:f1(p.x),cy:f1(p.y),rx:5,ry:12,transform:`rotate(${f1(p.ang*180/Math.PI)} ${f1(p.x)} ${f1(p.y)})`,fill:"#9b3d36",opacity:.9},sph); });
+  // juices
+  const juice=svgEl("g",{"pointer-events":"none"},g);
+  const drops=[...Array(14)].map(()=>svgEl("circle",{r:2.6,fill:"#5ea0d6",opacity:0},juice));
+  // peristalsis ring and the bolus
+  const peri=svgEl("path",{fill:"none",stroke:"#9b3d36","stroke-width":30,"stroke-linecap":"butt",opacity:0,"pointer-events":"none"},g);
+  const periL=svgEl("path",{fill:"none",stroke:"#fbe0dc","stroke-width":4,"stroke-linecap":"round",opacity:0,"pointer-events":"none"},g);
+  const bolG=svgEl("g",{"pointer-events":"none"},g); const bol=svgEl("ellipse",{rx:16,ry:12,fill:"#efe2bd",stroke:"#9b7f45","stroke-width":1.4},bolG); const bolHi=svgEl("ellipse",{rx:16,ry:12,fill:"url(#bolusG)"},bolG);
+  const bits=[]; const bitG=svgEl("g",{},bolG);
+  const abs=[]; const absG=svgEl("g",{"pointer-events":"none"},g);
+  // labels: left column ends at x 176, right column starts at x 624
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["saliv","Salivary glands",176,40,440,72],["teeth","Teeth",176,84,350,82],["tongue","Tongue",176,128,372,104],["oes","Oesophagus",176,206,412,206],["liver","Liver",176,268,262,276],["gall","Gall bladder",176,330,348,336],
+   ["duod","Duodenum",176,420,388,440],["colon","Large intestine",176,520,272,540],["appendix","Appendix",176,684,284,676],
+   ["mouth","Mouth",624,110,412,96],["stomach","Stomach",624,300,526,330],["pancreas","Pancreas",624,420,528,426],["ileum","Small intestine",624,580,520,590],["rectum","Rectum",624,666,474,668],["anus","Anus",624,716,428,714]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x<ax?"end":"start";
+    const ln=svgEl("line",{x1:x+(x<ax?5:-5),y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const jtxt=svgEl("text",{x:400,y:0,"text-anchor":"middle",visibility:"hidden"},ctx);
+  J={svg,R,stomach,rugae,ducts,bileD,pancD,drops,peri,periL,bolG,bol,bolHi,bits,bitG,abs,absG,labs,ctx,jtxt};
+  setMeal(S.meal);
+  return svg; }
+function setMeal(k){ S.meal=k; if(!J) return; J.bits.forEach(b=>b.el.remove()); J.bits.length=0; seed=9;
+  Object.entries(MEALS[k].c).forEach(([type,n])=>{ for(let i=0;i<n;i++){ const a=rnd()*Math.PI*2, r=Math.sqrt(rnd());
+    const el=type==="fibre"?svgEl("path",{d:"M-4 -1 Q0 -4 4 1",fill:"none",stroke:NCOL.fibre,"stroke-width":2,"stroke-linecap":"round"},J.bitG):type==="starch"?svgEl("path",{d:"M-3 -1.7L0 -3.4L3 -1.7L3 1.7L0 3.4L-3 1.7Z",fill:NCOL.starch,stroke:"#a8892a","stroke-width":.6},J.bitG):svgEl("circle",{r:type==="fat"?3.2:2.6,fill:NCOL[type],stroke:"rgba(0,0,0,.3)","stroke-width":.5},J.bitG);
+    J.bits.push({type,el,a,r,i,n,rot:rnd()*180}); } }); }
+function tickJourney(dt){
+  const t=S.t, st=stageOf(t), u=(t-st.t0)/(st.t1-st.t0), R=J.R, N=nutr(t);
+  // where is the bolus? it waits while chewing, then moves; in the stomach it is churned about
+  let s, e=u;
+  if(st.k==="mouth") e=u<0.75?0.38+0.04*Math.sin(u*40):0.38+0.62*(u-0.75)/0.25;
+  if(st.k==="stomach") e=0.15+0.7*(0.5-0.5*Math.cos(Math.PI*Math.min(1,u*1.2)))+0.08*Math.sin(u*28)*(u<0.85?1:0);
+  if(st.k==="rectum") e=u<0.7?u*0.5/0.7:0.5+0.5*(u-0.7)/0.3;
+  s=lerp(R.marks[st.a],R.marks[st.b],clamp(e,0,1));
+  const p=R.at(s);
+  // bolus size and colour change as food is digested and water removed
+  const size=st.k==="mouth"?1:st.k==="stomach"||st.k==="oes"?0.95:st.k==="duod"?0.85:st.k==="ileum"?lerp(0.85,0.55,u):st.k==="colon"?lerp(0.6,0.5,u):0.5;
+  const colr=st.k==="mouth"||st.k==="oes"?"#efe2bd":st.k==="stomach"?`rgb(${Math.round(lerp(239,214,u))},${Math.round(lerp(226,196,u))},${Math.round(lerp(189,138,u))})`:st.k==="duod"?"#cfc078":st.k==="ileum"?"#c9b25e":st.k==="colon"?`rgb(${Math.round(lerp(170,122,u))},${Math.round(lerp(130,82,u))},${Math.round(lerp(70,42,u))})`:"#7a522a";
+  const sq=st.k==="mouth"&&u<0.75?1+0.12*Math.sin(u*80):1;
+  J.bolG.setAttribute("transform",`translate(${f1(p.x)} ${f1(p.y)}) rotate(${f1(p.ang*180/Math.PI)}) scale(${f1(size*sq*10)/10} ${f1(size*10/sq)/10})`);
+  J.bol.setAttribute("fill",colr); J.bol.setAttribute("rx",st.k==="stomach"||st.k==="duod"?18:16);
+  // nutrient bits inside the bolus disappear as they are digested and absorbed
+  J.bits.forEach(b=>{ const left=N[b.type], shown=S.show.nutr&&b.i<Math.round(left*b.n);
+    b.el.setAttribute("visibility",shown?"visible":"hidden"); if(shown){ const wob=Math.sin(S.frameN*0.05+b.i)*0.08; b.el.setAttribute("transform",`translate(${f1(Math.cos(b.a+wob)*b.r*11)} ${f1(Math.sin(b.a+wob)*b.r*8)}) rotate(${f1(b.rot)}) scale(${b.type==="fat"&&(st.k==="duod"||st.k==="ileum")?0.6:1})`); } });
+  // absorbed molecules leave the gut through the wall of the small intestine (and water from the colon)
+  if(dt>0&&(st.k==="ileum"||st.k==="colon")&&Math.random()<dt*14){ const type=st.k==="colon"?"water":["starch","protein","fat"][Math.floor(Math.random()*3)];
+    const el=svgEl("circle",{r:2.4,fill:type==="water"?"#5ea0d6":type==="starch"?NCOL.starch:NCOL[type],opacity:.95},J.absG); const a=Math.random()*Math.PI*2; J.abs.push({x:p.x,y:p.y,vx:Math.cos(a)*40,vy:Math.sin(a)*40,life:0.9,el}); }
+  for(let i=J.abs.length-1;i>=0;i--){ const m=J.abs[i]; m.life-=dt; m.x+=m.vx*dt; m.y+=m.vy*dt; m.el.setAttribute("cx",f1(m.x)); m.el.setAttribute("cy",f1(m.y)); m.el.setAttribute("opacity",f1(Math.max(0,m.life))); if(m.life<=0){ m.el.remove(); J.abs.splice(i,1); } }
+  // peristalsis: a ring of contracted muscle just behind the bolus
+  const pk=S.show.peri&&(st.k==="oes"||st.k==="ileum"||st.k==="colon"||st.k==="duod"||(st.k==="rectum"&&u>0.7));
+  if(pk){ const w=st.k==="colon"||st.k==="rectum"?38:st.k==="oes"?22:26; const seg=pathOf(R.seg(s-16*size-12,s-16*size-4)); J.peri.setAttribute("d",seg); J.periL.setAttribute("d",seg); J.peri.setAttribute("stroke-width",w+4); J.periL.setAttribute("stroke-width",2); J.peri.setAttribute("opacity",.85); J.periL.setAttribute("opacity",.9); }
+  else { J.peri.setAttribute("opacity",0); J.periL.setAttribute("opacity",0); }
+  // stomach churns while food is in it
+  const ch=st.k==="stomach"?Math.sin(S.frameN*0.18)*0.025:0; J.stomach.setAttribute("transform",`translate(480 350) scale(${f1((1+ch)*1000)/1000} ${f1((1-ch)*1000)/1000}) translate(-480 -350)`); J.rugae.setAttribute("transform",J.stomach.getAttribute("transform"));
+  // digestive juices
+  const jOn=S.show.juice, src=st.k==="mouth"&&u<0.8?"saliva":st.k==="stomach"?"gastric":st.k==="duod"?"duod":null;
+  J.ducts.forEach(d=>{ d.setAttribute("stroke-dasharray",jOn&&src==="saliva"?"5 4":"none"); d.setAttribute("stroke-dashoffset",f1(-S.frameN*0.6)); });
+  [J.bileD,J.pancD].forEach(d=>{ d.setAttribute("stroke-dasharray",jOn&&src==="duod"?"6 4":"none"); d.setAttribute("stroke-dashoffset",f1(-S.frameN*0.6)); d.setAttribute("stroke-width",jOn&&src==="duod"?4.5:2.5); });
+  J.drops.forEach((d,i)=>{ if(!jOn||!src){ d.setAttribute("opacity",0); return; } const ph=((S.frameN*0.012+i/J.drops.length)%1);
+    let x,y,c; if(src==="saliva"){ const sx=i%2?446:400, sy=i%2?84:126; x=lerp(sx,382,ph); y=lerp(sy,94,ph); c="#7ab8e0"; }
+    else if(src==="gastric"){ const a=i/J.drops.length*Math.PI*2; x=lerp(480+Math.cos(a)*60,p.x,ph*0.8); y=lerp(355+Math.sin(a)*52,p.y,ph*0.8); c="#c9d94a"; }
+    else { x=i%2?lerp(362,388,ph):lerp(520,396,ph); y=i%2?lerp(352,440,ph):lerp(428,450,ph); c=i%2?"#5f9a35":"#e0a050"; }
+    d.setAttribute("cx",f1(x)); d.setAttribute("cy",f1(y)); d.setAttribute("fill",c); d.setAttribute("opacity",f1(0.9*Math.sin(Math.PI*ph))); });
+  // side panel readouts
+  if(S.frameN%5===0&&$("stname")){ $("stname").textContent=st.n; const pm=$("pmark"); if(pm) pm.style.left=`calc(${(t*100).toFixed(2)}% - 1px)`;
+    const bar=(id,v)=>{ const e=$(id); if(e) e.style.width=Math.round(clamp(v,0,1)*100)+"%"; };
+    bar("nb-starch",N.starch); bar("nb-protein",N.protein); bar("nb-fat",N.fat); bar("nb-fibre",N.fibre); bar("nb-water",N.water); bar("ab-glu",N.glucose); bar("ab-ami",N.amino); bar("ab-fat",N.fatAbs);
+    if($("sttext").dataset.k!==st.k){ $("sttext").dataset.k=st.k; $("sttext").textContent=STXT[st.k]; } } }
+function journeySide(){
+  const nb=(id,t,c)=>`<span>${t}</span><span class="nbar"><i id="${id}" style="background:${c}"></i></span>`;
+  $("side").innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><span class="phase" id="stname"></span><span class="note">about 24 to 72 hours, shown in under a minute</span></div>
+    <div class="phasebar" style="grid-template-columns:${STG.map(s=>s.d*100+"fr").join(" ")}">${STG.map((s,i)=>`<i style="background:${["#f1b36b","#e3958f","#d98a80","#e0b060","#e9a3a0","#c99a7a","#9b6b45"][i]}"></i>`).join("")}<b id="pmark"></b></div>
+    <div class="plabels" style="grid-template-columns:${STG.map(s=>s.d*100+"fr").join(" ")};font-size:.6rem"><span>Mouth</span><span>Oes.</span><span>Stomach</span><span>Duod.</span><span>Small int.</span><span>Large int.</span><span>Out</span></div>
+    <p id="sttext" style="margin:8px 0 0;font-size:.9rem"></p>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button><button id="step">Next organ</button><button id="again">Start again</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div>
+    <div class="ctl"><label for="meal">Choose a meal</label><select id="meal">${Object.entries(MEALS).map(([k,m])=>`<option value="${k}" ${S.meal===k?"selected":""}>${m.n}</option>`).join("")}</select></div></div>
+   <div class="card"><h2>What is in the food now</h2><div class="nb">${nb("nb-starch","Starch",NCOL.starch)}${nb("nb-protein","Protein",NCOL.protein)}${nb("nb-fat","Fat",NCOL.fat)}${nb("nb-fibre","Fibre",NCOL.fibre)}${nb("nb-water","Water","#5ea0d6")}</div>
+    <h2 style="margin-top:12px">Absorbed so far</h2><div class="nb">${nb("ab-glu","Glucose (into blood)",NCOL.starch)}${nb("ab-ami","Amino acids (into blood)",NCOL.protein)}${nb("ab-fat","Fatty acids and glycerol (into lymph)",NCOL.fat)}</div>
+    <p class="note" style="margin:8px 0 0">Fibre cannot be digested by human enzymes. It passes right through and helps the muscles of the gut push food along.</p></div>
+   <div class="card"><h2>Choose what is shown</h2><div class="chips">${[["peri","Peristalsis"],["juice","Digestive juices"],["nutr","Nutrients in the food"]].map(([k,t])=>`<label class="chip"><input type="checkbox" data-s="${k}" ${S.show[k]?"checked":""}>${t}</label>`).join("")}<label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div></div>
+   <div class="card info" id="info"><h2>Tap any organ</h2><p class="note" style="margin:0">Tap an organ to see what it does.</p><div class="chips" style="margin-top:8px">${["mouth","teeth","tongue","saliv","oes","stomach","liver","gall","pancreas","duod","ileum","colon","appendix","rectum","anus"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>
+   <div class="card" id="quiz"><h2>Test yourself</h2><p class="note" style="margin:0 0 8px">Eight questions: tap the right organ, or choose the right answer.</p><button class="primary" id="qstart">Start the test</button></div>`;
+  commonControls();
+  $("step").onclick=()=>{ const st=stageOf(S.t); S.stepTo=st.t1>=1?1:st.t1; S.playing=true; $("play").textContent="Pause"; };
+  $("again").onclick=()=>{ S.t=0; S.playing=true; $("play").textContent="Pause"; };
+  $("meal").onchange=e=>{ setMeal(e.target.value); S.t=0; };
+  $("side").querySelectorAll("[data-s]").forEach(c=>c.onchange=()=>{ S.show[c.dataset.s]=c.checked; });
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick));
+  $("qstart").onclick=startQuiz; }
+
+// ============================================================
+// ENZYMES AT WORK
+// ============================================================
+const ENZ={amylase:{n:"Amylase",from:"salivary glands and pancreas",where:"mouth and small intestine",opt:7,sub:"Starch",prod:"Maltose",col:"#3f9a62",sc:"#f2cf55",ss:"#a8892a"},
+ pepsin:{n:"Pepsin (a protease)",from:"stomach wall",where:"stomach",opt:2,sub:"Protein",prod:"Polypeptides and amino acids",col:"#6b5bb5",sc:"#d6474a",ss:"#8e2b2d"},
+ trypsin:{n:"Trypsin (a protease)",from:"pancreas",where:"small intestine",opt:8,sub:"Protein",prod:"Peptides and amino acids",col:"#2f78b5",sc:"#d6474a",ss:"#8e2b2d"},
+ lipase:{n:"Lipase",from:"pancreas",where:"small intestine",opt:8,sub:"Fat",prod:"Fatty acids and glycerol",col:"#b5622f",sc:"#f08c1a",ss:"#9a5a10"}};
+const tFac=T=>T<=37?Math.pow(2,(T-37)/10):Math.max(0,1-Math.pow((T-37)/18,2));
+const pFac=(pH,o)=>Math.exp(-Math.pow((pH-o)/1.6,2));
+let EZ=null;
+function buildEnz(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 520",role:"img","aria-label":"Live model of enzymes breaking down food molecules"});
+  svgEl("defs",{},svg).innerHTML=`<linearGradient id="sol" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f9fc"/><stop offset="1" stop-color="#e2f0f7"/></linearGradient>`;
+  const g=svgEl("g",{},svg);
+  svgEl("rect",{x:6,y:6,width:788,height:508,rx:18,fill:"url(#sol)",stroke:"#9fc3d6","stroke-width":2},g);
+  const enzG=svgEl("g",{class:"part","data-part":"enzyme",tabindex:0,role:"button","aria-label":"Enzyme"},g), molG=svgEl("g",{},g), subG=svgEl("g",{class:"part","data-part":"substrate",tabindex:0,role:"button","aria-label":"Substrate"},molG);
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":14,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const banner=svgEl("text",{x:400,y:500,"text-anchor":"middle","font-size":16,fill:"#b4442f"},ctx);
+  EZ={svg,g,molG,subG,enzG,ctx,banner,enz:[],mols:[],labs:[],made:0,hist:[]};
+  resetEnz(); return svg; }
+function enzPath(den,t){ // enzyme with a notch-shaped active site at the top; denatured: the notch collapses
+  if(!den) return "M-46 -6 C-50 -34, -30 -46, -16 -40 L-16 -22 L16 -22 L16 -40 C30 -46, 50 -34, 46 -6 C44 24, 22 40, 0 40 C-22 40, -44 24, -46 -6 Z";
+  return "M-46 -6 C-50 -34, -30 -46, -14 -38 C-6 -30, 4 -44, 14 -34 C30 -46, 50 -30, 44 0 C44 28, 18 44, -4 38 C-26 44, -44 22, -46 -6 Z"; }
+function newSub(x,y){ const k=S.enz.kind, el=svgEl("g",{},EZ.subG), m={x,y,vx:(Math.random()-0.5)*40,vy:(Math.random()-0.5)*40,ang:Math.random()*360,va:(Math.random()-0.5)*40,el,st:"free",kind:k};
+  if(k==="lipase") m.tails=3; else m.len=6; drawMol(m); EZ.mols.push(m); return m; }
+function drawMol(m){ const E=ENZ[m.kind], el=m.el; el.innerHTML="";
+  if(m.kind==="lipase"){ if(m.fa){ svgEl("path",{d:"M-14 0 L-9 -4 L-4 0 L1 -4 L6 0 L11 -4",fill:"none",stroke:E.sc,"stroke-width":3,"stroke-linecap":"round"},el); svgEl("circle",{cx:-16,cy:0,r:3.2,fill:"#c0392b"},el); return; }
+    svgEl("rect",{x:-5,y:-15,width:10,height:30,rx:3,fill:"#f7e7b0",stroke:E.ss,"stroke-width":1.2},el);
+    for(let i=0;i<m.tails;i++){ const y=-10+i*10; svgEl("path",{d:`M5 ${y} L10 ${y-4} L15 ${y} L20 ${y-4} L25 ${y} L30 ${y-4} L35 ${y}`,fill:"none",stroke:E.sc,"stroke-width":3,"stroke-linecap":"round"},el); } return; }
+  const n=m.len, w=13; for(let i=0;i<n;i++){ const x=(i-(n-1)/2)*w;
+    if(m.kind==="amylase") svgEl("path",{d:`M${x-6} 0 L${x-3} -5.2 L${x+3} -5.2 L${x+6} 0 L${x+3} 5.2 L${x-3} 5.2 Z`,fill:E.sc,stroke:E.ss,"stroke-width":1},el);
+    else svgEl("circle",{cx:x,cy:0,r:5.6,fill:["#d6474a","#e07b39","#c94f8a","#9a4fd6","#d6474a","#4f8fd6"][(i+(m.seed||0))%6],stroke:"#5a2020","stroke-width":.8},el);
+    if(i<n-1) svgEl("line",{x1:x+5.5,y1:0,x2:x+w-5.5,y2:0,stroke:E.ss,"stroke-width":2},el); } }
+function resetEnz(){ if(!EZ) return; EZ.subG.innerHTML=""; EZ.enzG.innerHTML=""; EZ.mols=[]; EZ.enz=[]; EZ.made=0; EZ.hist=[]; S.enz.den=false; S.enz.hot=0;
+  const E=ENZ[S.enz.kind]; S.enz.pH=S.enz.pHset??E.opt;
+  [[200,150],[560,150],[220,380],[580,370]].forEach(([x,y])=>{ const gg=svgEl("g",{},EZ.enzG); const body=svgEl("path",{d:enzPath(false),fill:E.col,stroke:"rgba(0,0,0,.35)","stroke-width":1.5},gg); const hi=svgEl("path",{d:"M-30 -20 C-26 -30, -20 -34, -16 -34",fill:"none",stroke:"#fff","stroke-width":3,opacity:.35,"stroke-linecap":"round"},gg);
+    const lab=svgEl("text",{x:0,y:14,"text-anchor":"middle","font-size":11,fill:"#fff","font-family":"IBM Plex Mono, monospace"},gg); lab.textContent="";
+    EZ.enz.push({x,y,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,ang:Math.random()*360,va:(Math.random()-0.5)*14,g:gg,body,lab,busy:null}); });
+  for(let i=0;i<14;i++) newSub(40+Math.random()*720,40+Math.random()*440); }
+function tickEnz(dt){
+  const Z=S.enz, E=ENZ[Z.kind], T=Z.T;
+  if(T>=55){ Z.hot+=dt; if(Z.hot>1.2&&!Z.den){ Z.den=true; EZ.enz.forEach(e=>{ e.body.setAttribute("d",enzPath(true)); e.body.setAttribute("fill","#9aa3a0"); e.lab.textContent=""; if(e.busy){ e.busy.st="free"; e.busy=null; } }); enzUI(); } } else Z.hot=0;
+  const rate=Z.den?0:tFac(T)*pFac(Z.pH,E.opt), mv=0.35+0.65*clamp(T/37,0.1,1.6);
+  EZ.banner.textContent=Z.den?"The active sites have changed shape: the substrate no longer fits":rate<0.15?"Very few successful collisions: the reaction is slow":"";
+  const bounce=o=>{ if(o.x<40||o.x>760) o.vx*=-1; if(o.y<40||o.y>480) o.vy*=-1; o.x=clamp(o.x,40,760); o.y=clamp(o.y,40,480); };
+  EZ.enz.forEach(e=>{ e.vx+=(Math.random()-0.5)*30*dt; e.vy+=(Math.random()-0.5)*30*dt; e.vx=clamp(e.vx,-14,14); e.vy=clamp(e.vy,-14,14); e.x+=e.vx*dt*mv; e.y+=e.vy*dt*mv; e.ang+=e.va*dt*mv; bounce(e);
+    e.g.setAttribute("transform",`translate(${f1(e.x)} ${f1(e.y)}) rotate(${f1(e.ang)})`);
+    // active site position (top of the notch) in solution coordinates
+    const a=(e.ang-90)*Math.PI/180; e.sx=e.x+Math.cos(a)*30; e.sy=e.y+Math.sin(a)*30; });
+  for(let i=EZ.mols.length-1;i>=0;i--){ const m=EZ.mols[i];
+    if(m.st==="bound"){ const e=m.enz; m.hold-=dt; const a=(e.ang-90)*Math.PI/180; m.x=lerp(m.x,e.x+Math.cos(a)*31,0.3); m.y=lerp(m.y,e.y+Math.sin(a)*31,0.3); m.ang=e.ang;
+      if(m.hold<=0){ e.busy=null; split(m); continue; } }
+    else { m.vx+=(Math.random()-0.5)*320*dt; m.vy+=(Math.random()-0.5)*320*dt; m.vx=clamp(m.vx,-110,110); m.vy=clamp(m.vy,-110,110); m.x+=m.vx*dt*mv; m.y+=m.vy*dt*mv; m.ang+=m.va*dt*mv; bounce(m);
+      // a substrate that bumps into a free active site may fit and react
+      if(m.st==="free"&&(m.kind==="lipase"?!m.fa&&m.tails>0:m.len>=3)) for(const e of EZ.enz){ if(e.busy||Z.den) continue; if(Math.hypot(m.x-e.sx,m.y-e.sy)<46&&Math.random()<rate*1.2){ m.st="bound"; m.enz=e; m.hold=0.45; e.busy=m; break; } } }
+    m.el.setAttribute("transform",`translate(${f1(m.x)} ${f1(m.y)}) rotate(${f1(m.ang)})`); m.el.setAttribute("opacity",m.st==="product"?0.75:1); }
+  // keep the demonstration going: add more substrate when it runs low
+  const subs=EZ.mols.filter(m=>m.kind==="lipase"?!m.fa&&m.tails>0:m.len>=3).length;
+  if(subs<5&&Math.random()<dt*1.5) newSub(Math.random()<0.5?50:750,60+Math.random()*400);
+  EZ.hist.push(S.simTime); while(EZ.hist.length&&EZ.hist[0]<S.simTime-20) EZ.hist.shift();
+  if(S.frameN%8===0&&$("erate")){ $("erate").textContent=Math.round(rate*100)+"% of the maximum"; $("emade").textContent=EZ.made; drawCurves(rate); } }
+function split(m){ const E=ENZ[m.kind]; EZ.made++;
+  if(m.kind==="lipase"){ m.tails--; drawMol(m); const fa=newSub(m.x+20,m.y); fa.fa=true; fa.st="product"; drawMol(fa); fa.vx=40; m.st=m.tails>0?"free":"product"; m.vx=-30; return; }
+  // the chain is cut: a short piece (maltose or a dipeptide) breaks off
+  const piece=newSub(m.x+18,m.y); piece.len=2; piece.st="product"; piece.seed=(m.seed||0)+m.len-2; drawMol(piece); piece.vx=50;
+  m.len-=2; drawMol(m); m.st=m.len>=3?"free":"product"; m.vx=-40; }
+function drawCurves(rate){ const E=ENZ[S.enz.kind];
+  const plot=(id,xs,f,xv,xl)=>{ const el=$(id); if(!el) return; let d=""; for(let i=0;i<=60;i++){ const x=xs[0]+(xs[1]-xs[0])*i/60; d+=(i?"L":"M")+f1(30+i/60*260)+" "+f1(84-f(x)*68); }
+    const px=30+(xv-xs[0])/(xs[1]-xs[0])*260, py=84-f(xv)*68;
+    el.innerHTML=`<rect width="300" height="104" rx="6" fill="#f4f8f5"/><line x1="30" y1="84" x2="290" y2="84" stroke="#9aa" /><line x1="30" y1="12" x2="30" y2="84" stroke="#9aa"/><path d="${d}" fill="none" stroke="${E.col}" stroke-width="2.4"/><circle cx="${f1(px)}" cy="${f1(S.enz.den&&id==="ct"?84:py)}" r="5" fill="#f58300" stroke="#fff" stroke-width="1.5"/>
+     <text x="160" y="100" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="#5a6966">${xl}</text><text x="8" y="50" font-size="10" font-family="IBM Plex Mono, monospace" fill="#5a6966" transform="rotate(-90 8 50)" text-anchor="middle">rate</text>`; };
+  plot("ct",[0,70],T=>tFac(T),S.enz.T,"temperature, °C (best at 37)"); plot("cp",[0,14],p=>pFac(p,E.opt),S.enz.pH,`pH (best at ${E.opt})`); }
+function enzUI(){ const Z=S.enz, E=ENZ[Z.kind]; if(!$("edesc")) return;
+  $("edesc").innerHTML=`<b>${esc(E.n)}</b> is made in the ${esc(E.from)} and works in the ${esc(E.where)}. It breaks <b>${esc(E.sub.toLowerCase())}</b> into <b>${esc(E.prod.toLowerCase())}</b>. Best pH: ${E.opt}.`;
+  $("eden").innerHTML=Z.den?`<div class="msg warn">Above about 50 °C the enzyme is <b>denatured</b>: its shape, including the active site, changes permanently. The substrate no longer fits, so the reaction stops. Cooling it down again does not help. Use fresh enzyme.</div>`:""; }
+function enzSide(){
+  const Z=S.enz;
+  $("side").innerHTML=`<div class="card"><h2>Choose an enzyme</h2><div class="chips" id="ekind">${Object.entries(ENZ).map(([k,e])=>`<button class="chip" data-k="${k}" aria-pressed="${Z.kind===k}">${esc(e.n)}</button>`).join("")}</div><p id="edesc" style="margin:8px 0 0;font-size:.9rem"></p>
+    <div class="ctl"><label for="etemp">Temperature <span id="etv"></span></label><input type="range" id="etemp" min="0" max="70" step="1" value="${Z.T}"></div>
+    <div class="ctl"><label for="eph">pH <span id="epv"></span></label><input type="range" id="eph" min="1" max="13" step="0.5" value="${Z.pH}"></div>
+    <div class="row" style="margin-top:8px"><button class="primary" id="play"></button><button id="body37">Body temperature</button><button id="fresh">Use fresh enzyme</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div><div id="eden"></div></div>
+   <div class="card"><h2>How fast is it working?</h2><div class="vstate" style="margin-top:0"><span>Rate of reaction</span><span class="op" id="erate" style="color:var(--ink)"></span><span>Molecules broken down</span><span class="op" id="emade" style="color:var(--ink)"></span></div>
+    <svg id="ct" viewBox="0 0 300 104" style="width:100%;margin-top:8px"></svg><svg id="cp" viewBox="0 0 300 104" style="width:100%;margin-top:6px"></svg>
+    <p class="note" style="margin:6px 0 0">Warmer molecules move faster and collide more often, so the rate rises up to about 37 °C. Above that the enzyme starts to lose its shape. Each enzyme also has its own best pH.</p></div>
+   <div class="card info" id="info"><h2>Lock and key</h2><p style="margin:0;font-size:.9rem">The substrate fits the <b>active site</b> of the enzyme like a key in a lock. Bonds in the substrate break, the products leave, and the enzyme is free to work again: it is not used up.</p><div class="chips" style="margin-top:8px"><button class="chip" data-pick="enzyme">Enzyme</button><button class="chip" data-pick="substrate">Substrate</button></div></div>`;
+  commonControls();
+  const setT=()=>{ Z.T=+$("etemp").value; $("etv").textContent=Z.T+" °C"; }, setP=()=>{ Z.pH=+$("eph").value; Z.pHset=Z.pH; $("epv").textContent=Z.pH; };
+  $("etemp").oninput=setT; $("eph").oninput=setP; setT(); $("epv").textContent=Z.pH;
+  $("body37").onclick=()=>{ $("etemp").value=37; setT(); };
+  $("fresh").onclick=()=>{ Z.pHset=Z.pH; resetEnz(); enzUI(); };
+  $("ekind").querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ Z.kind=b.dataset.k; Z.pHset=null; resetEnz(); enzSide(); });
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick));
+  enzUI(); drawCurves(0); }
+
+// ============================================================
+// ABSORPTION IN A VILLUS
+// ============================================================
+let VI=null;
+const VX=400, VB=470; // centre line and base of the big villus
+function villusPts(h,w,sway){ const P=[]; const top=VB-h;
+  for(let i=0;i<=10;i++){ const y=lerp(VB,top+w,i/10), sx=sway*Math.pow(i/10,1.5); P.push([VX-w+sx,y]); }
+  for(let i=0;i<=8;i++){ const a=Math.PI+i/8*Math.PI; P.push([VX+sway+Math.cos(a)*w,top+w+Math.sin(a)*w]); }
+  for(let i=10;i>=0;i--){ const y=lerp(VB,top+w,i/10), sx=sway*Math.pow(i/10,1.5); P.push([VX+w+sx,y]); } return P; }
+function buildVillus(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 560",role:"img","aria-label":"Live close-up of absorption in a villus"});
+  svgEl("defs",{},svg).innerHTML=`<linearGradient id="lumV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f1dc"/><stop offset="1" stop-color="#efe3bf"/></linearGradient>
+   <radialGradient id="vilG" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="#f8cfc8"/><stop offset="1" stop-color="#eba79e"/></radialGradient>
+   <clipPath id="microClip"><circle cx="690" cy="100" r="78"/></clipPath>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("rect",{width:800,height:560,fill:"url(#lumV)"},g);
+  // neighbouring villi
+  const nb=svgEl("g",{},g); const nbs=[[120,300,46],[250,240,40],[560,250,40],[690,310,46]].map(([x,h,w])=>({x,h,w,el:svgEl("path",{fill:"url(#vilG)",stroke:"#c06e66","stroke-width":2},nb)}));
+  // muscle and wall below
+  const wl=part("wall"); svgEl("rect",{y:470,width:800,height:90,fill:"#e9b4ac"},wl); for(let x=10;x<800;x+=26) svgEl("ellipse",{cx:x,cy:500,rx:10,ry:5,fill:"#c97f77",opacity:.7},wl); for(let y=522;y<560;y+=8) svgEl("line",{x1:0,x2:800,y1:y,y2:y,stroke:"#c97f77","stroke-width":2,opacity:.6},wl);
+  // the main villus
+  const vg=part("villus"); const vil=svgEl("path",{fill:"url(#vilG)"},vg);
+  const ep=part("epith"); const epi=svgEl("path",{fill:"none",stroke:"#d98a80","stroke-width":16,"stroke-linejoin":"round"},ep); const epC=svgEl("path",{fill:"none",stroke:"#b0605a","stroke-width":16,"stroke-dasharray":"1.5 16",opacity:.6},ep); const brush=svgEl("path",{fill:"none",stroke:"#c06e66","stroke-width":5,"stroke-dasharray":"1 2.2",opacity:.85},ep);
+  const cp=part("capil"); const art=svgEl("path",{fill:"none",stroke:"#c22a33","stroke-width":7,"stroke-linecap":"round"},cp); const ven=svgEl("path",{fill:"none",stroke:"#3c5ab0","stroke-width":7,"stroke-linecap":"round"},cp); const net=svgEl("path",{fill:"none",stroke:"#a0408a","stroke-width":3,opacity:.85},cp);
+  const lc=part("lacteal"); const lac=svgEl("path",{fill:"none",stroke:"#fffaf0","stroke-width":16,"stroke-linecap":"round"},lc); const lacE=svgEl("path",{fill:"none",stroke:"#d8cfb8","stroke-width":1.4},lc);
+  const bloodG=svgEl("g",{"pointer-events":"none"},g); const rbcs=[...Array(10)].map((_,i)=>({u:i/10,el:svgEl("ellipse",{rx:5,ry:3.6,fill:"#c22a33"},bloodG)}));
+  const molG=svgEl("g",{"pointer-events":"none"},g); const mols=[];
+  const KINDS=[["glu","#f2cf55"],["ami","#d6474a"],["fa","#f08c1a"],["gly","#f7e7b0"]];
+  const mkMol=(k)=>{ const col=KINDS.find(x=>x[0]===k)[1]; const el=k==="glu"?svgEl("path",{d:"M-4 -2.3L0 -4.6L4 -2.3L4 2.3L0 4.6L-4 2.3Z",fill:col,stroke:"#a8892a","stroke-width":.8},molG):k==="fa"?svgEl("path",{d:"M-7 0L-3.5 -3L0 0L3.5 -3L7 0",fill:"none",stroke:col,"stroke-width":2.6,"stroke-linecap":"round"},molG):k==="gly"?svgEl("rect",{x:-2.5,y:-5,width:5,height:10,rx:1.5,fill:col,stroke:"#9a7a30","stroke-width":.8},molG):svgEl("circle",{r:3.8,fill:col,stroke:"#7a2020","stroke-width":.8},molG);
+    let x=190+Math.random()*420; if(Math.abs(x-VX)<64) x+=x<VX?-70:70; return {k,el,x,y:20+Math.random()*420,vx:0,vy:0,st:"lumen",rot:Math.random()*180}; };
+  for(let i=0;i<46;i++) mols.push(mkMol(KINDS[i%4][0]));
+  // microvilli zoom
+  const mz=svgEl("g",{visibility:"hidden"},g); const mzc=svgEl("g",{"clip-path":"url(#microClip)"},mz); svgEl("circle",{cx:690,cy:100,r:78,fill:"#f7f1dc"},mzc);
+  svgEl("rect",{x:600,y:110,width:180,height:80,fill:"#f2c4bc"},mzc); for(let x=606;x<780;x+=9) svgEl("rect",{x,y:72,width:5.5,height:40,rx:2.7,fill:"#eaa69c",stroke:"#c06e66","stroke-width":.8},mzc);
+  svgEl("ellipse",{cx:690,cy:150,rx:16,ry:10,fill:"#7a4f9a"},mzc); svgEl("circle",{cx:690,cy:100,r:78,fill:"none",stroke:"#3d4846","stroke-width":1.6},mz);
+  const mzt=svgEl("text",{x:690,y:196,"text-anchor":"middle","font-size":14,class:"lbl small"},mz); mzt.textContent="microvilli on one cell";
+  // labels
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["villus","Villus",168,120,352,190],["epith","Epithelium (one cell thick)",560,96,438,140],["capil","Blood capillaries",632,240,426,300],["lacteal","Lacteal",632,400,402,420],["wall","Muscle layers",632,520,600,505]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x<ax?"end":"start";
+    const ln=svgEl("line",{x1:x+(x<ax?5:-5),y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  [["digested food in the small intestine",400,24,"middle"],["blood in",300,552,"middle"],["to the liver (hepatic portal vein)",460,552,"start"],["lymph",404,540,"middle"]].forEach(([t,x,y,a])=>{ const e=svgEl("text",{x,y,"text-anchor":a},ctx); e.textContent=t; });
+  VI={svg,nbs,vil,epi,epC,brush,art,ven,net,lac,lacE,rbcs,mols,mkMol,mz,labs,ctx,stats:{glu:0,ami:0,fat:0}};
+  return svg; }
+function tickVillus(dt){
+  const V=S.vil, tt=S.simTime, sway=8*Math.sin(tt*1.2)*(V.flow?1:0), h=V.coeliac?120:360, w=V.coeliac?62:48, top=VB-h;
+  const P=villusPts(h,w,sway), d=smooth(P,false)+" Z"; VI.vil.setAttribute("d",d); VI.epi.setAttribute("d",smooth(villusPts(h-8,w-8,sway),false)); VI.epC.setAttribute("d",smooth(villusPts(h-8,w-8,sway),false)); VI.brush.setAttribute("d",smooth(villusPts(h+2,w+2,sway),false));
+  VI.nbs.forEach((n,i)=>{ const hh=V.coeliac?n.h*0.3:n.h, sw=7*Math.sin(tt*1.2+i); const pts=[]; const t0=VB-hh; for(let k=0;k<=8;k++){ const y=lerp(VB,t0+n.w,k/8); pts.push([n.x-n.w+sw*Math.pow(k/8,1.5),y]); } for(let k=0;k<=6;k++){ const a=Math.PI+k/6*Math.PI; pts.push([n.x+sw+Math.cos(a)*n.w,t0+n.w+Math.sin(a)*n.w]); } for(let k=8;k>=0;k--){ const y=lerp(VB,t0+n.w,k/8); pts.push([n.x+n.w+sw*Math.pow(k/8,1.5),y]); } n.el.setAttribute("d",smooth(pts,false)+" Z"); });
+  // vessels inside the villus follow its sway
+  const xs=y=>sway*Math.pow(clamp((VB-y)/h,0,1),1.5);
+  const ar=[],vn=[],lcP=[]; for(let i=0;i<=12;i++){ const y=lerp(VB+60,top+w*0.9,i/12); ar.push([VX-w*0.55+xs(y),y]); vn.push([VX+w*0.55+xs(y),y]); } for(let i=0;i<=12;i++){ const y=lerp(VB+70,top+w*1.6,i/12); lcP.push([VX+xs(y),y]); }
+  const cap=[...ar,[VX+xs(top+w*0.5),top+w*0.45],...vn.slice().reverse()];
+  VI.art.setAttribute("d",smooth(ar,false)); VI.ven.setAttribute("d",smooth(vn,false)); VI.lac.setAttribute("d",smooth(lcP,false)); VI.lacE.setAttribute("d",smooth(lcP,false));
+  let nd=smooth(cap.slice(10,16),false); for(let k=1;k<6;k++){ const y=lerp(VB-20,top+w*1.2,k/6); nd+=` M${f1(VX-w*0.55+xs(y))} ${f1(y)} Q${f1(VX+xs(y))} ${f1(y-14)} ${f1(VX+w*0.55+xs(y))} ${f1(y)}`; } VI.net.setAttribute("d",nd);
+  const capPath=cap; const capR=mkRoute(capPath.map(p=>[p[0],p[1]]));
+  VI.rbcs.forEach(r=>{ if(V.flow) r.u=(r.u+dt*0.12)%1; const p=capR.at(r.u*capR.L), oxy=r.u<0.5; r.el.setAttribute("cx",f1(p.x)); r.el.setAttribute("cy",f1(p.y)); r.el.setAttribute("fill",oxy?"#c22a33":"#5b4aa0"); });
+  // molecules: diffuse in the lumen; touching the villus they are absorbed and carried away
+  const inside=(x,y)=>{ if(y>VB) return false; if(y<top) return false; const cx=VX+xs(y); return Math.abs(x-cx)<w+4; };
+  const eff=V.coeliac?0.18:1;
+  VI.mols.forEach((m,i)=>{
+    if(m.st==="lumen"){ m.vx+=(Math.random()-0.5)*2600*dt; m.vy+=(Math.random()-0.5)*2600*dt; m.vx*=0.95; m.vy*=0.95; m.vx+=(VX-m.x)*0.15*dt; m.x+=m.vx*dt; m.y+=m.vy*dt;
+      if(m.x<10||m.x>790) m.vx*=-1; if(m.y<12) m.vy=Math.abs(m.vy); if(m.y>VB-6){ m.y=VB-6; m.vy=-Math.abs(m.vy); }
+      if(inside(m.x,m.y)){ if(Math.random()<eff){ m.st="in"; m.t=0; m.x0=m.x; m.y0=m.y; } else { m.vx*=-1; m.x+=m.x<VX?-8:8; } } }
+    else if(m.st==="in"){ m.t+=dt*1.6; const tgtX=(m.k==="fa"||m.k==="gly")?VX+xs(m.y):(m.x<VX+xs(m.y)?VX-w*0.55:VX+w*0.55)+xs(m.y); m.x=lerp(m.x0,tgtX,clamp(m.t,0,1)); if(m.t>=1){ m.st=(m.k==="fa"||m.k==="gly")?"lymph":"blood"; VI.stats[m.k==="glu"?"glu":m.k==="ami"?"ami":"fat"]++; } }
+    else { // carried down and out of the villus
+      m.y+=110*dt*(V.flow?1:0.2); if(m.st==="blood") m.x=lerp(m.x,VX+w*0.55+xs(m.y),0.08); else m.x=VX+xs(m.y);
+      if(m.y>VB+80){ const n=VI.mkMol(m.k); n.y=10+Math.random()*30; m.el.remove(); VI.mols[i]=n; return; } }
+    m.el.setAttribute("transform",`translate(${f1(m.x)} ${f1(m.y)}) rotate(${f1(m.rot)})`); m.el.setAttribute("opacity",m.st==="lumen"?1:0.85); });
+  VI.mz.setAttribute("visibility",V.micro?"visible":"hidden");
+  if(S.frameN%8===0&&$("vglu")){ $("vglu").textContent=VI.stats.glu; $("vami").textContent=VI.stats.ami; $("vfat").textContent=VI.stats.fat; } }
+function villusSide(){
+  const V=S.vil;
+  $("side").innerHTML=`<div class="card"><h2>Absorption in the small intestine</h2><p style="margin:0;font-size:.9rem">Digested food molecules are small enough to pass through the wall of the villus. <b>Glucose and amino acids</b> go into the blood capillaries and travel to the liver in the hepatic portal vein. <b>Fatty acids and glycerol</b> go into the lacteal and are carried away in the lymph.</p>
+    <div class="vstate"><span>Glucose absorbed into the blood</span><span class="op" id="vglu" style="color:var(--ink)"></span><span>Amino acids absorbed into the blood</span><span class="op" id="vami" style="color:var(--ink)"></span><span>Fatty acids and glycerol into the lacteal</span><span class="op" id="vfat" style="color:var(--ink)"></span></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div></div>
+   <div class="card"><h2>Choose what is shown</h2><div class="chips"><label class="chip"><input type="checkbox" id="vflow" ${V.flow?"checked":""}>Blood and lymph flowing</label><label class="chip"><input type="checkbox" id="vmicro" ${V.micro?"checked":""}>Zoom in on the microvilli</label><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div>
+    <h2 style="margin-top:12px">What if…</h2><label class="chip"><input type="checkbox" id="vco" ${V.coeliac?"checked":""}>Coeliac disease (flattened villi)</label><div id="vmsg"></div></div>
+   <div class="card info" id="info"><h2>Why the ileum absorbs so well</h2><ul style="margin:4px 0 0;padding-left:18px;font-size:.9rem"><li><b>Very long</b>, about 6 metres.</li><li><b>Millions of villi</b>, each covered in microvilli: a huge surface area.</li><li><b>Thin wall</b>: the epithelium is one cell thick.</li><li><b>Rich blood supply</b> carries food away, keeping the concentration gradient steep.</li><li><b>Lacteals</b> absorb the products of fat digestion.</li></ul>
+    <div class="chips" style="margin-top:10px">${["villus","epith","capil","lacteal","wall"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  $("vflow").onchange=e=>{ V.flow=e.target.checked; }; $("vmicro").onchange=e=>{ V.micro=e.target.checked; };
+  const msg=()=>{ $("vmsg").innerHTML=V.coeliac?`<div class="msg warn">In coeliac disease the lining reacts to gluten (a protein in wheat). The villi become flattened, so there is far less surface area: watch how few molecules are absorbed. People with coeliac disease can lose weight and become tired and anaemic. A gluten-free diet lets the villi grow back.</div>`:""; };
+  $("vco").onchange=e=>{ V.coeliac=e.target.checked; VI.stats={glu:0,ami:0,fat:0}; msg(); }; msg();
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ---------- shared controls, info and quiz ----------
+function commonControls(){
+  const rates=[0.25,0.5,1], rn=["Slow motion (25%)","Half speed","Normal"];
+  if(!rates.includes(S.rate)) S.rate=1;
+  $("rate").value=rates.indexOf(S.rate); const setRate=()=>{ S.rate=rates[+$("rate").value]; $("ratev").textContent=rn[+$("rate").value]; }; $("rate").oninput=setRate; setRate();
+  const playLbl=()=>$("play").textContent=S.playing?"Pause":"Play"; $("play").onclick=()=>{ S.playing=!S.playing; S.stepTo=null; playLbl(); }; playLbl();
+  if($("lbl")) $("lbl").onchange=e=>{ S.labels=e.target.checked; applyLabels(); }; }
+function cur(){ return S.view==="journey"?J:S.view==="enz"?EZ:VI; }
+function applyLabels(){ cur().labs.forEach(l=>l.grp.setAttribute("visibility",S.labels?"visible":"hidden")); }
+function dimTo(id){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==id)); }
+function undim(){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); }
+function showInfo(id){ const p=PARTS[id]; if(!p||!$("info")) return; S.selected=id; dimTo(id);
+  $("info").innerHTML=`<h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="row" style="margin-top:6px"><button id="clr">Show everything</button>${id==="ileum"?`<button class="primary" id="govil">See absorption</button>`:""}${["saliv","stomach","pancreas"].includes(id)?`<button id="goenz">See the enzymes work</button>`:""}</div>`;
+  $("clr").onclick=()=>{ S.selected=null; undim(); setView(S.view); };
+  if($("govil")) $("govil").onclick=()=>setView("villus");
+  if($("goenz")) $("goenz").onclick=()=>{ S.enz.kind=id==="stomach"?"pepsin":id==="pancreas"?"trypsin":"amylase"; S.enz.pHset=null; if(EZ) resetEnz(); setView("enz"); }; }
+const QZ=[{tap:"stomach",q:"Tap the stomach."},{tap:"liver",q:"Tap the liver."},{tap:"pancreas",q:"Tap the pancreas."},{tap:"ileum",q:"Tap the small intestine, where most digested food is absorbed."},
+ {q:"Where does the digestion of protein begin?",o:["In the mouth","In the stomach","In the large intestine","In the liver"],a:1},
+ {q:"What does bile do?",o:["Digests protein","Emulsifies fats and neutralises stomach acid","Absorbs water","Turns starch into maltose"],a:1},
+ {q:"Which enzyme breaks starch down into maltose?",o:["Lipase","Pepsin","Amylase","Trypsin"],a:2},
+ {q:"Where is most of the water absorbed from undigested food?",o:["Stomach","Oesophagus","Large intestine","Rectum"],a:2}];
+function startQuiz(){ S.quiz={i:0,score:0}; drawQuiz(); }
+function drawQuiz(){ const Q=S.quiz, el=$("quiz"); if(!el) return;
+  if(Q.i>=QZ.length){ el.innerHTML=`<h2>Test complete</h2><p class="phase" style="font-size:1.6rem;margin:4px 0">${Q.score} / ${QZ.length}</p><p>${Q.score===QZ.length?"Excellent: you know how we digest food.":"Tap the organs you missed to read about them, then try again."}</p><button class="primary" id="qagain">Try again</button>`; $("qagain").onclick=startQuiz;
+    try{ parent.postMessage({type:"lablink-3d-result",prac:"digestion",score:Math.round(Q.score/QZ.length*100)},"*"); }catch(e){} Q.done=true; return; }
+  const q=QZ[Q.i]; el.innerHTML=`<h2>Question ${Q.i+1} of ${QZ.length}</h2><div class="q"><p><b>${esc(q.q)}</b></p>${q.tap?`<p class="note">Tap it in the picture. Labels are hidden during the test.</p>`:`<div class="opts">${q.o.map((o,i)=>`<button data-o="${i}">${esc(o)}</button>`).join("")}</div>`}</div><div id="qfb"></div>`;
+  if(q.tap){ S.labels=false; applyLabels(); }
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>answer(+b.dataset.o===q.a,b,el.querySelector(`[data-o="${q.a}"]`))); }
+function answer(ok,btn,right){ const Q=S.quiz; if(Q.lock) return; Q.lock=true; if(ok) Q.score++; if(btn){ btn.classList.add(ok?"right":"wrong"); if(right) right.classList.add("right"); }
+  const q=QZ[Q.i]; $("qfb").innerHTML=`<div class="msg ${ok?"":"warn"}">${ok?"Correct.":q.tap?`Not quite: look at the highlighted organ, the ${esc(PARTS[q.tap].n.toLowerCase())}.`:"Not quite: the right answer is highlighted."}</div><button class="primary" id="qnext" style="margin-top:8px">${Q.i+1<QZ.length?"Next question":"See your score"}</button>`;
+  if(q.tap&&!ok) dimTo(q.tap);
+  $("qnext").onclick=()=>{ Q.lock=false; Q.i++; undim(); if(Q.i>=QZ.length){ S.labels=true; applyLabels(); } drawQuiz(); }; }
+
+// ---------- shell ----------
+const LEG={journey:`<span><i style="background:${NCOL.starch}"></i>Starch</span><span><i style="background:${NCOL.protein}"></i>Protein</span><span><i style="background:${NCOL.fat}"></i>Fat</span><span><i style="background:${NCOL.fibre}"></i>Fibre</span><span><i style="background:#5ea0d6"></i>Saliva and water</span><span><i style="background:#5f9a35"></i>Bile</span><span><i style="background:#e0a050"></i>Pancreatic juice</span><span><i style="background:#c9d94a"></i>Gastric juice</span>`,
+ enz:`<span>Drag the temperature and pH sliders and watch how often the substrate fits the active site.</span>`,
+ villus:`<span><i style="background:${NCOL.starch}"></i>Glucose</span><span><i style="background:${NCOL.protein}"></i>Amino acids</span><span><i style="background:${NCOL.fat}"></i>Fatty acids</span><span><i style="background:#f7e7b0"></i>Glycerol</span><span>Magnified about 200 times</span>`};
+const BELOW={enz:`<h2>The digestive enzymes</h2><div class="tbl"><table><tr><th>Enzyme</th><th>Made in</th><th>Works in</th><th>Breaks down</th><th>Into</th></tr><tr><td>Amylase</td><td>Salivary glands, pancreas</td><td>Mouth, small intestine</td><td>Starch</td><td>Maltose</td></tr><tr><td>Maltase</td><td>Small intestine wall</td><td>Small intestine</td><td>Maltose</td><td>Glucose</td></tr><tr><td>Pepsin (protease)</td><td>Stomach wall</td><td>Stomach (pH 2)</td><td>Protein</td><td>Polypeptides</td></tr><tr><td>Trypsin (protease)</td><td>Pancreas</td><td>Small intestine</td><td>Protein and polypeptides</td><td>Peptides and amino acids</td></tr><tr><td>Lipase</td><td>Pancreas</td><td>Small intestine</td><td>Fats (lipids)</td><td>Fatty acids and glycerol</td></tr></table></div><p class="note">Test for starch: iodine solution turns blue-black. As amylase works, the blue-black colour disappears. Test for maltose and glucose (reducing sugars): heat with Benedict's solution; it turns from blue to brick red.</p>`};
+function setView(v){
+  S.view=v; document.querySelectorAll("[data-view]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.view===v));
+  const st=$("stage"); st.innerHTML=""; S.selected=null; S.quiz=null; $("legend").innerHTML=LEG[v]; $("below").hidden=!BELOW[v]; $("below").innerHTML=BELOW[v]||"";
+  if(v==="journey"){ if(!J) buildJourney(); st.appendChild(J.svg); journeySide(); }
+  else if(v==="enz"){ if(!EZ) buildEnz(); st.appendChild(EZ.svg); enzSide(); }
+  else { if(!VI) buildVillus(); st.appendChild(VI.svg); villusSide(); }
+  undim(); applyLabels(); fitLabels(); }
+function fitLabels(){ const narrow=innerWidth<600;
+  [J,VI].forEach(V=>{ if(!V) return; V.labs.forEach(l=>{ if(!l.tx) return; const words=l.t.split(" "); l.tx.textContent=""; l.tx.setAttribute("font-size",narrow?24:16);
+    if(narrow&&words.length>1){ const cut=Math.ceil(words.length/2); [words.slice(0,cut).join(" "),words.slice(cut).join(" ")].forEach((w,i)=>{ const sp=document.createElementNS(NS,"tspan"); sp.setAttribute("x",l.x); sp.setAttribute("y",l.y+(i?13:-11)); sp.textContent=w; l.tx.appendChild(sp); }); l.ln.setAttribute("y1",l.y-8); }
+    else { l.tx.textContent=l.t; l.ln.setAttribute("y1",l.y-5); } }); V.ctx.setAttribute("font-size",narrow?17:13); }); }
+addEventListener("resize",fitLabels);
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("stage").addEventListener("click",e=>{ const p=e.target.closest(".part"); if(!p) return; const id=p.dataset.part;
+  if(S.view==="journey"&&S.quiz&&!S.quiz.done&&QZ[S.quiz.i]&&QZ[S.quiz.i].tap&&!S.quiz.lock){ answer(id===QZ[S.quiz.i].tap); return; } showInfo(id); });
+$("stage").addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("part")){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click",{bubbles:true})); } });
+let last=performance.now(); S.simTime=0;
+const CYCLE=50; // seconds for one journey at normal speed
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  const dtS=S.playing?dtReal*S.rate:0; S.simTime+=dtS;
+  if(S.view==="journey"&&J){ let dc=dtS/CYCLE; if(S.stepTo!=null&&S.playing&&S.t+dc>=S.stepTo){ dc=S.stepTo-S.t+1e-6; S.playing=false; S.stepTo=null; if($("play")) $("play").textContent="Play"; }
+    S.t=(S.t+dc)%1; tickJourney(dtS); }
+  else if(S.view==="enz"&&EZ) tickEnz(dtS); else if(S.view==="villus"&&VI) tickVillus(dtS);
+  S.frameN++; requestAnimationFrame(frame); }
+setView("journey");
+if(RM) S.playing=false;
+requestAnimationFrame(frame);
+window.__dig={S,get J(){return J;},get EZ(){return EZ;},get VI(){return VI;},setView};
+})();
+</script></body></html>
