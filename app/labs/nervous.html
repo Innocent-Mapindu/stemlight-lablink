@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Body Systems: Nervous System</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: view tabs on top; stage (live SVG) left, control and explanation panel right; stacks on phones */
+:root{--navy:#023d84;--orange:#f58300;--bio:#2f7d4f;--bio-soft:#e3f1e8;--ink:#17221f;--muted:#5a6966;--line:#d3dbd8;--bg:#eef1f0;--panel:#fff;
+ --deoxy:#2f4ea0;--oxy:#d4232f;--muscle:#d9726a;--muscle-d:#a94a43;--cav-r:#d9def3;--cav-l:#f7d3d0;--warn:#b4442f;--good:#2f7d4f;
+ --f-display:"Montserrat",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{font-family:var(--f-display);font-size:1.15rem;margin:0;color:var(--navy)}
+.top .sub{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--bio)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:var(--f-body);font-weight:600;font-size:.88rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--bio)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button[aria-pressed=true]{background:var(--bio-soft);border-color:var(--bio);color:var(--bio)}
+button.primary{background:var(--bio);border-color:var(--bio);color:#fff}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px max(14px,env(safe-area-inset-right,0px)) 24px max(14px,env(safe-area-inset-left,0px));max-width:1280px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:0;position:relative}
+.stage svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.side{display:grid;gap:12px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h2{font-family:var(--f-display);font-size:.98rem;margin:0 0 8px;color:var(--navy)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--panel);cursor:pointer;min-height:34px}
+.chip input{margin:0;accent-color:var(--bio);width:16px;height:16px}
+.chip .sw{width:10px;height:10px;border-radius:50%}
+.phase{font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--bio)}
+.phasebar{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;height:10px;border-radius:99px;overflow:hidden;margin:6px 0 2px;position:relative;background:var(--line)}
+.phasebar i{display:block} .phasebar i:nth-child(1){background:#f1b36b} .phasebar i:nth-child(2){background:#e0645c} .phasebar i:nth-child(3){background:#9cc7ad}
+.phasebar b{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.plabels{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;font-size:.68rem;color:var(--muted);font-family:var(--f-mono)}
+.vstate{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.86rem;margin-top:8px}
+.op{font-family:var(--f-mono);font-weight:500;color:var(--good)} .cl{font-family:var(--f-mono);font-weight:500;color:var(--warn)}
+.ctl{display:grid;gap:4px;margin-top:8px}
+.ctl label{display:flex;justify-content:space-between;font-size:.84rem;font-weight:500}
+.ctl label span{font-family:var(--f-mono);color:var(--bio)}
+input[type=range]{width:100%;accent-color:var(--bio)}
+.info h3{font-family:var(--f-display);margin:0 0 4px;font-size:1rem}
+.info p{margin:4px 0;font-size:.9rem}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.68rem;border-radius:99px;padding:1px 8px;border:1px solid}
+.tag.o{color:var(--oxy);border-color:var(--oxy)} .tag.d{color:var(--deoxy);border-color:var(--deoxy)}
+.follow{font-size:.9rem;background:#fff7ec;border-left:3px solid var(--orange);padding:8px 10px;border-radius:6px;margin-top:8px}
+.note{font-size:.78rem;color:var(--muted)}
+.part{cursor:pointer}
+.part:focus{outline:none}
+.lbl{font-family:var(--f-body);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.lbl.small{font-weight:500}
+.dim{opacity:.28;transition:opacity .2s}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-weight:500;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tbl{overflow-x:auto}
+.q p{margin:4px 0 8px}
+.opts{display:grid;gap:6px}
+.opts button{text-align:left;font-weight:500;justify-content:flex-start}
+.opts .right{border-color:var(--good);box-shadow:inset 0 0 0 2px var(--good)} .opts .wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.msg{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bio-soft);border-left:3px solid var(--bio);margin-top:8px}
+.msg.warn{background:#fbe7e3;border-left-color:var(--warn)}
+@media (max-width:600px){svg .cz{font-size:21px} svg .cz-h{font-size:22px} svg .cz-s{font-size:17px} svg .vz-h{font-size:25px} svg .vz,svg .vz-s{font-size:15px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted);padding:4px 8px 6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+select{font:inherit;min-height:40px;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;width:100%;color:var(--ink)}
+ol li{margin:2px 0}
+</style></head><body>
+<div class="top"><div><div class="sub">STEMLight LabLink · Biology Lab · live demonstration</div><h1>Body systems: the nervous system</h1></div>
+<div class="tabs" role="tablist" aria-label="Views"><button data-view="reflex" aria-pressed="true">The reflex arc</button><button data-view="syn" aria-pressed="false">A synapse close up</button><button data-view="eye" aria-pressed="false">The eye and the brain</button></div></div>
+<div class="wrap">
+ <div><div class="stage" id="stage"></div>
+  <div class="legend" id="legend"></div>
+  <div class="card" id="below" hidden></div></div>
+ <div class="side" id="side"></div>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), f1=n=>n.toFixed(1);
+const RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const svgEl=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; };
+function smooth(P,closed){ const n=P.length, g=i=>closed?P[(i+n)%n]:P[clamp(i,0,n-1)]; let d=`M${f1(P[0][0])} ${f1(P[0][1])}`;
+  for(let i=0;i<(closed?n:n-1);i++){ const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);
+    d+=` C${f1(p1[0]+(p2[0]-p0[0])/6)} ${f1(p1[1]+(p2[1]-p0[1])/6)} ${f1(p2[0]-(p3[0]-p1[0])/6)} ${f1(p2[1]-(p3[1]-p1[1])/6)} ${f1(p2[0])} ${f1(p2[1])}`; }
+  return d+(closed?" Z":""); }
+// point at a fraction along a polyline (after smoothing into many points)
+function dense(P){ const out=[]; const n=P.length; for(let i=0;i<n-1;i++){ const p0=P[Math.max(0,i-1)],p1=P[i],p2=P[i+1],p3=P[Math.min(n-1,i+2)];
+    for(let k=0;k<10;k++){ const t=k/10,t2=t*t,t3=t2*t,f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3); out.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])]); } }
+  out.push(P[n-1]); const cum=[0]; for(let i=1;i<out.length;i++) cum.push(cum[i-1]+Math.hypot(out[i][0]-out[i-1][0],out[i][1]-out[i-1][1]));
+  return {P:out,cum,L:cum.at(-1),at(f){ const s=clamp(f,0,1)*this.L; let i=1; while(i<cum.length-1&&cum[i]<s) i++; const a=out[i-1],b=out[i],t=(s-cum[i-1])/((cum[i]-cum[i-1])||1); return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]; },
+    upto(f){ const s=clamp(f,0,1)*this.L, r=[]; for(let i=0;i<out.length&&cum[i]<=s;i++) r.push(out[i]); r.push(this.at(f)); return r; }}; }
+const pathOf=P=>P.length<2?"M0 0":"M"+P.map(p=>f1(p[0])+" "+f1(p[1])).join("L");
+
+const S={view:"reflex",playing:!RM,rate:0.5,labels:true,quiz:null,selected:null,frameN:0,simTime:0,
+  rf:{T:0,mode:"reflex",stim:"pan",damage:false,running:!RM},
+  sy:{T:0,dir:"fwd",block:false,noBreak:false,auto:true},
+  eye:{light:50,dist:0.2,fault:"none"}};
+
+const PARTS={
+ stimulus:{n:"Stimulus",t:"A change in the surroundings that the body detects: here, the heat of the pan."},
+ receptor:{n:"Receptor",t:"Cells in the skin that detect the stimulus (heat or pain) and start a nerve impulse."},
+ sensory:{n:"Sensory neurone",t:"Carries impulses from the receptor to the spinal cord. Its cell body is in a swelling just outside the spinal cord, the dorsal root ganglion."},
+ relay:{n:"Relay neurone",t:"Found inside the spinal cord. It passes the impulse from the sensory neurone straight to the motor neurone, so the brain does not have to decide. It also sends impulses up to the brain, which is why you feel the pain a moment later."},
+ motor:{n:"Motor neurone",t:"Carries impulses from the spinal cord to an effector. Its cell body is in the grey matter of the spinal cord."},
+ effector:{n:"Effector (biceps muscle)",t:"The muscle that responds. It contracts, bending the arm at the elbow and pulling the hand away from the heat. Glands can also be effectors."},
+ cord:{n:"Spinal cord",t:"A thick bundle of nerve tissue running down the backbone. The grey matter in the middle contains cell bodies and relay neurones; the white matter around it carries impulses up to and down from the brain."},
+ synapse:{n:"Synapse",t:"A tiny gap between two neurones. Impulses cross it using a chemical messenger, a neurotransmitter."},
+ brainpath:{n:"Nerve fibres to the brain",t:"Carry impulses up the spinal cord to the brain, so that you become aware of the pain and can remember it."},
+ axon1:{n:"Axon of the first neurone",t:"The long fibre that carries the impulse towards the synapse."},
+ knob:{n:"Synaptic knob",t:"The swollen end of the axon. It contains vesicles of neurotransmitter and many mitochondria, which provide the energy to make and release it."},
+ vesicle:{n:"Vesicles",t:"Tiny bags of neurotransmitter. When an impulse arrives they move to the membrane and release their contents into the gap."},
+ mito:{n:"Mitochondria",t:"Release energy by respiration for making and releasing the neurotransmitter."},
+ cleft:{n:"Synaptic gap (cleft)",t:"About 20 millionths of a millimetre wide. The neurotransmitter diffuses across it."},
+ receptors:{n:"Receptors",t:"Protein molecules on the next neurone. The neurotransmitter fits them like a key in a lock; when enough are filled, a new impulse starts."},
+ neuron2:{n:"Next neurone",t:"The impulse continues along this neurone. Only the first neurone has vesicles, so impulses can cross a synapse in one direction only."},
+ cornea:{n:"Cornea",t:"The clear front of the eye. It does most of the bending (refraction) of light."},
+ iris:{n:"Iris",t:"The coloured ring of muscle that controls the size of the pupil, and so how much light enters the eye."},
+ pupil:{n:"Pupil",t:"The hole in the middle of the iris that lets light in. It gets smaller in bright light and bigger in dim light: a reflex."},
+ lens:{n:"Lens",t:"Fine-focuses light onto the retina. Its shape changes: thicker for near objects, thinner for distant ones (accommodation)."},
+ ciliary:{n:"Ciliary muscle",t:"A ring of muscle around the lens. It contracts for near objects, so the suspensory ligaments go slack and the lens becomes fatter. It relaxes for distant objects."},
+ ligament:{n:"Suspensory ligaments",t:"Fibres holding the lens. When they are pulled tight, the lens is stretched thin."},
+ retina:{n:"Retina",t:"The light-sensitive layer at the back of the eye, made of rods (dim light, black and white) and cones (colour). They send impulses along the optic nerve. The image here is upside down: the brain turns it the right way up."},
+ fovea:{n:"Fovea",t:"The part of the retina with the most cones, giving the sharpest colour vision. Light from what you look at falls here."},
+ blind:{n:"Blind spot",t:"Where the optic nerve leaves the eye. There are no rods or cones here, so light falling on it is not detected."},
+ optic:{n:"Optic nerve",t:"Carries impulses from the retina to the brain."},
+ sclera:{n:"Sclera",t:"The tough white outer coat that protects the eye."},
+ cerebrum:{n:"Cerebrum",t:"The largest part of the brain. It controls thinking, memory, the senses, speech and voluntary movement. The visual area at the back makes sense of the impulses from the eyes."},
+ cerebellum:{n:"Cerebellum",t:"Coordinates movement and balance."},
+ medulla:{n:"Medulla",t:"Controls automatic actions such as heart rate and breathing rate."}};
+
+// ============================================================
+// THE REFLEX ARC
+// ============================================================
+const EL=[272,382], FA_REST=152, FA_UP=236, FAL=168; // elbow, forearm angles (degrees), forearm length
+const fa=(a,d,o)=>{ const r=a*Math.PI/180; return [EL[0]+Math.cos(r)*d-Math.sin(r)*o, EL[1]+Math.sin(r)*d+Math.cos(r)*o]; };
+// stage plans: [name, start, end] in seconds of slowed-down time, and the real time in milliseconds at each boundary
+const PLAN={reflex:[["Stimulus",0,0.7,0,0],["Receptor and sensory neurone",0.7,2.3,0,15],["Synapse in the spinal cord",2.3,2.7,15,17],["Relay neurone",2.7,3.2,17,20],["Synapse",3.2,3.6,20,22],["Motor neurone",3.6,4.8,22,35],["Effector: the muscle contracts",4.8,5.8,35,60],["The impulse reaches the brain: you feel the pain",5.8,7.4,60,120]],
+ think:[["Stimulus",0,0.7,0,0],["Receptor and sensory neurone",0.7,2.3,0,15],["Up the spinal cord to the brain",2.3,4.0,15,80],["The brain decides what to do",4.0,6.0,80,230],["Down the spinal cord from the brain",6.0,7.6,230,290],["Motor neurone",7.6,8.8,290,305],["Effector: the muscle contracts",8.8,9.8,305,330]]};
+const planOf=()=>PLAN[S.rf.mode==="think"?"think":"reflex"];
+let RF=null;
+function buildReflex(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 580",role:"img","aria-label":"Live reflex arc: a hand pulled away from a hot pan"});
+  svgEl("defs",{},svg).innerHTML=`<radialGradient id="glowN"><stop offset="0" stop-color="#fff59a"/><stop offset=".4" stop-color="#ffd23f"/><stop offset="1" stop-color="#ffb000" stop-opacity="0"/></radialGradient>
+   <linearGradient id="armG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d2b8"/><stop offset="1" stop-color="#e2ae8c"/></linearGradient>
+   <radialGradient id="flame" cx=".5" cy=".8" r=".8"><stop offset="0" stop-color="#fff3a0"/><stop offset=".5" stop-color="#ffa21f"/><stop offset="1" stop-color="#e2401c" stop-opacity=".2"/></radialGradient>
+   <radialGradient id="muscG" cx=".45" cy=".35" r=".8"><stop offset="0" stop-color="#e5766e"/><stop offset="1" stop-color="#a8342f"/></radialGradient>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  // pan and flame / pin
+  const stG=part("stimulus"); const fl=[0,1,2].map(i=>svgEl("path",{fill:"url(#flame)",opacity:.9},stG));
+  svgEl("rect",{x:30,y:510,width:150,height:14,rx:7,fill:"#3d3f45"},stG); svgEl("rect",{x:178,y:512,width:70,height:9,rx:4,fill:"#5b4632"},stG); const heat=svgEl("rect",{x:34,y:504,width:142,height:6,rx:3,fill:"#ff7a3a",opacity:.6},stG);
+  const pin=svgEl("path",{d:"M96 520 L102 470 L108 520 Z",fill:"#9aa3ad",stroke:"#5d6670",visibility:"hidden"},stG);
+  // spinal cord in section
+  const cdG=part("cord"); svgEl("ellipse",{cx:640,cy:300,rx:110,ry:84,fill:"#f6efe3",stroke:"#b39d7c","stroke-width":2.5},cdG);
+  const BF=[[-12,-6],[-30,-60],[-19,-67],[-5,-22],[5,-22],[19,-67],[30,-60],[12,-6],[14,8],[54,30],[58,52],[36,60],[10,24],[-10,24],[-36,60],[-58,52],[-54,30],[-14,8]].map(([x,y])=>[640+x,300+y]);
+  svgEl("path",{d:smooth(BF,true),fill:"#cdbccc",stroke:"#9a86a0","stroke-width":1.5},cdG); svgEl("circle",{cx:640,cy:302,r:4,fill:"#fff",stroke:"#9a86a0"},cdG);
+  // vertebra hint and dorsal root ganglion
+  svgEl("text",{x:640,y:372,"text-anchor":"middle","font-size":12,"font-family":"IBM Plex Mono, monospace",fill:"#8a7a60"},cdG).textContent="grey matter";
+  // arm: upper arm (fixed), forearm (rotates at the elbow)
+  const arm=svgEl("g",{},g); const upper=svgEl("path",{fill:"url(#armG)",stroke:"#b98a6c","stroke-width":2},arm); const fore=svgEl("path",{fill:"url(#armG)",stroke:"#b98a6c","stroke-width":2},arm); const hand=svgEl("path",{fill:"url(#armG)",stroke:"#b98a6c","stroke-width":2},arm);
+  const efG=part("effector"); const bic=svgEl("ellipse",{fill:"url(#muscG)",stroke:"#7d2420","stroke-width":1.5},efG); const tendon=svgEl("path",{fill:"none",stroke:"#efe6d4","stroke-width":5,"stroke-linecap":"round"},efG); const bicGlow=svgEl("ellipse",{fill:"#ffd23f",opacity:0,"pointer-events":"none"},efG);
+  // neurones
+  const NC={sensory:"#2f78b5",relay:"#8e5bb5",motor:"#c0392b",brain:"#5f8f3a"};
+  const nv=(id,col)=>{ const gp=part(id); const sheath=svgEl("path",{fill:"none",stroke:col,"stroke-width":7,"stroke-linecap":"round","stroke-linejoin":"round","stroke-dasharray":"16 3",opacity:.9},gp); const core=svgEl("path",{fill:"none",stroke:"#fff","stroke-width":1.6,opacity:.8},gp); const lit=svgEl("path",{fill:"none",stroke:"#ffd23f","stroke-width":5,"stroke-linecap":"round",opacity:0},gp); return {gp,sheath,core,lit}; };
+  const NV={sensory:nv("sensory",NC.sensory),relay:nv("relay",NC.relay),motor:nv("motor",NC.motor),brain:nv("brainpath",NC.brain),down:nv("brainpath",NC.brain)};
+  // cell bodies, receptor, synapses
+  const cb=(id,x,y,col)=>{ const gp=part(id); svgEl("circle",{cx:x,cy:y,r:11,fill:col,stroke:"rgba(0,0,0,.35)"},gp); svgEl("circle",{cx:x,cy:y,r:4,fill:"#fff",opacity:.8},gp); return gp; };
+  const gang=svgEl("ellipse",{cx:548,cy:196,rx:26,ry:16,fill:"#efe2c9",stroke:"#b39d7c","stroke-width":1.5},g); cb("sensory",548,196,NC.sensory); cb("motor",600,340,NC.motor);
+  const recG=part("receptor"); const rec=svgEl("path",{fill:"none",stroke:NC.sensory,"stroke-width":2.2},recG); const recDot=svgEl("circle",{r:6,fill:NC.sensory,stroke:"#fff","stroke-width":1.5},recG);
+  const syG=part("synapse"); const syn=[[626,252],[604,334]].map(([x,y])=>svgEl("circle",{cx:x,cy:y,r:7,fill:"none",stroke:"#555","stroke-width":1.4,"stroke-dasharray":"2 2"},syG));
+  const synDots=[...Array(10)].map(()=>svgEl("circle",{r:1.8,fill:"#e07b39",opacity:0,"pointer-events":"none"},g));
+  const dmg=svgEl("g",{visibility:"hidden","pointer-events":"none"},g); svgEl("path",{d:"M488 330 l16 16 M504 330 l-16 16",stroke:"#b4442f","stroke-width":4,"stroke-linecap":"round"},dmg);
+  const imp=svgEl("circle",{r:13,fill:"url(#glowN)",opacity:0,"pointer-events":"none"},g);
+  const ouch=svgEl("text",{x:700,y:60,"text-anchor":"middle","font-size":26,"font-weight":800,fill:"#b4442f","font-family":"Montserrat, sans-serif",opacity:0},g); ouch.textContent="Ouch!";
+  // labels
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["stimulus","Stimulus (heat)",30,556,100,520],["receptor","Receptor in the skin",30,410,82,470],["sensory","Sensory neurone",300,180,492,236],["relay","Relay neurone",790,250,640,272],["motor","Motor neurone",500,470,530,350],["effector","Effector (biceps)",230,300,350,338],["cord","Spinal cord",790,430,712,350],["synapse","Synapse",790,180,628,248],["brainpath","To the brain",540,40,656,90]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x>=700?"end":ax&&Math.abs(x-ax)<10?"middle":"start";
+    const w=t.length*8.2, lx=anchor==="end"?x-w-4:(ax>x+w?x+w+4:x+w*0.5), ly=anchor!=="end"&&ax<=x+w?(ay>y?y+5:y-18):y-5;
+    const ln=ax?svgEl("line",{x1:lx,y1:ly,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp):null; if(ln) svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const clock=svgEl("text",{x:790,y:560,"text-anchor":"end","font-size":20},ctx);
+  RF={svg,fl,heat,pin,upper,fore,hand,bic,tendon,bicGlow,NV,rec,recDot,syn,synDots,dmg,imp,ouch,labs,ctx,clock,ang:FA_REST};
+  return svg; }
+function sensoryPts(ang){ const P=[fa(ang,FAL+34,-10),fa(ang,FAL+10,-17),fa(ang,110,-19),fa(ang,40,-19)]; return P.concat([[276,356],[330,346],[400,336],[446,326],[476,286],[500,222],[548,196],[592,212],[620,244],[626,252]]); }
+const RELAY=[[628,258],[634,282],[624,312],[606,330]], MOTOR=[[598,346],[566,352],[530,346],[496,338],[460,348],[420,352],[380,350],[360,346]], BRAIN=[[628,254],[650,224],[656,170],[658,100],[660,0]], DOWN=[[674,0],[672,120],[664,210],[640,300],[610,336]];
+function tickReflex(dt){
+  const R=S.rf, plan=planOf(), Tend=plan.at(-1)[2];
+  if(R.running){ R.T+=dt; if(R.T>=Tend+1.2){ R.running=false; if($("rgo")) $("rgo").textContent="Touch the pan again"; } }
+  const T=R.T, st=plan.find(p=>T>=p[1]&&T<p[2])||plan.at(-1), k=st[0];
+  const prog=(name)=>{ const p=plan.find(q=>q[0]===name); return p?clamp((T-p[1])/(p[2]-p[1]),0,1):0; };
+  // arm moves when the muscle contracts (not if the motor neurone is damaged)
+  const mus=R.damage?0:prog("Effector: the muscle contracts"), target=lerp(FA_REST,FA_UP,mus<1?0.5-0.5*Math.cos(Math.PI*mus):1);
+  RF.ang=target; const a=RF.ang;
+  // limbs
+  const up=[[470,350],[440,338],[340,348],[278,360],[262,384],[276,408],[340,404],[440,402],[474,388],[480,368]]; RF.upper.setAttribute("d",smooth(up,true));
+  const fP=[fa(a,-8,-26),fa(a,60,-24),fa(a,FAL,-16),fa(a,FAL,16),fa(a,60,22),fa(a,-8,24)]; RF.fore.setAttribute("d",smooth(fP,true));
+  const hP=[fa(a,FAL-4,-18),fa(a,FAL+30,-20),fa(a,FAL+52,-10),fa(a,FAL+54,2),fa(a,FAL+30,16),fa(a,FAL-4,16)]; RF.hand.setAttribute("d",smooth(hP,true));
+  // biceps bulges as it contracts
+  const c=mus>0&&mus<1?1:mus>=1?1:0, bx=lerp(372,360,c), rx=lerp(62,48,c), ry=lerp(17,25,c);
+  RF.bic.setAttribute("cx",bx); RF.bic.setAttribute("cy",lerp(344,338,c)); RF.bic.setAttribute("rx",rx); RF.bic.setAttribute("ry",ry); RF.bic.setAttribute("transform","rotate(-4 360 344)");
+  RF.bicGlow.setAttribute("cx",bx); RF.bicGlow.setAttribute("cy",lerp(344,338,c)); RF.bicGlow.setAttribute("rx",rx); RF.bicGlow.setAttribute("ry",ry); RF.bicGlow.setAttribute("opacity",k.startsWith("Effector")&&!R.damage?0.45:0);
+  const tE=fa(a,26,-20); RF.tendon.setAttribute("d",`M${f1(bx-rx+6)} ${f1(lerp(344,338,c)+4)} Q290 360 ${f1(tE[0])} ${f1(tE[1])}`);
+  // stimulus
+  const flick=Math.sin(S.frameN*0.3)*3; RF.fl.forEach((f,i)=>{ const x=60+i*45; f.setAttribute("d",`M${x} 552 C${x-14} 540, ${x-8} 528, ${x+flick} ${516+i*2} C${x+8} 528, ${x+14} 540, ${x} 552 Z`); f.setAttribute("visibility",R.stim==="pan"?"visible":"hidden"); });
+  RF.heat.setAttribute("visibility",R.stim==="pan"?"visible":"hidden"); RF.pin.setAttribute("visibility",R.stim==="pin"?"visible":"hidden");
+  // neurones
+  const sens=dense(sensoryPts(a)), rel=dense(RELAY), mot=dense(MOTOR), br=dense(BRAIN), dn=dense(DOWN);
+  const setN=(n,D)=>{ const d=smooth(D.P.filter((p,i,arr)=>i%4===0||i===arr.length-1),false); n.sheath.setAttribute("d",d); n.core.setAttribute("d",d); };
+  setN(RF.NV.sensory,sens); setN(RF.NV.relay,rel); setN(RF.NV.motor,mot); setN(RF.NV.brain,br); setN(RF.NV.down,dn);
+  RF.NV.down.gp.setAttribute("visibility",R.mode==="think"?"visible":"hidden");
+  const tip=fa(a,FAL+40,-10); const tp=[[tip[0],tip[1]],fa(a,FAL+34,-10)]; RF.rec.setAttribute("d",`M${f1(tip[0]-6)} ${f1(tip[1]-6)} L${f1(tp[1][0])} ${f1(tp[1][1])} M${f1(tip[0]+6)} ${f1(tip[1]-4)} L${f1(tp[1][0])} ${f1(tp[1][1])}`); RF.recDot.setAttribute("cx",f1(tp[1][0])); RF.recDot.setAttribute("cy",f1(tp[1][1])); const rl=RF.labs.find(l=>l.id==="receptor"); if(rl&&rl.ln){ rl.ln.setAttribute("x2",f1(tp[1][0])); rl.ln.setAttribute("y2",f1(tp[1][1]+8)); const cc=rl.grp.querySelector("circle"); cc.setAttribute("cx",f1(tp[1][0])); cc.setAttribute("cy",f1(tp[1][1]+8)); }
+  RF.dmg.setAttribute("visibility",R.damage?"visible":"hidden");
+  // the impulse: lit trail and glowing head
+  const lit=(n,D,f)=>{ if(f<=0){ n.lit.setAttribute("opacity",0); return null; } n.lit.setAttribute("d",pathOf(D.upto(f))); n.lit.setAttribute("opacity",T<plan.at(-1)[2]+1?0.85:0.4); return D.at(f); };
+  let head=null; const sF=prog("Receptor and sensory neurone"); head=lit(RF.NV.sensory,sens,sF)||head;
+  if(R.mode==="reflex"){ const rF=prog("Relay neurone"); const h2=lit(RF.NV.relay,rel,rF); if(rF>0&&rF<1) head=h2;
+    let mF=prog("Motor neurone"); if(R.damage) mF=Math.min(mF,0.62); const h3=lit(RF.NV.motor,mot,mF); if(mF>0&&prog("Effector: the muscle contracts")<1) head=h3;
+    const bF=prog("The impulse reaches the brain: you feel the pain")+(R.damage?prog("Effector: the muscle contracts"):0); const h4=lit(RF.NV.brain,br,Math.min(1,bF)); if(bF>0&&bF<1) head=h4;
+    lit(RF.NV.down,dn,0); }
+  else { lit(RF.NV.relay,rel,0); const bF=prog("Up the spinal cord to the brain"); const h4=lit(RF.NV.brain,br,bF); if(bF>0&&bF<1) head=h4;
+    const dF=prog("Down the spinal cord from the brain"); const h5=lit(RF.NV.down,dn,dF); if(dF>0&&dF<1) head=h5;
+    let mF=prog("Motor neurone"); if(R.damage) mF=Math.min(mF,0.62); const h3=lit(RF.NV.motor,mot,mF); if(mF>0&&mF<1) head=h3; }
+  if(sF>0&&sF<1) head=sens.at(sF);
+  if(k.startsWith("Synapse")||k==="Synapse in the spinal cord"){ head=null; }
+  RF.imp.setAttribute("opacity",head&&R.running?1:0); if(head){ RF.imp.setAttribute("cx",f1(head[0])); RF.imp.setAttribute("cy",f1(head[1])); }
+  // neurotransmitter crossing the synapses
+  const syI=k==="Synapse in the spinal cord"?0:k==="Synapse"?1:-1;
+  RF.synDots.forEach((d,i)=>{ if(syI<0){ d.setAttribute("opacity",0); return; } const [x,y]=syI?[604,334]:[626,252]; const ph=(S.frameN*0.04+i/10)%1; d.setAttribute("cx",f1(x-5+i%5*2.5)); d.setAttribute("cy",f1(y-6+ph*12)); d.setAttribute("opacity",0.9); });
+  // pain felt
+  const feel=R.mode==="reflex"?prog("The impulse reaches the brain: you feel the pain"):prog("The brain decides what to do"); RF.ouch.setAttribute("opacity",feel>=1||(R.mode==="think"&&feel>0)?1:0);
+  // clock (real time in milliseconds)
+  const ms=Math.round(lerp(st[3],st[4],clamp((T-st[1])/(st[2]-st[1]),0,1))); RF.clock.textContent=R.running||T>0?`${ms} ms after touching`:"";
+  if($("rstage")&&S.frameN%4===0){ $("rstage").textContent=T===0&&!R.running?"Ready":st[0]; const pm=$("rmark"); if(pm) pm.style.left=`calc(${(clamp(T/Tend,0,1)*100).toFixed(1)}% - 1px)`;
+    if($("rtext").dataset.k!==k+R.mode+R.damage){ $("rtext").dataset.k=k+R.mode+R.damage; $("rtext").textContent=RTXT(k); } } }
+function RTXT(k){ const R=S.rf;
+  if(R.running===false&&R.T===0) return R.mode==="think"?"Press the button. This time the person decides to move the hand, so the impulse has to go to the brain and back.":"Press the button to touch the hot pan.";
+  if(R.damage&&(k.startsWith("Effector")||k.startsWith("The impulse reaches"))) return "The motor neurone is damaged, so the impulse never reaches the muscle. The hand stays on the pan even though the person can feel the pain: the muscle is paralysed.";
+  return ({"Stimulus":"The stimulus: the hand touches something hot (or sharp).","Receptor and sensory neurone":"Receptors in the skin detect the heat and start an impulse. The sensory neurone carries it to the spinal cord.","Synapse in the spinal cord":"At the synapse, a chemical neurotransmitter carries the message across to the relay neurone.","Relay neurone":"The relay neurone in the spinal cord passes the impulse straight to a motor neurone: the brain is not involved, which saves time.","Synapse":"Another synapse, from relay neurone to motor neurone.","Motor neurone":"The motor neurone carries the impulse out of the spinal cord to the effector.","Effector: the muscle contracts":"The effector, the biceps muscle, contracts and pulls the hand away. The whole reflex takes about 50 milliseconds.","The impulse reaches the brain: you feel the pain":"The relay neurone also sends impulses up to the brain. You feel the pain only after your hand has already moved.","Up the spinal cord to the brain":"For a conscious (voluntary) action, the impulse must travel all the way up to the brain.","The brain decides what to do":"The brain processes the information and decides to move the hand. This takes time.","Down the spinal cord from the brain":"Impulses travel back down the spinal cord to the motor neurone."})[k]||""; }
+function reflexSide(){
+  const R=S.rf, plan=planOf();
+  $("side").innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><span class="phase" id="rstage"></span></div>
+    <div class="phasebar" style="grid-template-columns:${plan.map(p=>(p[2]-p[1])+"fr").join(" ")}">${plan.map((p,i)=>`<i style="background:${["#f1b36b","#2f78b5","#aaa","#8e5bb5","#aaa","#c0392b","#e0645c","#5f8f3a"][i]||"#5f8f3a"}"></i>`).join("")}<b id="rmark"></b></div>
+    <p id="rtext" style="margin:8px 0 0;font-size:.9rem"></p>
+    <div class="row" style="margin-top:10px"><button class="primary" id="rgo">Touch the hot pan</button><button id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div>
+    <div class="ctl"><label for="stim">Stimulus</label><select id="stim"><option value="pan" ${R.stim==="pan"?"selected":""}>A hot pan</option><option value="pin" ${R.stim==="pin"?"selected":""}>A sharp pin</option></select></div></div>
+   <div class="card"><h2>Compare</h2><div class="chips" id="rmode"><button class="chip" data-m="reflex" aria-pressed="${R.mode==="reflex"}">Reflex action</button><button class="chip" data-m="think" aria-pressed="${R.mode==="think"}">Conscious (voluntary) action</button></div>
+    <div class="row" style="margin-top:8px"><label class="chip"><input type="checkbox" id="rdmg" ${R.damage?"checked":""}>What if: a damaged motor neurone</label><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div></div>
+   <div class="card"><h2>Test your reaction time</h2><p class="note" style="margin:0 0 6px">Tap the box as soon as it turns green. A conscious reaction goes through your brain, so it takes far longer than a reflex (about 50 ms).</p>
+    <button id="rt" style="width:100%;min-height:72px;font-size:1rem">Tap here to start</button><p id="rtres" class="note" style="margin:6px 0 0"></p></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["stimulus","receptor","sensory","synapse","relay","motor","effector","cord","brainpath"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>
+   <div class="card" id="quiz"><h2>Test yourself</h2><p class="note" style="margin:0 0 8px">Eight questions: tap the right part, or choose the right answer.</p><button class="primary" id="qstart">Start the test</button></div>`;
+  commonControls();
+  $("rgo").onclick=()=>{ R.T=0; R.running=true; S.playing=true; $("play").textContent="Pause"; $("rgo").textContent="Running…"; };
+  $("stim").onchange=e=>{ R.stim=e.target.value; PARTS.stimulus.t=R.stim==="pan"?"A change in the surroundings that the body detects: here, the heat of the pan.":"A change in the surroundings that the body detects: here, the sharp point of a pin."; RF.labs.find(l=>l.id==="stimulus").t=R.stim==="pan"?"Stimulus (heat)":"Stimulus (sharp pin)"; fitLabels(); };
+  $("rmode").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{ R.mode=b.dataset.m; R.T=0; R.running=false; reflexSide(); });
+  $("rdmg").onchange=e=>{ R.damage=e.target.checked; R.T=0; R.running=false; $("rgo").textContent="Touch the hot pan"; };
+  // reaction time game
+  let rt={st:"idle",t0:0,res:[]}, tm=null; const box=$("rt");
+  box.onclick=()=>{ if(rt.st==="idle"||rt.st==="done"){ rt.st="wait"; box.style.background="#e9ecef"; box.textContent="Wait for green…"; tm=setTimeout(()=>{ rt.st="go"; rt.t0=performance.now(); box.style.background="#2f7d4f"; box.style.color="#fff"; box.textContent="TAP NOW!"; },1500+Math.random()*2500); }
+    else if(rt.st==="wait"){ clearTimeout(tm); rt.st="done"; box.style.background="#fbe7e3"; box.style.color=""; box.textContent="Too soon! Tap to try again"; }
+    else if(rt.st==="go"){ const ms=Math.round(performance.now()-rt.t0); rt.res.push(ms); rt.st="done"; box.style.background=""; box.style.color=""; box.textContent=`${ms} ms. Tap to try again`; const av=Math.round(rt.res.reduce((a,b)=>a+b,0)/rt.res.length);
+      $("rtres").textContent=`Your average: ${av} ms over ${rt.res.length} ${rt.res.length>1?"tries":"try"}. That is about ${Math.max(2,Math.round(av/50))} times slower than a reflex.`; } };
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick));
+  $("qstart").onclick=startQuiz; }
+
+// ============================================================
+// A SYNAPSE CLOSE UP
+// ============================================================
+let SY=null;
+function buildSyn(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 520",role:"img","aria-label":"Live close-up of a synapse"});
+  svgEl("defs",{},svg).innerHTML=`<linearGradient id="neuA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9e6f4"/><stop offset="1" stop-color="#bcd2ea"/></linearGradient><linearGradient id="neuB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8dcf2"/><stop offset="1" stop-color="#d4c1e6"/></linearGradient>
+   <radialGradient id="glowS"><stop offset="0" stop-color="#fff59a" stop-opacity=".95"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("rect",{width:800,height:520,fill:"#f7f4ee"},g);
+  const clG=part("cleft"); svgEl("rect",{x:150,y:270,width:500,height:30,fill:"#fffdf6"},clG);
+  // first neurone: axon and synaptic knob
+  const a1=part("axon1"); 
+  svgEl("path",{d:"M352 -10 L352 100 M448 -10 L448 100",stroke:"#f3e6c4","stroke-width":10,"stroke-dasharray":"40 8"},a1);
+  const kn=part("knob"); svgEl("path",{d:"M360 -10 L440 -10 L440 110 C440 140, 500 150, 540 165 C600 185, 620 230, 616 268 L184 268 C180 230, 200 185, 260 165 C300 150, 360 140, 360 110 Z",fill:"url(#neuA)",stroke:"#6c8fb8","stroke-width":2.5},kn);
+  svgEl("rect",{x:362,y:-10,width:76,height:118,fill:"transparent"},a1); a1.parentNode.appendChild(a1);
+  const mtG=part("mito"); [[260,214,-20],[540,220,25]].forEach(([x,y,r])=>{ const e=svgEl("g",{transform:`rotate(${r} ${x} ${y})`},mtG); svgEl("ellipse",{cx:x,cy:y,rx:30,ry:13,fill:"#f2b6a0",stroke:"#b5674f","stroke-width":1.5},e); svgEl("path",{d:`M${x-20} ${y} q5 -10 10 0 q5 10 10 0 q5 -10 10 0 q5 10 10 0`,fill:"none",stroke:"#b5674f","stroke-width":1.3},e); });
+  // second neurone
+  const n2=part("neuron2"); svgEl("path",{d:"M150 300 L650 300 C660 360, 600 400, 520 420 L470 430 L470 530 L330 530 L330 430 L280 420 C200 400, 140 360, 150 300 Z",fill:"url(#neuB)",stroke:"#8a6fb0","stroke-width":2.5},n2);
+  const recG=part("receptors"); const recs=[]; for(let i=0;i<8;i++){ const x=232+i*48; const r=svgEl("path",{d:`M${x-11} 300 L${x-11} 290 L${x-5} 290 L${x-5} 296 L${x+5} 296 L${x+5} 290 L${x+11} 290 L${x+11} 300 Z`,fill:"#7b5fb0",stroke:"#4b3580","stroke-width":1},recG); recs.push({x,el:r,bound:null}); }
+  const glow=svgEl("ellipse",{cx:400,cy:60,rx:70,ry:40,fill:"url(#glowS)",opacity:0,"pointer-events":"none"},g);
+  const glow2=svgEl("ellipse",{cx:400,cy:400,rx:90,ry:40,fill:"url(#glowS)",opacity:0,"pointer-events":"none"},g);
+  const vsG=part("vesicle"); const ves=[];
+  const mkVes=(x,y)=>{ const e=svgEl("g",{},vsG); svgEl("circle",{r:13,fill:"#fff8e6",stroke:"#d49a4a","stroke-width":1.6},e); for(let k=0;k<5;k++) svgEl("circle",{cx:Math.cos(k*1.3)*6,cy:Math.sin(k*1.3)*6,r:2.2,fill:"#e07b39"},e); const v={x,y,hx:x,hy:y,el:e,st:"rest",t:0}; ves.push(v); return v; };
+  [[250,180],[300,196],[350,184],[400,200],[450,186],[500,196],[550,184],[280,236],[340,240],[400,236],[460,240],[520,236]].forEach(([x,y])=>mkVes(x,y));
+  const molG=svgEl("g",{"pointer-events":"none"},g); const mols=[];
+  const drugG=svgEl("g",{"pointer-events":"none"},g); const drugs=recs.map(r=>svgEl("path",{d:`M${r.x-5} 296 L${r.x} 286 L${r.x+5} 296 Z`,fill:"#3f9a62",stroke:"#1f5a36",visibility:"hidden"},drugG));
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["axon1","Axon of the first neurone",470,40,442,40],["knob","Synaptic knob",650,190,600,220],["vesicle","Vesicles",650,120,552,180],["mito","Mitochondrion",20,180,234,206],["cleft","Synaptic gap",20,290,180,286],["receptors","Receptors",650,330,575,298],["neuron2","Next neurone",650,450,470,460]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor="start";
+    const ln=svgEl("line",{x1:x<300?x+(t.length*8.2)+4:x-4,y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor,syn:true}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const msg=svgEl("text",{x:400,y:508,"text-anchor":"middle","font-size":15,fill:"#b4442f"},ctx);
+  SY={svg,recs,ves,mols,molG,mkVes,glow,glow2,drugs,labs,ctx,msg,phase:"idle",count:0,fired:0};
+  return svg; }
+function synFire(dir){ const Y=S.sy; Y.T=0; Y.dir=dir; SY.phase=dir==="fwd"?"down":"back"; SY.msg.textContent=""; }
+function tickSyn(dt){
+  const Y=S.sy, Z=SY; Y.T+=dt;
+  Z.drugs.forEach((d,i)=>{ d.setAttribute("visibility",Y.block?"visible":"hidden"); });
+  if(Z.phase==="idle"&&Y.auto&&Y.T>2.2) synFire("fwd");
+  // impulse travelling down the axon into the knob
+  if(Z.phase==="down"){ const p=clamp(Y.T/1.1,0,1); Z.glow.setAttribute("cy",f1(lerp(-30,200,p))); Z.glow.setAttribute("opacity",f1(Math.sin(Math.PI*p))); if(p>=1){ Z.phase="release"; Y.T=0; } }
+  else Z.glow.setAttribute("opacity",0);
+  if(Z.phase==="back"){ const p=clamp(Y.T/1.4,0,1); Z.glow2.setAttribute("cy",f1(lerp(520,320,p))); Z.glow2.setAttribute("opacity",f1(p<0.85?0.9:0.9*(1-p)/0.15)); if(p>=1){ Z.phase="idle"; Y.T=0; Z.msg.textContent="Nothing crosses: only the first neurone has vesicles of neurotransmitter, so impulses go one way only."; } }
+  // vesicles move to the membrane and release neurotransmitter
+  if(Z.phase==="release"){ const near=Z.ves.filter(v=>v.st==="rest"&&v.hy>220).slice(0,4); near.forEach(v=>{ v.st="move"; v.t=0; }); Z.phase="cross"; Y.T=0; }
+  Z.ves.forEach(v=>{ if(v.st==="move"){ v.t+=dt*2.2; v.y=lerp(v.hy,262,clamp(v.t,0,1)); if(v.t>=1){ v.st="fused"; v.t=0; for(let k=0;k<6;k++){ const el=svgEl("circle",{r:3,fill:"#e07b39",stroke:"#9a4f1f","stroke-width":.6},Z.molG); Z.mols.push({x:v.x+(Math.random()-0.5)*14,y:270,vx:(Math.random()-0.5)*60,vy:20+Math.random()*30,el,st:"free",life:0}); } } }
+    else if(v.st==="fused"){ v.t+=dt; v.el.setAttribute("opacity",f1(Math.max(0,1-v.t*2))); if(v.t>2.5){ v.st="rest"; v.y=v.hy; v.el.setAttribute("opacity",1); } }
+    v.el.setAttribute("transform",`translate(${f1(v.x)} ${f1(v.y)})`); });
+  // neurotransmitter diffuses across and binds to receptors
+  for(let i=Z.mols.length-1;i>=0;i--){ const m=Z.mols[i]; m.life+=dt;
+    if(m.st==="free"){ m.vx+=(Math.random()-0.5)*300*dt; m.x+=m.vx*dt; m.y+=m.vy*dt; m.x=clamp(m.x,160,640); if(m.y>288){ m.y=288; const r=Z.recs.find(r=>!r.bound&&Math.abs(r.x-m.x)<16); if(r&&!Y.block){ r.bound=m; m.st="bound"; m.x=r.x; m.y=291; m.r=r; } else { m.vy=-Math.abs(m.vy)*0.6; } } if(m.y<272){ m.y=272; m.vy=Math.abs(m.vy); } }
+    if(m.st==="bound"&&!Y.noBreak&&m.life>1.8){ m.st="gone"; m.r.bound=null; }
+    if(m.st==="free"&&m.life>(Y.noBreak?99:3)) m.st="gone";
+    if(m.st==="gone"){ m.el.remove(); Z.mols.splice(i,1); continue; }
+    m.el.setAttribute("cx",f1(m.x)); m.el.setAttribute("cy",f1(m.y)); }
+  const nb=Z.recs.filter(r=>r.bound).length; Z.recs.forEach(r=>r.el.setAttribute("fill",r.bound?"#ffb000":"#7b5fb0"));
+  // enough receptors filled: a new impulse starts in the next neurone
+  if(nb>=4&&Z.phase==="cross"){ Z.phase="post"; Y.T=0; Z.fired++; }
+  if(Z.phase==="cross"&&Y.T>2.5){ Z.phase="idle"; Y.T=0; if(Y.block) Z.msg.textContent="The drug blocks the receptors: the neurotransmitter cannot bind, so no impulse starts in the next neurone."; }
+  if(Z.phase==="post"){ const p=clamp(Y.T/1.3,0,1); Z.glow2.setAttribute("cy",f1(lerp(320,540,p))); Z.glow2.setAttribute("opacity",f1(Math.sin(Math.PI*p))); if(p>=1){ Z.phase=Y.noBreak&&nb>=4?"post":"idle"; Y.T=0; if(Y.noBreak){ Z.fired++; Z.msg.textContent="The neurotransmitter is not broken down, so the receptors stay filled and the next neurone keeps firing."; } } }
+  if(S.frameN%6===0&&$("sfired")){ $("sfired").textContent=Z.fired; $("sbound").textContent=nb+" of 8"; $("sstate").textContent={idle:"Waiting",down:"Impulse arriving",release:"Vesicles releasing",cross:"Neurotransmitter crossing the gap",post:"New impulse in the next neurone",back:"Impulse arriving from the wrong side"}[Z.phase]; } }
+function synSide(){
+  const Y=S.sy;
+  $("side").innerHTML=`<div class="card"><h2>How an impulse crosses a synapse</h2><ol style="margin:0;padding-left:20px;font-size:.9rem"><li>An impulse arrives at the end of the first neurone.</li><li>Vesicles release a chemical, the neurotransmitter, into the gap.</li><li>It diffuses across and binds to receptors on the next neurone.</li><li>This starts a new impulse in the next neurone.</li><li>The neurotransmitter is then broken down, ready for the next impulse.</li></ol>
+    <div class="vstate"><span>Now</span><span class="op" id="sstate" style="color:var(--ink);font-family:var(--f-body)"></span><span>Receptors filled</span><span class="op" id="sbound" style="color:var(--ink)"></span><span>Impulses passed on</span><span class="op" id="sfired" style="color:var(--ink)"></span></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="sgo">Send an impulse</button><button id="sback">Try the wrong way</button><button id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div>
+    <div class="row" style="margin-top:6px"><label class="chip"><input type="checkbox" id="sauto" ${Y.auto?"checked":""}>Keep sending impulses</label><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div></div>
+   <div class="card"><h2>What if… (drugs and poisons)</h2><div class="chips"><label class="chip"><input type="checkbox" id="sblock" ${Y.block?"checked":""}>A drug blocks the receptors</label><label class="chip"><input type="checkbox" id="snob" ${Y.noBreak?"checked":""}>The neurotransmitter is not broken down</label></div>
+    <p class="note" style="margin:8px 0 0">Some painkillers work by blocking receptors at synapses in pain pathways. Some nerve poisons and insecticides stop the neurotransmitter being broken down, so muscles keep contracting.</p></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["axon1","knob","vesicle","mito","cleft","receptors","neuron2"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  $("sgo").onclick=()=>{ S.playing=true; $("play").textContent="Pause"; synFire("fwd"); }; $("sback").onclick=()=>{ S.playing=true; $("play").textContent="Pause"; synFire("back"); };
+  $("sauto").onchange=e=>{ Y.auto=e.target.checked; }; $("sblock").onchange=e=>{ Y.block=e.target.checked; SY.recs.forEach(r=>{ if(r.bound){ r.bound.st="gone"; r.bound=null; } }); SY.msg.textContent=""; }; $("snob").onchange=e=>{ Y.noBreak=e.target.checked; SY.msg.textContent=""; };
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ============================================================
+// THE EYE AND THE BRAIN
+// ============================================================
+let EY=null;
+const EC=[330,250], ER=150, AX=250; // eye centre, radius, optical axis y
+function buildEye(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 520",role:"img","aria-label":"Live section through the eye, with light focusing on the retina, and the brain"});
+  svgEl("defs",{},svg).innerHTML=`<radialGradient id="vit" cx=".45" cy=".45" r=".7"><stop offset="0" stop-color="#f6fbfd"/><stop offset="1" stop-color="#e2eff5"/></radialGradient>
+   <radialGradient id="lensG" cx=".4" cy=".4" r=".7"><stop offset="0" stop-color="#fffbe8"/><stop offset="1" stop-color="#f1e1a8"/></radialGradient>
+   <radialGradient id="brainG" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#f6c9c4"/><stop offset="1" stop-color="#df9c95"/></radialGradient>
+   <radialGradient id="irisG"><stop offset=".3" stop-color="#8a5a2b"/><stop offset="1" stop-color="#4e3015"/></radialGradient>
+   <clipPath id="eyeClip"><circle cx="${EC[0]}" cy="${EC[1]}" r="${ER-8}"/></clipPath>`;
+  const bg=svgEl("rect",{width:800,height:520,fill:"#f4f4ef"},svg);
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  // object being looked at: a tree far away or a book close up
+  const obj=svgEl("g",{"pointer-events":"none"},g);
+  // brain (side view, facing left) and optic nerve
+  const bx=640,by=150;
+  const crG=part("cerebrum"); svgEl("path",{d:`M${bx-120} ${by+30} C${bx-130} ${by-50}, ${bx-40} ${by-100}, ${bx+40} ${by-90} C${bx+120} ${by-80}, ${bx+150} ${by-10}, ${bx+140} ${by+50} C${bx+130} ${by+80}, ${bx+90} ${by+90}, ${bx+60} ${by+80} C${bx+20} ${by+100}, ${bx-40} ${by+100}, ${bx-80} ${by+80} C${bx-110} ${by+70}, ${bx-122} ${by+55}, ${bx-120} ${by+30} Z`,fill:"url(#brainG)",stroke:"#a8605a","stroke-width":2},crG);
+  ["M560 110 C590 90, 620 120, 650 100 C680 80, 700 110, 730 100","M540 150 C570 140, 600 160, 630 145 C660 130, 690 160, 740 150","M560 190 C590 180, 610 200, 650 190","M640 70 C630 100, 650 130, 640 160"].forEach(d=>svgEl("path",{d,fill:"none",stroke:"#c27d76","stroke-width":2},crG));
+  const vis=svgEl("ellipse",{cx:bx+108,cy:by+14,rx:26,ry:36,fill:"#ffc400",opacity:0,"pointer-events":"none"},g);
+  const cbG=part("cerebellum"); svgEl("path",{d:`M${bx+40} ${by+86} C${bx+70} ${by+70}, ${bx+130} ${by+76}, ${bx+130} ${by+104} C${bx+128} ${by+130}, ${bx+70} ${by+136}, ${bx+40} ${by+118} Z`,fill:"#e8aea6",stroke:"#a8605a","stroke-width":2},cbG);
+  for(let i=0;i<4;i++) svgEl("path",{d:`M${bx+50} ${by+94+i*8} C${bx+80} ${by+88+i*8}, ${bx+110} ${by+92+i*8}, ${bx+126} ${by+96+i*8}`,fill:"none",stroke:"#b8706a","stroke-width":1.2},cbG);
+  const mdG=part("medulla"); svgEl("path",{d:`M${bx+10} ${by+90} C${bx+30} ${by+110}, ${bx+34} ${by+150}, ${bx+26} ${by+200} L${bx-4} ${by+200} C${bx-4} ${by+150}, ${bx-6} ${by+120}, ${bx-14} ${by+96} Z`,fill:"#eab7af",stroke:"#a8605a","stroke-width":2},mdG);
+  const opG=part("optic"); const optic=svgEl("path",{d:`M${EC[0]+ER-6} ${AX+30} C520 300, 560 280, 600 240 C640 200, 700 200, ${bx+108} ${by+28}`,fill:"none",stroke:"#e6d38c","stroke-width":16,"stroke-linecap":"round"},opG); svgEl("path",{d:optic.getAttribute("d"),fill:"none",stroke:"#c9b35a","stroke-width":16,"stroke-dasharray":"2 6",opacity:.5},opG);
+  const spikes=[...Array(8)].map(()=>svgEl("circle",{r:4,fill:"#ffd23f",stroke:"#b88a10","stroke-width":1,opacity:0,"pointer-events":"none"},g));
+  // eye
+  const sc=part("sclera"); svgEl("circle",{cx:EC[0],cy:EC[1],r:ER,fill:"#fdfdf8",stroke:"#9a9a8a","stroke-width":2.5},sc);
+  svgEl("circle",{cx:EC[0],cy:EC[1],r:ER-6,fill:"#6b3b52"},sc);
+  const rt=part("retina"); svgEl("circle",{cx:EC[0],cy:EC[1],r:ER-11,fill:"#e9a0a0"},rt);
+  svgEl("circle",{cx:EC[0],cy:EC[1],r:ER-16,fill:"url(#vit)"},g);
+  // front of the eye cut away for the cornea
+  svgEl("path",{d:`M${EC[0]-ER+28} ${AX-82} C${EC[0]-ER-28} ${AX-50}, ${EC[0]-ER-28} ${AX+50}, ${EC[0]-ER+28} ${AX+82} L${EC[0]-ER+44} ${AX+82} L${EC[0]-ER+44} ${AX-82} Z`,fill:"#eef6fa"},g);
+  const co=part("cornea"); svgEl("path",{d:`M${EC[0]-ER+28} ${AX-82} C${EC[0]-ER-28} ${AX-50}, ${EC[0]-ER-28} ${AX+50}, ${EC[0]-ER+28} ${AX+82}`,fill:"none",stroke:"#9fc6db","stroke-width":5},co);
+  const fv=part("fovea"); svgEl("path",{d:`M${EC[0]+ER-14} ${AX-8} q-6 8 0 16`,fill:"none",stroke:"#c44a4a","stroke-width":5},fv);
+  const bs=part("blind"); svgEl("rect",{x:EC[0]+ER-16,y:AX+22,width:14,height:18,fill:"#e6d38c"},bs);
+  const lig=part("ligament"); const ligs=[0,1,2,3].map(()=>svgEl("path",{fill:"none",stroke:"#b9a882","stroke-width":1.4},lig));
+  const cil=part("ciliary"); const cils=[-1,1].map(s=>svgEl("ellipse",{cx:EC[0]-ER+52,cy:AX+s*78,rx:12,ry:9,fill:"#b5574f",stroke:"#7d2a24","stroke-width":1.2},cil)); const cilGlow=[-1,1].map(s=>svgEl("ellipse",{cx:EC[0]-ER+52,cy:AX+s*78,rx:12,ry:9,fill:"#ffd23f",opacity:0,"pointer-events":"none"},cil));
+  const ln=part("lens"); const lens=svgEl("ellipse",{cx:EC[0]-ER+60,cy:AX,ry:50,fill:"url(#lensG)",stroke:"#c2a75a","stroke-width":1.6},ln);
+  const ir=part("iris"); const irisT=svgEl("rect",{x:EC[0]-ER+34,width:9,fill:"#7a4a22",rx:3},ir), irisB=svgEl("rect",{x:EC[0]-ER+34,width:9,fill:"#7a4a22",rx:3},ir);
+  const pu=part("pupil"); const pupilHit=svgEl("rect",{x:EC[0]-ER+30,width:18,fill:"transparent"},pu);
+  // light rays and the image
+  const rays=svgEl("g",{"pointer-events":"none"},g); const rayEls=[0,1,2].map(()=>({a:svgEl("path",{fill:"none",stroke:"#f2a900","stroke-width":2,opacity:.9},rays),b:svgEl("path",{fill:"none",stroke:"#f2a900","stroke-width":2,opacity:.9},rays),c:svgEl("path",{fill:"none",stroke:"#f2a900","stroke-width":1.6,"stroke-dasharray":"4 4",opacity:.6},rays)}));
+  const img=svgEl("line",{stroke:"#2f78b5","stroke-width":4,"stroke-linecap":"round","pointer-events":"none"},g);
+  // pupil front view inset
+  const fr=svgEl("g",{"pointer-events":"none"},g); svgEl("circle",{cx:96,cy:440,r:56,fill:"#fff",stroke:"#9a9a8a","stroke-width":2},fr); svgEl("circle",{cx:96,cy:440,r:36,fill:"url(#irisG)"},fr);
+  const radial=[...Array(16)].map((_,i)=>{ const a=i/16*Math.PI*2; return svgEl("line",{x1:96+Math.cos(a)*14,y1:440+Math.sin(a)*14,x2:96+Math.cos(a)*35,y2:440+Math.sin(a)*35,stroke:"#c48a52","stroke-width":1.6},fr); });
+  const circ=[18,24].map(r=>svgEl("circle",{cx:96,cy:440,r,fill:"none",stroke:"#c48a52","stroke-width":1.6},fr));
+  const pupF=svgEl("circle",{cx:96,cy:440,r:12,fill:"#111"},fr); svgEl("circle",{cx:88,cy:432,r:3,fill:"#fff",opacity:.8},fr);
+  const frT=svgEl("text",{x:96,y:512,"text-anchor":"middle","font-size":12,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},fr); frT.textContent="pupil seen from the front";
+  // labels
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["cornea","Cornea",20,200,EC[0]-ER-14,AX-40],["iris","Iris",20,140,EC[0]-ER+38,AX-62],["pupil","Pupil",20,262,EC[0]-ER+38,AX],["lens","Lens",300,96,EC[0]-ER+64,AX-30],["ciliary","Ciliary muscle",150,40,EC[0]-ER+50,AX-84],["ligament","Suspensory ligaments",230,470,EC[0]-ER+56,AX+64],["retina","Retina",360,40,EC[0]+70,EC[1]-ER+16],["fovea","Fovea",520,250,EC[0]+ER-12,AX],["blind","Blind spot",520,340,EC[0]+ER-10,AX+34],["sclera","Sclera",420,470,EC[0]+60,EC[1]+ER-2],["optic","Optic nerve",560,420,560,292],["cerebrum","Cerebrum",530,40,600,80],["cerebellum","Cerebellum",780,300,750,252],["medulla","Medulla",780,370,660,330]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x>=760?"end":"start";
+    const w=t.length*8.4, lx=anchor==="end"?x-w-4:(ax<x?x-4:x+w+4);
+    const lnn=svgEl("line",{x1:lx,y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln:lnn,t,x,y,anchor,eye:true}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const vtxt=svgEl("text",{x:bx+104,y:by-28,"text-anchor":"middle","font-size":12},ctx); vtxt.textContent="visual area";
+  EY={svg,bg,obj,lens,ligs,cils,cilGlow,irisT,irisB,pupilHit,rayEls,img,radial,circ,pupF,spikes,optic,vis,labs,ctx,sp:0};
+  return svg; }
+function tickEye(dt){
+  const E=S.eye, Y=EY, lx=EC[0]-ER+60;
+  // pupil reflex: bright light, small pupil
+  const pr=lerp(34,8,E.light/100); Y.pr=(Y.pr??pr)+(pr-(Y.pr??pr))*Math.min(1,dt*3);
+  const p=Y.pr; Y.irisT.setAttribute("y",AX-82); Y.irisT.setAttribute("height",f1(82-p)); Y.irisB.setAttribute("y",f1(AX+p)); Y.irisB.setAttribute("height",f1(82-p)); Y.pupilHit.setAttribute("y",f1(AX-p)); Y.pupilHit.setAttribute("height",f1(2*p));
+  Y.pupF.setAttribute("r",f1(lerp(5,26,(p-8)/26)));
+  const bright=E.light>55, dim=E.light<45; Y.circ.forEach(c=>{ c.setAttribute("stroke",bright?"#ffb000":"#c48a52"); c.setAttribute("stroke-width",bright?3:1.6); }); Y.radial.forEach(r=>{ r.setAttribute("stroke",dim?"#ffb000":"#c48a52"); r.setAttribute("stroke-width",dim?2.6:1.6); });
+  const L=E.light/100; const Lb=Math.sqrt(L); Y.bg.setAttribute("fill",`rgb(${Math.round(lerp(70,250,Lb))},${Math.round(lerp(72,250,Lb))},${Math.round(lerp(84,244,Lb))})`);
+  // accommodation: near objects need a fat lens (ciliary muscle contracted, ligaments slack)
+  const near=1-E.dist, canNear=E.fault!=="old", acc=canNear?near:Math.min(near,0.15);
+  Y.ac=(Y.ac??acc)+(acc-(Y.ac??acc))*Math.min(1,dt*2.5); const a=Y.ac;
+  const rx=lerp(12,24,a); Y.lens.setAttribute("rx",f1(rx)); Y.lens.setAttribute("ry",f1(lerp(52,44,a)));
+  Y.cils.forEach((c,i)=>{ c.setAttribute("rx",f1(lerp(12,16,a))); c.setAttribute("cy",f1(AX+(i?1:-1)*lerp(78,72,a))); }); Y.cilGlow.forEach((c,i)=>{ c.setAttribute("rx",f1(lerp(12,16,a))); c.setAttribute("cy",f1(AX+(i?1:-1)*lerp(78,72,a))); c.setAttribute("opacity",f1(0.6*a)); });
+  const ly=lerp(52,44,a); [[-1,-4],[-1,4],[1,-4],[1,4]].forEach(([s,dx],i)=>{ const x1=lx+dx, y1=AX+s*ly, x2=EC[0]-ER+52+dx, y2=AX+s*lerp(70,64,a); const sag=a*8; Y.ligs[i].setAttribute("d",`M${f1(x1)} ${f1(y1)} Q${f1((x1+x2)/2+sag)} ${f1((y1+y2)/2)} ${f1(x2)} ${f1(y2)}`); });
+  // where the light focuses: on the retina if the lens has adjusted correctly
+  const retX=EC[0]+ER-14; let fx=retX;
+  if(E.fault==="old") fx=retX+150*Math.max(0,near-0.15);
+  if(E.fault==="short") fx=retX-80*E.dist;
+  if(E.fault==="long") fx=retX+130*near;
+  // object: a tree far away or a book near
+  const ox=lerp(150,22,E.dist), oh=lerp(46,90,E.dist), oy=AX;
+  Y.obj.innerHTML=E.dist>0.5?`<path d="M${f1(ox)} ${oy} L${f1(ox)} ${f1(oy-oh*0.5)}" stroke="#6d4c2f" stroke-width="5"/><circle cx="${f1(ox)}" cy="${f1(oy-oh*0.7)}" r="${f1(oh*0.3)}" fill="#4f8f3a"/><path d="M${f1(ox)} ${oy} L${f1(ox)} ${f1(oy-oh)}" stroke="#2f78b5" stroke-width="3" stroke-dasharray="3 3"/>`:`<rect x="${f1(ox-6)}" y="${f1(oy-oh)}" width="12" height="${f1(oh)}" fill="#c0392b" stroke="#7d2420"/><text x="${f1(ox)}" y="${f1(oy-oh-8)}" font-size="12" text-anchor="middle" fill="#5a6966" font-family="IBM Plex Mono, monospace">book</text>`;
+  const tipY=oy-oh, hImg=lerp(10,22,1-E.dist)*(E.dist>0.5?1:1), iy=AX+hImg;
+  // three rays from the top of the object through the pupil, bent by cornea and lens to the focus point
+  const objTip=[ox,tipY], pts=[-0.7,0,0.7].map(k=>[EC[0]-ER-18,AX+k*Math.max(p,24)*0.9]);
+  Y.rayEls.forEach((r,i)=>{ const c=pts[i], l=[lx,AX+(c[1]-AX)*0.95];
+    r.a.setAttribute("d",`M${f1(objTip[0])} ${f1(objTip[1])} L${f1(c[0])} ${f1(c[1])} L${f1(l[0])} ${f1(l[1])}`);
+    // after the lens: straight towards the focus; stop at the retina
+    const tF=(retX-l[0])/(fx-l[0]); const endX=Math.min(retX,fx<retX?retX:retX), ex=retX, ey=l[1]+(iy-l[1])*((ex-l[0])/(fx-l[0]));
+    r.b.setAttribute("d",`M${f1(l[0])} ${f1(l[1])} L${f1(ex)} ${f1(ey)}`);
+    if(fx>retX+2) r.c.setAttribute("d",`M${f1(ex)} ${f1(ey)} L${f1(fx)} ${f1(iy)}`); else r.c.setAttribute("d","M0 0");
+    r.ey=ey; });
+  // image on the retina: sharp if in focus, blurred if not; always upside down
+  const spread=Math.abs(Y.rayEls[0].ey-Y.rayEls[2].ey), sharp=spread<5;
+  Y.img.setAttribute("x1",retX-4); Y.img.setAttribute("x2",retX-4); Y.img.setAttribute("y1",f1(AX)); Y.img.setAttribute("y2",f1(iy)); Y.img.setAttribute("stroke-width",sharp?4:4+spread*0.7); Y.img.setAttribute("opacity",sharp?1:0.45);
+  // impulses along the optic nerve to the visual area of the brain
+  const rate=0.3+L*1.2; Y.sp+=dt*rate; const len=Y.optic.getTotalLength?Y.optic.getTotalLength():400;
+  Y.spikes.forEach((s,i)=>{ const f=((Y.sp+i/Y.spikes.length)%1); const pt=Y.optic.getPointAtLength?Y.optic.getPointAtLength(f*len):{x:0,y:0}; s.setAttribute("cx",f1(pt.x)); s.setAttribute("cy",f1(pt.y)); s.setAttribute("opacity",S.playing?0.95:0); });
+  Y.vis.setAttribute("opacity",S.playing?f1(0.45+0.3*Math.sin(S.frameN*0.15)):"0.4");
+  if(S.frameN%6===0&&$("eyestate")){ $("eyestate").innerHTML=`<span>Pupil</span><span class="op" style="color:var(--ink)">${bright?"small (circular muscles contract)":dim?"wide (radial muscles contract)":"medium"}</span><span>Lens</span><span class="op" style="color:var(--ink)">${a>0.55?"fat (ciliary muscle contracted, ligaments slack)":a<0.3?"thin (ciliary muscle relaxed, ligaments tight)":"medium"}</span><span>Image on the retina</span><span class="${sharp?"op":"cl"}">${sharp?"sharp, upside down":"blurred"}</span>`; } }
+function eyeSide(){
+  const E=S.eye;
+  $("side").innerHTML=`<div class="card"><h2>Light into the eye</h2><p style="margin:0;font-size:.9rem">The cornea and lens bend light so that it focuses on the retina, making an upside-down image. Rods and cones in the retina send impulses along the optic nerve to the brain, which turns the picture the right way up.</p>
+    <div class="ctl"><label for="elight">Brightness <span id="elv"></span></label><input type="range" id="elight" min="0" max="100" step="1" value="${E.light}"></div>
+    <div class="ctl"><label for="edist">Looking at <span id="edv"></span></label><input type="range" id="edist" min="0" max="1" step="0.01" value="${E.dist}"></div>
+    <div class="vstate" id="eyestate"></div><div class="row" style="margin-top:10px"><button class="primary" id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div></div>
+   <div class="card"><h2>What if…</h2><div class="chips" id="efault">${[["none","Healthy eye"],["short","Short sight"],["long","Long sight"],["old","Old age: a stiff lens"]].map(([k,t])=>`<button class="chip" data-f="${k}" aria-pressed="${E.fault===k}">${t}</button>`).join("")}</div><div id="efmsg"></div>
+    <div class="row" style="margin-top:8px"><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["cornea","iris","pupil","lens","ciliary","ligament","retina","fovea","blind","sclera","optic","cerebrum","cerebellum","medulla"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  const setL=()=>{ E.light=+$("elight").value; $("elv").textContent=E.light<30?"dim":E.light>70?"bright":"normal"; }, setD=()=>{ E.dist=+$("edist").value; $("edv").textContent=E.dist>0.5?"a tree far away":"a book close up"; };
+  $("elight").oninput=setL; $("edist").oninput=setD; setL(); setD();
+  const FM={none:"",short:"Short sight: the eyeball is too long (or the lens too strong), so light from distant objects focuses in front of the retina. Close objects are clear. Corrected with diverging (concave) lenses. Move the slider to the tree to see it.",long:"Long sight: the eyeball is too short, so light from near objects would focus behind the retina. Distant objects are clear. Corrected with converging (convex) lenses. Move the slider to the book to see it.",old:"With age the lens becomes stiff and cannot get fat enough for close objects, so near things look blurred. Reading glasses help. Move the slider to the book to see it."};
+  $("efault").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ E.fault=b.dataset.f; eyeSide(); });
+  $("efmsg").innerHTML=E.fault!=="none"?`<div class="msg">${FM[E.fault]}</div>`:"";
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ---------- shared controls, info and quiz ----------
+function commonControls(){
+  const rates=[0.25,0.5,1], rn=["Very slow","Slow motion","Normal"];
+  if(!rates.includes(S.rate)) S.rate=0.5;
+  $("rate").value=rates.indexOf(S.rate); const setRate=()=>{ S.rate=rates[+$("rate").value]; $("ratev").textContent=rn[+$("rate").value]; }; $("rate").oninput=setRate; setRate();
+  const playLbl=()=>$("play").textContent=S.playing?"Pause":"Play"; $("play").onclick=()=>{ S.playing=!S.playing; playLbl(); }; playLbl();
+  if($("lbl")) $("lbl").onchange=e=>{ S.labels=e.target.checked; applyLabels(); }; }
+function cur(){ return S.view==="reflex"?RF:S.view==="syn"?SY:EY; }
+function applyLabels(){ cur().labs.forEach(l=>l.grp.setAttribute("visibility",S.labels?"visible":"hidden")); }
+function dimTo(id){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==id)); }
+function undim(){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); }
+function showInfo(id){ const p=PARTS[id]; if(!p||!$("info")) return; S.selected=id; dimTo(id);
+  $("info").innerHTML=`<h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="row" style="margin-top:6px"><button id="clr">Show everything</button>${id==="synapse"?`<button class="primary" id="gosyn">See a synapse close up</button>`:""}</div>`;
+  $("clr").onclick=()=>{ S.selected=null; undim(); setView(S.view); }; if($("gosyn")) $("gosyn").onclick=()=>setView("syn"); }
+const QZ=[{tap:"sensory",q:"Tap the sensory neurone."},{tap:"relay",q:"Tap the relay neurone."},{tap:"motor",q:"Tap the motor neurone."},{tap:"effector",q:"Tap the effector."},
+ {q:"Which is the correct order in a reflex arc?",o:["Receptor, motor neurone, relay neurone, sensory neurone, effector","Receptor, sensory neurone, relay neurone, motor neurone, effector","Effector, sensory neurone, brain, motor neurone, receptor","Receptor, relay neurone, sensory neurone, effector, motor neurone"],a:1},
+ {q:"Why is a reflex faster than a conscious action?",o:["Its neurones are thicker","The impulse does not have to go to the brain to be processed","It uses no synapses","Muscles contract faster in a reflex"],a:1},
+ {q:"How does a nerve impulse cross a synapse?",o:["It jumps across as electricity","A neurotransmitter diffuses across the gap","Blood carries it across","The two neurones touch"],a:1},
+ {q:"What happens to the pupil in bright light?",o:["It gets bigger","It gets smaller","It stays the same","It moves to the side"],a:1}];
+function startQuiz(){ S.quiz={i:0,score:0}; drawQuiz(); }
+function drawQuiz(){ const Q=S.quiz, el=$("quiz"); if(!el) return;
+  if(Q.i>=QZ.length){ el.innerHTML=`<h2>Test complete</h2><p class="phase" style="font-size:1.6rem;margin:4px 0">${Q.score} / ${QZ.length}</p><p>${Q.score===QZ.length?"Excellent: you know the nervous system.":"Tap the parts you missed to read about them, then try again."}</p><button class="primary" id="qagain">Try again</button>`; $("qagain").onclick=startQuiz;
+    try{ parent.postMessage({type:"lablink-3d-result",prac:"nervous",score:Math.round(Q.score/QZ.length*100)},"*"); }catch(e){} Q.done=true; return; }
+  const q=QZ[Q.i]; el.innerHTML=`<h2>Question ${Q.i+1} of ${QZ.length}</h2><div class="q"><p><b>${esc(q.q)}</b></p>${q.tap?`<p class="note">Tap it in the picture. Labels are hidden during the test.</p>`:`<div class="opts">${q.o.map((o,i)=>`<button data-o="${i}">${esc(o)}</button>`).join("")}</div>`}</div><div id="qfb"></div>`;
+  if(q.tap){ S.labels=false; applyLabels(); }
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>answer(+b.dataset.o===q.a,b,el.querySelector(`[data-o="${q.a}"]`))); }
+function answer(ok,btn,right){ const Q=S.quiz; if(Q.lock) return; Q.lock=true; if(ok) Q.score++; if(btn){ btn.classList.add(ok?"right":"wrong"); if(right) right.classList.add("right"); }
+  const q=QZ[Q.i]; $("qfb").innerHTML=`<div class="msg ${ok?"":"warn"}">${ok?"Correct.":q.tap?`Not quite: look at the highlighted part, the ${esc(PARTS[q.tap].n.toLowerCase())}.`:"Not quite: the right answer is highlighted."}</div><button class="primary" id="qnext" style="margin-top:8px">${Q.i+1<QZ.length?"Next question":"See your score"}</button>`;
+  if(q.tap&&!ok) dimTo(q.tap);
+  $("qnext").onclick=()=>{ Q.lock=false; Q.i++; undim(); if(Q.i>=QZ.length){ S.labels=true; applyLabels(); } drawQuiz(); }; }
+
+// ---------- shell ----------
+const LEG={reflex:`<span><i style="background:#2f78b5"></i>Sensory neurone</span><span><i style="background:#8e5bb5"></i>Relay neurone</span><span><i style="background:#c0392b"></i>Motor neurone</span><span><i style="background:#5f8f3a"></i>To and from the brain</span><span><i style="background:#ffd23f"></i>Nerve impulse</span>`,
+ syn:`<span><i style="background:#e07b39"></i>Neurotransmitter</span><span><i style="background:#7b5fb0"></i>Receptor (empty)</span><span><i style="background:#ffb000"></i>Receptor (filled)</span><span><i style="background:#3f9a62"></i>Drug</span><span>Magnified about 50 000 times</span>`,
+ eye:`<span><i style="background:#f2a900"></i>Light rays</span><span><i style="background:#2f78b5"></i>Image on the retina</span><span><i style="background:#ffd23f"></i>Impulses to the brain; muscles contracting</span>`};
+const BELOW={reflex:`<h2>Reflex or conscious action?</h2><div class="tbl"><table><tr><th></th><th>Reflex action</th><th>Conscious (voluntary) action</th></tr><tr><td>Speed</td><td>Very fast, about 50 ms</td><td>Slower, 200 ms or more</td></tr><tr><td>Brain involved?</td><td>No: the relay neurone is in the spinal cord</td><td>Yes: the brain decides</td></tr><tr><td>Do you think about it?</td><td>No, it is automatic</td><td>Yes</td></tr><tr><td>Same every time?</td><td>Yes</td><td>No, it can change</td></tr><tr><td>Examples</td><td>Pulling your hand from heat, blinking, the knee jerk, the pupil reflex</td><td>Writing, kicking a ball, answering a question</td></tr></table></div>`,
+ eye:`<h2>Two reflexes in the eye</h2><div class="tbl"><table><tr><th></th><th>Bright light</th><th>Dim light</th></tr><tr><td>Circular muscles of the iris</td><td>Contract</td><td>Relax</td></tr><tr><td>Radial muscles of the iris</td><td>Relax</td><td>Contract</td></tr><tr><td>Pupil</td><td>Smaller, protecting the retina</td><td>Wider, letting in more light</td></tr></table><table style="margin-top:10px"><tr><th></th><th>Looking at a near object</th><th>Looking at a distant object</th></tr><tr><td>Ciliary muscle</td><td>Contracts</td><td>Relaxes</td></tr><tr><td>Suspensory ligaments</td><td>Slack</td><td>Tight</td></tr><tr><td>Lens</td><td>Fatter: bends light more</td><td>Thinner: bends light less</td></tr></table></div>`};
+function setView(v){
+  S.view=v; document.querySelectorAll("[data-view]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.view===v));
+  const st=$("stage"); st.innerHTML=""; S.selected=null; S.quiz=null; $("legend").innerHTML=LEG[v]; $("below").hidden=!BELOW[v]; $("below").innerHTML=BELOW[v]||"";
+  if(v==="reflex"){ if(!RF) buildReflex(); st.appendChild(RF.svg); reflexSide(); }
+  else if(v==="syn"){ if(!SY) buildSyn(); st.appendChild(SY.svg); synSide(); }
+  else { if(!EY) buildEye(); st.appendChild(EY.svg); eyeSide(); }
+  undim(); applyLabels(); fitLabels(); }
+function fitLabels(){ const narrow=innerWidth<600;
+  [RF,SY,EY].forEach(V=>{ if(!V) return; V.labs.forEach(l=>{ if(!l.tx) return; const words=l.t.split(" "); l.tx.textContent=""; l.tx.setAttribute("font-size",narrow?22:16);
+    if(narrow&&words.length>1){ const cut=Math.ceil(words.length/2); [words.slice(0,cut).join(" "),words.slice(cut).join(" ")].forEach((w,i)=>{ const sp=document.createElementNS(NS,"tspan"); sp.setAttribute("x",l.x); sp.setAttribute("y",l.y+(i?12:-10)); sp.textContent=w; l.tx.appendChild(sp); }); }
+    else l.tx.textContent=l.t; }); V.ctx.setAttribute("font-size",narrow?17:13); }); }
+addEventListener("resize",fitLabels);
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("stage").addEventListener("click",e=>{ const p=e.target.closest(".part"); if(!p) return; const id=p.dataset.part;
+  if(S.view==="reflex"&&S.quiz&&!S.quiz.done&&QZ[S.quiz.i]&&QZ[S.quiz.i].tap&&!S.quiz.lock){ answer(id===QZ[S.quiz.i].tap); return; } showInfo(id); });
+$("stage").addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("part")){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click",{bubbles:true})); } });
+let last=performance.now();
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  const dt=S.playing?dtReal*S.rate*2:0; S.simTime+=dt;
+  if(S.view==="reflex"&&RF) tickReflex(dt); else if(S.view==="syn"&&SY) tickSyn(dt); else if(S.view==="eye"&&EY) tickEye(dtReal);
+  S.frameN++; requestAnimationFrame(frame); }
+setView("reflex");
+if(RM) S.playing=false;
+requestAnimationFrame(frame);
+window.__nerv={S,get RF(){return RF;},get SY(){return SY;},get EY(){return EY;},setView};
+})();
+</script></body></html>

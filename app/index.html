@@ -551,7 +551,7 @@ const APP={
 for(const k in APP) APP[k].forEach(a=>{ if(!NAMES[a.id]) NAMES[a.id]=a.name; });
 
 // ---------- levels ----------
-const LINK={pend:"labs/pendulum.html",hooke:"labs/hookes-law.html",ohm:"labs/ohms-law.html",wire:"labs/wire-resistance.html",titr:"labs/titration.html",titr3d:"labs/titration3d.html",heart:"labs/heart.html",lungs:"labs/lungs.html",digest:"labs/digestion.html",lathe:"labs/lathe.html"};
+const LINK={pend:"labs/pendulum.html",hooke:"labs/hookes-law.html",ohm:"labs/ohms-law.html",wire:"labs/wire-resistance.html",titr:"labs/titration.html",titr3d:"labs/titration3d.html",heart:"labs/heart.html",lungs:"labs/lungs.html",digest:"labs/digestion.html",nerv:"labs/nervous.html",lathe:"labs/lathe.html"};
 const tryLink=(href,t)=>`<p><button class="primary" data-sim="${href}" data-simt="${t.replace(/^Try the /,"").replace(/^./,c=>c.toUpperCase())}">${t}</button></p>`;
 const tbl=(head,rows)=>`<div class="tbl"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const SYMBOLS=`<svg viewBox="0 0 340 190" width="100%" style="max-width:420px" fill="none" stroke="currentColor" stroke-width="2" font-family="IBM Plex Sans,sans-serif" font-size="11" aria-label="Circuit symbols">
@@ -799,7 +799,7 @@ const LABS={
     practice:[{t:"3D titration bench (new)",d:"A full 3D laboratory: collect, clamp, fill, pipette and titrate to the end point",lvl:"O-Level · 3D",href:LINK.titr3d},{id:"rates",t:"Rate of reaction: magnesium and acid",d:"Collect hydrogen in a gas syringe; vary concentration and temperature",lvl:"O-Level"},
       {t:"Acid–base titration",d:"Burette, indicators and the concentration calculation",lvl:"O-Level",href:LINK.titr}]},
   biology:{name:"Biology Lab",accent:"--bio",soft:"--bio-soft",icon:"microscope",blurb:"Living material behaves as it does in the lab, variation included.",
-    practice:[{t:"Human body systems: live demonstrations",d:"The heart and circulation, breathing and gas exchange, digestion, and more systems on the way. Choose a system, then choose which parts move",lvl:"O/A-Level",go:"body"},{id:"osmosis",t:"Osmosis in potato tissue",d:"Mass change in sucrose solutions; find the isotonic point",lvl:"O-Level"}]},
+    practice:[{t:"Human body systems: live demonstrations",d:"The heart and circulation, breathing, digestion, the nervous system, and more systems on the way. Choose a system, then choose which parts move",lvl:"O/A-Level",go:"body"},{id:"osmosis",t:"Osmosis in potato tissue",d:"Mass change in sucrose solutions; find the isotonic point",lvl:"O-Level"}]},
   tvet:{name:"Workshop (TVET)",accent:"--tvet",soft:"--tvet-soft",icon:"lathe",blurb:"Industrial machine training for technical colleges and learning factories.",
     practice:[{t:"Centre lathe: turn a bar to a drawing",d:"Safety checks, speeds and feeds, tool wear, inspection",lvl:"TVET",href:LINK.lathe}]}
 };
@@ -2411,7 +2411,7 @@ function renderExplore(){
   const n=unreadCount();
   el.innerHTML=`<h2 style="font-family:var(--f-display);margin:6px 0 10px">More in LabLink</h2><div class="explore">
     <button class="excard" data-go="chem" style="--accent:var(--chem);--soft:var(--chem-soft)"><span class="ic">${svgI("flask")}</span><b>Chemicals library</b><span>${CHEM.list.length} chemicals: properties, reactions, tests and safety</span></button>
-    <button class="excard" data-go="body" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${SYSI.body}</span><b>Human body systems</b><span>Live, moving demonstrations: the heart and circulation, breathing, digestion, and more</span></button>
+    <button class="excard" data-go="body" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${SYSI.body}</span><b>Human body systems</b><span>Live, moving demonstrations: the heart, breathing, digestion, the nervous system, and more</span></button>
     <button class="excard" data-go="tutors" style="--accent:var(--navy);--soft:#e8eef8"><span class="ic">${ICONX.tutor}</span><b>Find a tutor${n?` <span class="badge-n">${n}</span>`:""}</b><span>Book lessons with verified science teachers near you or online</span></button>
     <button class="excard" data-go="groups" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${ICONX.group}</span><b>Study groups</b><span>Revise and discuss science with other learners</span></button>
     <button class="excard" data-go="faq" style="--accent:var(--orange);--soft:#fdebd6"><span class="ic">${ICONX.help}</span><b>Help and FAQ</b><span>Answers that grow from the questions learners ask</span></button>
@@ -2452,7 +2452,7 @@ const SYSTEMS=[
  {id:"circ",n:"Circulatory system",d:"The heart pumps blood through two circuits: to the lungs and to the rest of the body.",inside:["Heart in cross-section: chambers, valves and tendons","Choose which parts move; follow one blood cell","Double circulation and blood vessels"],href:"heart",t:"Body systems: the heart and circulation"},
  {id:"resp",n:"Respiratory system",d:"Breathing moves air in and out of the lungs; oxygen and carbon dioxide are exchanged in the alveoli.",inside:["Ribs, intercostal muscles and diaphragm in action","Gas exchange in an alveolus","Cilia, mucus and the effects of smoking"],href:"lungs",t:"Body systems: breathing and gas exchange"},
  {id:"dig",n:"Digestive system",d:"Food is broken down by enzymes, moved along by peristalsis and absorbed in the villi.",inside:["Follow a meal from mouth to anus: peristalsis and digestive juices","Enzymes at work: lock and key, temperature and pH","Absorption in a villus"],href:"digest",t:"Body systems: digestion"},
- {id:"nerv",n:"Nervous system",d:"Neurones carry electrical impulses; reflexes protect the body in a fraction of a second.",inside:["The reflex arc","A synapse close up","The eye and the brain"]},
+ {id:"nerv",n:"Nervous system",d:"Neurones carry electrical impulses; reflexes protect the body in a fraction of a second.",inside:["The reflex arc: pull your hand from a hot pan, then test your own reaction time","A synapse close up, with drugs and poisons","The eye and the brain: pupil reflex and focusing"],href:"nerv",t:"Body systems: the nervous system"},
  {id:"excr",n:"Excretory system",d:"The kidneys filter the blood and remove urea, excess water and salts as urine.",inside:["The kidney in section","Filtration and reabsorption in a nephron"]},
  {id:"skel",n:"Skeletal and muscular systems",d:"Bones, joints and muscles work together to support and move the body.",inside:["Antagonistic muscles at the elbow","Inside a synovial joint"]},
  {id:"endo",n:"Endocrine system",d:"Glands release hormones into the blood to control the body more slowly than nerves.",inside:["Control of blood glucose","Adrenaline: fight or flight"]},
