@@ -274,6 +274,18 @@ td.nm{font-family:var(--f-body);font-weight:600}
 .explore{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
 .excard{display:grid;gap:6px;justify-items:start;text-align:left;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;cursor:pointer}
 .excard:hover{border-color:var(--accent)}
+.sysgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.syscard{display:grid;gap:8px;align-content:start;padding:16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);min-width:0}
+.syscard.live{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.syscard.soon{background:transparent;border-style:dashed}
+.syscard .hd{display:flex;gap:12px;align-items:center}
+.syscard .ic{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
+.syscard.soon .ic{background:var(--line);color:var(--muted)}
+.syscard .ic svg{width:32px;height:32px}
+.syscard h3{font-family:var(--f-display);font-size:1.08rem;margin:0}
+.syscard p{margin:0;font-size:.9rem}
+.syscard ul{margin:0;padding-left:18px;font-size:.86rem;color:var(--muted)}
+.syscard .row{margin-top:4px}
 .excard .ic{width:46px;height:46px;border-radius:12px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
 .excard .ic svg{width:30px;height:30px}
 .excard b{font-family:var(--f-display);font-size:1.05rem}
@@ -787,7 +799,7 @@ const LABS={
     practice:[{t:"3D titration bench (new)",d:"A full 3D laboratory: collect, clamp, fill, pipette and titrate to the end point",lvl:"O-Level · 3D",href:LINK.titr3d},{id:"rates",t:"Rate of reaction: magnesium and acid",d:"Collect hydrogen in a gas syringe; vary concentration and temperature",lvl:"O-Level"},
       {t:"Acid–base titration",d:"Burette, indicators and the concentration calculation",lvl:"O-Level",href:LINK.titr}]},
   biology:{name:"Biology Lab",accent:"--bio",soft:"--bio-soft",icon:"microscope",blurb:"Living material behaves as it does in the lab, variation included.",
-    practice:[{t:"Live demonstration: breathing and gas exchange",d:"Watch the ribs and diaphragm move as the lungs fill, see oxygen diffuse into the blood in an alveolus, and see how cilia keep the airways clean",lvl:"O/A-Level · live",href:LINK.lungs},{t:"Live demonstration: the heart and circulation",d:"Watch a beating heart in cross-section, choose which parts move, and follow a blood cell round the body",lvl:"O/A-Level · live",href:LINK.heart},{id:"osmosis",t:"Osmosis in potato tissue",d:"Mass change in sucrose solutions; find the isotonic point",lvl:"O-Level"}]},
+    practice:[{t:"Human body systems: live demonstrations",d:"The heart and circulation, breathing and gas exchange, and more systems on the way. Choose a system, then choose which parts move",lvl:"O/A-Level",go:"body"},{id:"osmosis",t:"Osmosis in potato tissue",d:"Mass change in sucrose solutions; find the isotonic point",lvl:"O-Level"}]},
   tvet:{name:"Workshop (TVET)",accent:"--tvet",soft:"--tvet-soft",icon:"lathe",blurb:"Industrial machine training for technical colleges and learning factories.",
     practice:[{t:"Centre lathe: turn a bar to a drawing",d:"Safety checks, speeds and feeds, tool wear, inspection",lvl:"TVET",href:LINK.lathe}]}
 };
@@ -839,7 +851,7 @@ function go(view,lab,arg){
   if(view==="home") home(); else if(view==="lab") labView(lab); else if(view==="level") levelView(lab,arg);
   else if(view==="classwork") classworkView(); else if(view==="task") taskView(lab,arg); else if(view==="teacher") teacherView(); else if(view==="sub") subView(arg); else if(view==="bank") bankView(lab,arg); else if(view==="qedit") qeditView(arg);
   else if(view==="chem") chemView(arg); else if(view==="tutors") tutorsView(); else if(view==="lessons") lessonsView(); else if(view==="req") reqView(arg); else if(view==="tprof") tutorProfileView();
-  else if(view==="groups") groupsView(); else if(view==="group") groupView(arg); else if(view==="faq") faqView(); else if(view==="admin") adminView();
+  else if(view==="body") bodyView(); else if(view==="groups") groupsView(); else if(view==="group") groupView(arg); else if(view==="faq") faqView(); else if(view==="admin") adminView();
   else practical(lab,arg);
   window.scrollTo({top:0});
 }
@@ -859,8 +871,8 @@ function home(){
 function labView(lab){
   const L=LABS[lab];
   $("view").innerHTML=`<section><p class="eyebrow">${L.name}</p><h1>${L.name}</h1><p class="lead">${L.blurb}</p></section>
-  <div class="tabs" role="tablist">${[["levels","Levels"],["bank","Question bank"],["apparatus","Apparatus"],["practice","Free practice"]].concat(lab==="chemistry"?[["chemicals","Chemicals library"]]:[]).map(([k,t])=>`<button role="tab" data-t="${k}" aria-pressed="${state.tab===k}">${t}</button>`).join("")}</div><div id="tabbody"></div>`;
-  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="chemicals"){ go("chem","chemistry"); return; } state.tab=b.dataset.t; labView(lab); });
+  <div class="tabs" role="tablist">${[["levels","Levels"],["bank","Question bank"],["apparatus","Apparatus"],["practice","Free practice"]].concat(lab==="chemistry"?[["chemicals","Chemicals library"]]:lab==="biology"?[["body","Human body systems"]]:[]).map(([k,t])=>`<button role="tab" data-t="${k}" aria-pressed="${state.tab===k}">${t}</button>`).join("")}</div><div id="tabbody"></div>`;
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.t==="chemicals"){ go("chem","chemistry"); return; } if(b.dataset.t==="body"){ go("body","biology"); return; } state.tab=b.dataset.t; labView(lab); });
   const body=$("tabbody");
   if(state.tab==="levels"){
     body.innerHTML=`<div class="path">${L.levels.map((lv,i)=>{ const st=stars(lab,i), un=unlocked(lab,i);
@@ -871,8 +883,8 @@ function labView(lab){
   } else if(state.tab==="apparatus"){
     body.innerHTML=`<p class="lead" style="margin:0 0 10px">Tap any item to see what it does, how to use it, and a safety or accuracy tip.</p><div class="applist">${APP[lab].map(a=>`<details class="appd"><summary>${svgI(a.id)}<span><b>${esc(a.name)}</b><span class="muted">${esc(a.what)}</span></span></summary><div class="appbody"><p><b>Used to</b> ${esc(a.use)}.</p><p><b>How to use it:</b> ${esc(a.how)}</p><p class="tip"><b>Tip:</b> ${esc(a.tip)}</p></div></details>`).join("")}</div>`;
   } else {
-    body.innerHTML=`<p class="lead" style="margin:0 0 10px">Practise any time, without affecting your levels. Full bench practicals take you from collecting apparatus to the final result.</p><div class="plist">${L.practice.map((p,i)=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(p.t)}</div><div class="d">${esc(p.d)}</div></div><div class="row"><span class="pill ${p.id?"full":""}">${p.id?"Full bench":"Single experiment"} · ${p.lvl}</span>${p.id?`<button class="primary" data-p="${p.id}">Enter lab</button>`:`<button class="primary" data-sim="${p.href}" data-simt="${esc(p.t)}">Enter lab</button>`}</div></div>`).join("")}</div>`;
-    body.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>go("prac",lab,b.dataset.p));
+    body.innerHTML=`<p class="lead" style="margin:0 0 10px">Practise any time, without affecting your levels. Full bench practicals take you from collecting apparatus to the final result.</p><div class="plist">${L.practice.map((p,i)=>`<div class="prow"><div style="min-width:0;flex:1 1 240px"><div class="t">${esc(p.t)}</div><div class="d">${esc(p.d)}</div></div><div class="row"><span class="pill ${p.id?"full":""}">${p.id?"Full bench":p.go?"Live demonstrations":"Single experiment"} · ${p.lvl}</span>${p.id?`<button class="primary" data-p="${p.id}">Enter lab</button>`:p.go?`<button class="primary" data-gov="${p.go}">Open</button>`:`<button class="primary" data-sim="${p.href}" data-simt="${esc(p.t)}">Enter lab</button>`}</div></div>`).join("")}</div>`;
+    body.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>go("prac",lab,b.dataset.p)); body.querySelectorAll("[data-gov]").forEach(b=>b.onclick=()=>go(b.dataset.gov,lab));
   }
 }
 
@@ -2399,13 +2411,12 @@ function renderExplore(){
   const n=unreadCount();
   el.innerHTML=`<h2 style="font-family:var(--f-display);margin:6px 0 10px">More in LabLink</h2><div class="explore">
     <button class="excard" data-go="chem" style="--accent:var(--chem);--soft:var(--chem-soft)"><span class="ic">${svgI("flask")}</span><b>Chemicals library</b><span>${CHEM.list.length} chemicals: properties, reactions, tests and safety</span></button>
-    <button class="excard" data-sim="${LINK.heart}" data-simt="Body systems: the heart and circulation" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M4 12h4l2-3 3 6 2-3h5"/></svg></span><b>Body systems: the heart</b><span>Live, beating heart and circulation you can slow down and explore</span></button>
-    <button class="excard" data-sim="${LINK.lungs}" data-simt="Body systems: breathing and gas exchange" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M12 11c-1.5 0-2.5 1-3 2.5"/><path d="M12 11c1.5 0 2.5 1 3 2.5"/><path d="M9 8C6 8 4 12 4 16c0 3 1.5 4.5 3.5 4.5S10 19 10 16v-3"/><path d="M15 8c3 0 5 4 5 8 0 3-1.5 4.5-3.5 4.5S14 19 14 16v-3"/></svg></span><b>Body systems: breathing</b><span>Watch the lungs fill, oxygen enter the blood, and cilia sweep the airways</span></button>
+    <button class="excard" data-go="body" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${SYSI.body}</span><b>Human body systems</b><span>Live, moving demonstrations: the heart and circulation, breathing, and more</span></button>
     <button class="excard" data-go="tutors" style="--accent:var(--navy);--soft:#e8eef8"><span class="ic">${ICONX.tutor}</span><b>Find a tutor${n?` <span class="badge-n">${n}</span>`:""}</b><span>Book lessons with verified science teachers near you or online</span></button>
     <button class="excard" data-go="groups" style="--accent:var(--bio);--soft:var(--bio-soft)"><span class="ic">${ICONX.group}</span><b>Study groups</b><span>Revise and discuss science with other learners</span></button>
     <button class="excard" data-go="faq" style="--accent:var(--orange);--soft:#fdebd6"><span class="ic">${ICONX.help}</span><b>Help and FAQ</b><span>Answers that grow from the questions learners ask</span></button>
     ${NETME&&NETME.admin?`<button class="excard" data-go="admin" style="--accent:var(--good);--soft:#e3f1e8"><span class="ic">${ICONX.shield}</span><b>Admin</b><span>Verify tutors, payments, reports and FAQ answers</span></button>`:""}</div>`;
-  el.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,b.dataset.go==="chem"?"chemistry":null));
+  el.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go,{chem:"chemistry",body:"biology"}[b.dataset.go]||null));
 }
 const ICONX={
   tutor:`<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="7" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M15 4h6v6h-6zM16.5 7.5l1.2 1.2 2-2.4"/></svg>`,
@@ -2427,6 +2438,32 @@ function chemBody(c){
   <div class="msg caution" style="margin:12px 0"><b>Safety:</b> ${esc(c.safety)}</div>
   <h3>Uses</h3><ul>${c.uses.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`;
 }
+const SYSI={
+ body:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 9.5h8M12 14l-3 7M12 14l3 7"/><path d="M5 10l3-.5M19 10l-3-.5"/></svg>`,
+ circ:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M4 12h4l2-3 3 6 2-3h5"/></svg>`,
+ resp:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v8"/><path d="M12 11c-1.5 0-2.5 1-3 2.5"/><path d="M12 11c1.5 0 2.5 1 3 2.5"/><path d="M9 8C6 8 4 12 4 16c0 3 1.5 4.5 3.5 4.5S10 19 10 16v-3"/><path d="M15 8c3 0 5 4 5 8 0 3-1.5 4.5-3.5 4.5S14 19 14 16v-3"/></svg>`,
+ dig:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v5c0 1.5-4 2.5-4 7a5.5 5.5 0 0 0 10.5 2.3c.8-1.8-.3-3.3-2-3.3h-1.5c-1.2 0-2-.8-2-2V2"/><path d="M14 19c0 2-1.5 3-3 3"/></svg>`,
+ nerv:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="7" r="2.5"/><path d="M5 5L3 3M5 9L3 11M9 5l2-2M9.5 7.5L19 17"/><path d="M19 17l2 0M19 17l0 2M19 17l1.5-1.5"/></svg>`,
+ excr:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3C5 3 3 6 3 10s2 8 5 8 3.5-2.5 2.5-4.5S10 10 11 9s0-6-3-6z"/><path d="M16 3c3 0 5 3 5 7s-2 8-5 8-3.5-2.5-2.5-4.5S14 10 13 9s0-6 3-6z"/><path d="M9.5 15.5L11 21M14.5 15.5L13 21"/></svg>`,
+ skel:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8l8 8"/><path d="M8 8a2 2 0 1 0-3-1 2 2 0 1 0 1 3"/><path d="M16 16a2 2 0 1 0 3 1 2 2 0 1 0-1-3"/></svg>`,
+ endo:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/></svg>`,
+ repro:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="14" r="5"/><path d="M14 9l6-6M15 3h5v5"/></svg>`};
+const SYSTEMS=[
+ {id:"circ",n:"Circulatory system",d:"The heart pumps blood through two circuits: to the lungs and to the rest of the body.",inside:["Heart in cross-section: chambers, valves and tendons","Choose which parts move; follow one blood cell","Double circulation and blood vessels"],href:"heart",t:"Body systems: the heart and circulation"},
+ {id:"resp",n:"Respiratory system",d:"Breathing moves air in and out of the lungs; oxygen and carbon dioxide are exchanged in the alveoli.",inside:["Ribs, intercostal muscles and diaphragm in action","Gas exchange in an alveolus","Cilia, mucus and the effects of smoking"],href:"lungs",t:"Body systems: breathing and gas exchange"},
+ {id:"dig",n:"Digestive system",d:"Food is broken down by enzymes, moved along by peristalsis and absorbed in the villi.",inside:["Peristalsis along the gut","Enzymes at work","Absorption in a villus"]},
+ {id:"nerv",n:"Nervous system",d:"Neurones carry electrical impulses; reflexes protect the body in a fraction of a second.",inside:["The reflex arc","A synapse close up","The eye and the brain"]},
+ {id:"excr",n:"Excretory system",d:"The kidneys filter the blood and remove urea, excess water and salts as urine.",inside:["The kidney in section","Filtration and reabsorption in a nephron"]},
+ {id:"skel",n:"Skeletal and muscular systems",d:"Bones, joints and muscles work together to support and move the body.",inside:["Antagonistic muscles at the elbow","Inside a synovial joint"]},
+ {id:"endo",n:"Endocrine system",d:"Glands release hormones into the blood to control the body more slowly than nerves.",inside:["Control of blood glucose","Adrenaline: fight or flight"]},
+ {id:"repro",n:"Reproductive system",d:"How human reproduction works, from gametes to the growing fetus.",inside:["Male and female systems","The menstrual cycle","The placenta"]}];
+function bodyView(){
+  const live=SYSTEMS.filter(x=>x.href), soon=SYSTEMS.filter(x=>!x.href);
+  const card=x=>`<div class="syscard ${x.href?"live":"soon"}"><div class="hd"><span class="ic">${SYSI[x.id]}</span><div style="min-width:0"><h3>${esc(x.n)}</h3><span class="pill ${x.href?"full":""}">${x.href?"Live · O/A-Level":"Coming soon"}</span></div></div><p>${esc(x.d)}</p>
+    <ul>${x.inside.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>${x.href?`<div class="row"><button class="primary" data-sim="${LINK[x.href]}" data-simt="${esc(x.t)}">Open the demonstration</button></div>`:""}</div>`;
+  $("view").innerHTML=`<section><p class="eyebrow">Biology Lab · live demonstrations</p><h1>Human body systems</h1><p class="lead">Each system is a live, moving model. Slow it down, choose which parts move, tap any part to learn what it does, then test yourself.</p></section>
+    <h2 style="font-family:var(--f-display);margin:6px 0 10px">Ready to explore</h2><div class="sysgrid">${live.map(card).join("")}</div>
+    <h2 style="font-family:var(--f-display);margin:22px 0 10px">Coming next</h2><div class="sysgrid">${soon.map(card).join("")}</div>`; }
 function chemView(id){
   if(id&&CH[id]) return chemItem(id);
   $("view").innerHTML=`<section><p class="eyebrow">Chemistry Lab · reference</p><h1>Chemicals library</h1><p class="lead">${CHEM.list.length} common laboratory chemicals. Each lesson covers what the chemical looks like, its physical and chemical properties, its key reactions with balanced equations, how to test for it and how to handle it safely, with a short quiz.</p></section>
