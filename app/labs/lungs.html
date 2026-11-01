@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Body Systems: Breathing</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: view tabs on top; stage (live SVG) left, control and explanation panel right; stacks on phones */
+:root{--navy:#023d84;--orange:#f58300;--bio:#2f7d4f;--bio-soft:#e3f1e8;--ink:#17221f;--muted:#5a6966;--line:#d3dbd8;--bg:#eef1f0;--panel:#fff;
+ --deoxy:#2f4ea0;--oxy:#d4232f;--muscle:#d9726a;--muscle-d:#a94a43;--cav-r:#d9def3;--cav-l:#f7d3d0;--warn:#b4442f;--good:#2f7d4f;
+ --f-display:"Montserrat",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{font-family:var(--f-display);font-size:1.15rem;margin:0;color:var(--navy)}
+.top .sub{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--bio)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:var(--f-body);font-weight:600;font-size:.88rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--bio)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button[aria-pressed=true]{background:var(--bio-soft);border-color:var(--bio);color:var(--bio)}
+button.primary{background:var(--bio);border-color:var(--bio);color:#fff}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px max(14px,env(safe-area-inset-right,0px)) 24px max(14px,env(safe-area-inset-left,0px));max-width:1280px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:0;position:relative}
+.stage svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.side{display:grid;gap:12px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h2{font-family:var(--f-display);font-size:.98rem;margin:0 0 8px;color:var(--navy)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--panel);cursor:pointer;min-height:34px}
+.chip input{margin:0;accent-color:var(--bio);width:16px;height:16px}
+.chip .sw{width:10px;height:10px;border-radius:50%}
+.phase{font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--bio)}
+.phasebar{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;height:10px;border-radius:99px;overflow:hidden;margin:6px 0 2px;position:relative;background:var(--line)}
+.phasebar i{display:block} .phasebar i:nth-child(1){background:#f1b36b} .phasebar i:nth-child(2){background:#e0645c} .phasebar i:nth-child(3){background:#9cc7ad}
+.phasebar b{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.plabels{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;font-size:.68rem;color:var(--muted);font-family:var(--f-mono)}
+.vstate{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.86rem;margin-top:8px}
+.op{font-family:var(--f-mono);font-weight:500;color:var(--good)} .cl{font-family:var(--f-mono);font-weight:500;color:var(--warn)}
+.ctl{display:grid;gap:4px;margin-top:8px}
+.ctl label{display:flex;justify-content:space-between;font-size:.84rem;font-weight:500}
+.ctl label span{font-family:var(--f-mono);color:var(--bio)}
+input[type=range]{width:100%;accent-color:var(--bio)}
+.info h3{font-family:var(--f-display);margin:0 0 4px;font-size:1rem}
+.info p{margin:4px 0;font-size:.9rem}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.68rem;border-radius:99px;padding:1px 8px;border:1px solid}
+.tag.o{color:var(--oxy);border-color:var(--oxy)} .tag.d{color:var(--deoxy);border-color:var(--deoxy)}
+.follow{font-size:.9rem;background:#fff7ec;border-left:3px solid var(--orange);padding:8px 10px;border-radius:6px;margin-top:8px}
+.note{font-size:.78rem;color:var(--muted)}
+.part{cursor:pointer}
+.part:focus{outline:none}
+.lbl{font-family:var(--f-body);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.lbl.small{font-weight:500}
+.dim{opacity:.28;transition:opacity .2s}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-weight:500;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tbl{overflow-x:auto}
+.q p{margin:4px 0 8px}
+.opts{display:grid;gap:6px}
+.opts button{text-align:left;font-weight:500;justify-content:flex-start}
+.opts .right{border-color:var(--good);box-shadow:inset 0 0 0 2px var(--good)} .opts .wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.msg{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bio-soft);border-left:3px solid var(--bio);margin-top:8px}
+.msg.warn{background:#fbe7e3;border-left-color:var(--warn)}
+@media (max-width:600px){svg .cz{font-size:21px} svg .cz-h{font-size:22px} svg .cz-s{font-size:17px} svg .vz-h{font-size:25px} svg .vz,svg .vz-s{font-size:15px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted);padding:4px 8px 6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+</style></head><body>
+<div class="top"><div><div class="sub">STEMLight LabLink · Biology Lab · live demonstration</div><h1>Body systems: breathing and gas exchange</h1></div>
+<div class="tabs" role="tablist" aria-label="Views"><button data-view="breath" aria-pressed="true">Breathing</button><button data-view="gas" aria-pressed="false">Gas exchange in an alveolus</button><button data-view="air" aria-pressed="false">Airways and cilia</button></div></div>
+<div class="wrap">
+ <div><div class="stage" id="stage"></div>
+  <div class="legend" id="legend"></div>
+  <div class="card" id="below" hidden></div></div>
+ <div class="side" id="side"></div>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), f1=n=>n.toFixed(1);
+const OXY=[212,35,47], DEOXY=[47,78,160];
+const mixc=t=>`rgb(${OXY.map((v,i)=>Math.round(lerp(DEOXY[i],v,clamp(t,0,1)))).join(",")})`;
+const RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const svgEl=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; };
+// smooth curve through points (Catmull-Rom as cubic Beziers)
+function smooth(P,closed){ const n=P.length, g=i=>closed?P[(i+n)%n]:P[clamp(i,0,n-1)]; let d=`M${f1(P[0][0])} ${f1(P[0][1])}`;
+  for(let i=0;i<(closed?n:n-1);i++){ const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);
+    d+=` C${f1(p1[0]+(p2[0]-p0[0])/6)} ${f1(p1[1]+(p2[1]-p0[1])/6)} ${f1(p2[0]-(p3[0]-p1[0])/6)} ${f1(p2[1]-(p3[1]-p1[1])/6)} ${f1(p2[0])} ${f1(p2[1])}`; }
+  return d+(closed?" Z":""); }
+// route through waypoints with arc length, for blood cells in a capillary
+function mkRoute(pts){ const P=[]; for(let i=0;i<pts.length-1;i++){ const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];
+    for(let k=0;k<12;k++){ const t=k/12,t2=t*t,t3=t2*t, f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3); P.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])]); } }
+  P.push(pts.at(-1)); const cum=[0]; for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+  return {P,cum,L:cum.at(-1),at(s){ s=clamp(s,0,this.L-0.01); let lo=1,hi=P.length-1; while(lo<hi){ const m=(lo+hi)>>1; if(cum[m]<s) lo=m+1; else hi=m; }
+    const a=P[lo-1],b=P[lo],t=(s-cum[lo-1])/((cum[lo]-cum[lo-1])||1); return {x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,ang:Math.atan2(b[1]-a[1],b[0]-a[0])}; }}; }
+const inPoly=(x,y,P)=>{ let c=false; for(let i=0,j=P.length-1;i<P.length;j=i++){ const [xi,yi]=P[i],[xj,yj]=P[j]; if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi)) c=!c; } return c; };
+let seed=7; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+
+// ---------- shared state ----------
+const S={view:"breath",playing:!RM,rate:0.5,bpm:12,t:0,labels:true,mode:"rest",deepReq:false,stepTo:null,simTime:0,hist:[],quiz:null,selected:null,
+  cyc:{a:0.55,top:2.9,bot:2.4,prevBot:2.4,deep:false},
+  move:{ribs:true,diaphragm:true,air:true,glow:true},pneumo:false,
+  gas:{o2:true,co2:true,blood:true,breath:true,exercise:false,emph:false,fluid:false},
+  air:{smoke:false,cough:0,cilia:true,particles:true}};
+const PH=[{k:"IN",name:"Breathing in",a:0,b:0.4},{k:"OUT",name:"Breathing out",a:0.4,b:1}];
+const phaseOf=t=>t<0.4?PH[0]:PH[1];
+const vOf=t=>t<0.4?0.5-0.5*Math.cos(Math.PI*t/0.4):0.5+0.5*Math.cos(Math.PI*(t-0.4)/0.6);
+const dvOf=t=>t<0.4?0.5*Math.PI/0.4*Math.sin(Math.PI*t/0.4):-0.5*Math.PI/0.6*Math.sin(Math.PI*(t-0.4)/0.6);
+function newCycle(){ const c=S.cyc; c.prevBot=c.bot;
+  if(S.deepReq){ S.deepReq=false; Object.assign(c,{deep:true,a:1,top:5.4,bot:1.4}); }
+  else if(S.mode==="ex") Object.assign(c,{deep:false,a:0.8,top:3.9,bot:2.0});
+  else Object.assign(c,{deep:false,a:0.55,top:2.9,bot:2.4}); }
+function volume(){ const c=S.cyc, v=vOf(S.t), ph=phaseOf(S.t), base=ph.k==="IN"?c.prevBot:c.bot; return {V:lerp(base,c.top,v),dV:(c.top-base)*dvOf(S.t)*S.bpm/60,v,ph}; }
+
+const PARTS={
+ larynx:{n:"Larynx (voice box)",t:"The top of the trachea. It contains the vocal cords. Air passes through it on the way in and out of the lungs."},
+ trachea:{n:"Trachea (windpipe)",t:"Carries air from the throat to the lungs. C-shaped rings of cartilage hold it open so it never collapses, even when the pressure inside falls. It is lined with cells that have cilia and cells that make mucus."},
+ bronchus:{n:"Bronchi",t:"The trachea divides into two bronchi, one going into each lung. Like the trachea, they are held open by rings of cartilage."},
+ bronchiole:{n:"Bronchioles",t:"The bronchi branch again and again into thousands of narrower tubes called bronchioles. They have no cartilage, but they do have smooth muscle: in an asthma attack this muscle tightens and makes breathing difficult."},
+ lung:{n:"Lungs",t:"Spongy organs made of millions of tiny air sacs (alveoli) and the blood capillaries around them. They are not muscles: they expand and shrink only because the chest around them changes size."},
+ alveoli:{n:"Alveoli",t:"Tiny air sacs at the ends of the bronchioles, covered in blood capillaries. This is where oxygen diffuses into the blood and carbon dioxide diffuses out. Open the Gas exchange tab to watch it happen."},
+ pleura:{n:"Pleural membranes",t:"Two thin membranes: one covers each lung, the other lines the inside of the chest. A thin layer of fluid between them lets the lungs slide smoothly, and holds the lungs against the chest wall so they follow it outwards. If the chest wall is punctured, air gets in between the membranes and the lung collapses."},
+ rib:{n:"Ribs",t:"Bones that protect the heart and lungs. When you breathe in, the external intercostal muscles pull the ribs upwards and outwards, which makes the chest bigger."},
+ intercostal:{n:"Intercostal muscles",t:"Muscles between the ribs. The external intercostal muscles contract when you breathe in, raising the ribs. The internal intercostal muscles contract when you breathe out forcefully, for example during exercise or coughing, pulling the ribs down and in."},
+ diaphragm:{n:"Diaphragm",t:"A dome-shaped sheet of muscle under the lungs. When it contracts it flattens and moves down, making the chest taller. When it relaxes, it returns to its dome shape."},
+ heart:{n:"Heart",t:"Sits between the two lungs. The pulmonary arteries carry deoxygenated blood from it to the lungs, and the pulmonary veins bring oxygenated blood back."},
+ abdomen:{n:"Liver and stomach",t:"Organs of the abdomen, below the diaphragm. When the diaphragm contracts it pushes them down; that is why your belly moves out when you breathe in deeply."},
+ alv:{n:"Alveolus",t:"A tiny air sac. Its wall is only one cell thick and it is lined with a thin film of moisture, so gases dissolve and diffuse across very quickly."},
+ alvwall:{n:"Alveolus wall",t:"Made of a single layer of very thin, flattened cells. Together with the capillary wall, the gases have to cross less than a thousandth of a millimetre."},
+ lining:{n:"Moist lining",t:"Oxygen dissolves in this thin layer of water before it diffuses across the wall into the blood."},
+ cap:{n:"Capillary",t:"The narrowest blood vessel. Its wall is one cell thick and it is so narrow that red blood cells pass in single file, pressed close to the wall: this shortens the distance oxygen has to diffuse. Blood keeps flowing, carrying oxygen away, so the concentration gradient is kept steep."},
+ rbc:{n:"Red blood cells",t:"Contain haemoglobin, which combines with oxygen to form oxyhaemoglobin. Arriving from the body they are low in oxygen (shown blue); they leave full of oxygen (shown red)."},
+ plasma:{n:"Plasma",t:"The liquid part of blood. Most carbon dioxide is carried in the plasma as hydrogencarbonate ions; it diffuses out into the alveolus."},
+ bronchiole2:{n:"Bronchiole",t:"Air moves in and out of the alveolus through the bronchiole. Breathing keeps bringing in fresh air with a high oxygen concentration and taking away air with a high carbon dioxide concentration. This keeps the concentration gradients steep."},
+ cilia:{n:"Cilia",t:"Tiny hairs on the cells lining the airways. They beat in waves, sweeping mucus (and the dirt and bacteria trapped in it) up towards the throat, where it is swallowed. Tar in cigarette smoke stops the cilia beating."},
+ mucus:{n:"Mucus",t:"A sticky liquid that traps dust, pollen and bacteria before they reach the alveoli."},
+ goblet:{n:"Goblet cells",t:"Cells that make mucus and release it onto the surface of the airway. Cigarette smoke makes them produce more mucus."},
+ ciliated:{n:"Ciliated cells",t:"Column-shaped cells lining the trachea and bronchi. Each has many cilia on its free surface."},
+ cart:{n:"Cartilage",t:"Tough, flexible tissue that forms the C-shaped rings of the trachea and bronchi, keeping the airways open."},
+ particles:{n:"Dust, pollen and bacteria",t:"Breathed in with the air. Most are trapped in the mucus before they can reach the delicate alveoli."}};
+
+// ============================================================
+// BREATHING (front section through the chest)
+// ============================================================
+const BW=y=>95+97*Math.sin(clamp((y-150)/330,0,1)*Math.PI/2);
+const RIBY=[...Array(9)].map((_,k)=>168+k*38);
+function geom(gR,gD){
+  const W=y=>BW(y)+gR*26*(0.3+0.7*clamp((y-150)/370,0,1));
+  const yc=470+gD*26, ye=540-gR*4, Wb=W(520);
+  const dia=(s,u)=>({x:400+s*(60+u*(Wb-60)),y:lerp(yc,ye,u)-(112-gD*64)*(s<0?1.08:0.92)*Math.sin(Math.PI*Math.pow(u,1.5))});
+  return {gR,gD,W,yc,ye,Wb,dia}; }
+// heart borders (offset from the midline) for a given height
+const hr=(y,yc)=>y<318?0:30+22*Math.sin(Math.PI*clamp((y-318)/(yc-300),0,1));
+const hl=(y,yc)=>y<318?0:30+50*Math.sin(Math.PI*0.5*Math.pow(clamp((y-318)/(yc-330),0,1),1.1));
+function cavityPts(G,s,inset){ const P=[], W=G.W, yc=G.yc;
+  P.push([400+s*(58+inset),156+inset]); P.push([400+s*80,141+inset]);
+  for(let y=162;y<=500;y+=24) P.push([400+s*(W(y)-inset),y]);
+  const m=(s<0?54:82)+8, umin=Math.max(0.02,(m-60)/(G.Wb-60));
+  for(let u=0.97;u>=umin;u-=0.08){ const d=G.dia(s,u); P.push([d.x-s*inset*0.4,d.y-inset]); }
+  const dEnd=G.dia(s,umin); const yTop=dEnd.y-inset;
+  for(let y=Math.min(yTop-14,yc-20);y>=180;y-=22){ const off=Math.max(y<300?50:38,(s<0?hr(y,yc):hl(y,yc))+8); P.push([400+s*(off+inset),y]); }
+  return P; }
+function shrink(P,cx,cy,k){ return P.map(([x,y])=>[cx+(x-cx)*k,cy+(y-cy)*k]); }
+let B=null;
+function buildBreath(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 640",role:"img","aria-label":"Live section through the chest showing breathing"});
+  svgEl("defs",{},svg).innerHTML=`
+   <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e6b597"/><stop offset=".18" stop-color="#f4d0b8"/><stop offset=".82" stop-color="#f4d0b8"/><stop offset="1" stop-color="#e6b597"/></linearGradient>
+   <radialGradient id="lungG" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#f7c7c6"/><stop offset=".7" stop-color="#eaa2a5"/><stop offset="1" stop-color="#d98289"/></radialGradient>
+   <pattern id="alvP" width="14" height="12" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="3.1" fill="none" stroke="#c97a80" stroke-width=".7" opacity=".55"/><circle cx="11" cy="9" r="2.6" fill="none" stroke="#c97a80" stroke-width=".7" opacity=".45"/></pattern>
+   <radialGradient id="liverG" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#a5503f"/><stop offset="1" stop-color="#6d2b22"/></radialGradient>
+   <radialGradient id="stomG" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#f2b9b0"/><stop offset="1" stop-color="#d9877f"/></radialGradient>
+   <radialGradient id="heartG" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#e0716a"/><stop offset="1" stop-color="#9b302d"/></radialGradient>
+   <radialGradient id="boneG" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#e6dac0"/></radialGradient>
+   <clipPath id="insetClip"><circle cx="716" cy="470" r="56"/></clipPath>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent,extra)=>svgEl("g",Object.assign({class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},extra||{}),parent||g);
+  const body=svgEl("path",{fill:"url(#skin)",stroke:"#b98a6c","stroke-width":2},g);
+  const abd=svgEl("path",{fill:"#f5ddcd"},g);
+  // intestines (static loops in the lower abdomen)
+  const gut=svgEl("g",{opacity:.9},g);
+  [[330,610],[400,600],[470,612],[365,640],[435,640]].forEach(([x,y])=>svgEl("ellipse",{cx:x,cy:y,rx:34,ry:18,fill:"#f2c3b4",stroke:"#cf9483","stroke-width":1.5},gut));
+  const abG=part("abdomen");
+  const liver=svgEl("path",{fill:"url(#liverG)",stroke:"#5a2119","stroke-width":1.5},abG);
+  const stom=svgEl("path",{fill:"url(#stomG)",stroke:"#a95e57","stroke-width":1.5},abG);
+  // great vessels and heart between the lungs
+  const vess=svgEl("g",{"pointer-events":"none"},g);
+  svgEl("path",{d:"M378 336 L378 200",stroke:"#4b66b8","stroke-width":14,fill:"none"},vess);
+  svgEl("path",{d:"M410 330 C408 232, 420 206, 444 206 C468 206, 474 230, 470 300",stroke:"#c7333b","stroke-width":15,fill:"none"},vess);
+  svgEl("path",{d:"M426 334 C428 300, 440 288, 462 286",stroke:"#4b66b8","stroke-width":12,fill:"none"},vess);
+  const hG=part("heart"); const heart=svgEl("path",{fill:"url(#heartG)",stroke:"#6b1c1a","stroke-width":1.6},hG);
+  // pleural cavities and lungs
+  const pl=part("pleura"), cav={}, lung={}, lungTex={}, fiss={};
+  [-1,1].forEach(s=>{ cav[s]=svgEl("path",{fill:"#cde7f5",stroke:"#5d89b8","stroke-width":1.6},pl); });
+  const lg=part("lung");
+  [-1,1].forEach(s=>{ lung[s]=svgEl("path",{fill:"url(#lungG)",stroke:"#5d89b8","stroke-width":1.2},lg); lungTex[s]=svgEl("path",{fill:"url(#alvP)","pointer-events":"none"},lg); fiss[s]=svgEl("path",{fill:"none",stroke:"#b5646c","stroke-width":1.6,opacity:.8},lg); });
+  const pneumoTxt=svgEl("text",{x:238,y:430,"text-anchor":"middle","font-size":13,class:"lbl small",visibility:"hidden",transform:"rotate(-80 238 430)"},g); pneumoTxt.textContent="air in the pleural cavity";
+  // bronchial tree (generated once at rest, stretched as the lungs expand)
+  const G0=geom(0,0), rest={}; [-1,1].forEach(s=>rest[s]=cavityPts(G0,s,6));
+  const trees={}, treeEl={};
+  const brG=part("bronchiole",g,{"pointer-events":"stroke"});
+  [-1,1].forEach(s=>{ const segs=[], P=rest[s], hx=400+s*66, hy=266; seed=s<0?11:23;
+    const grow=(x,y,ang,len,w,depth)=>{ let ex=x+Math.cos(ang)*len, ey=y+Math.sin(ang)*len, n=0; while(!inPoly(ex,ey,shrink(P,hx,hy,0.92))&&n++<6){ len*=0.75; ex=x+Math.cos(ang)*len; ey=y+Math.sin(ang)*len; } if(n>=6) return;
+      segs.push({x1:x,y1:y,x2:ex,y2:ey,w}); if(depth<4){ const sp=0.38+rnd()*0.22; grow(ex,ey,ang-sp,len*0.74,w*0.68,depth+1); grow(ex,ey,ang+sp*0.9,len*0.7,w*0.66,depth+1); } };
+    const A=s<0?[-2.05,Math.PI,2.1]:[-1.1,0,1.0]; const lens=s<0?[58,48,66]:[58,40,66];
+    A.forEach((a,i)=>grow(hx,hy,a,lens[i],7,1));
+    trees[s]=segs; treeEl[s]={o:svgEl("path",{fill:"none",stroke:"#c77f84","stroke-linecap":"round","stroke-width":1},brG),lay:[]};
+    [6,4,2.6,1.6].forEach((w,i)=>{ treeEl[s].lay.push({w,o:svgEl("path",{fill:"none",stroke:"#b06a70","stroke-linecap":"round","stroke-width":w+2.4},brG),i:svgEl("path",{fill:"none",stroke:"#fff3ee","stroke-linecap":"round","stroke-width":w},brG)}); }); });
+  // trachea, larynx and bronchi with cartilage rings
+  const tr=part("trachea");
+  svgEl("path",{d:"M383 44 L383 236 Q383 248 372 254 M417 44 L417 236 Q417 248 428 254",fill:"none",stroke:"#9b5a55","stroke-width":2},tr);
+  svgEl("rect",{x:384,y:44,width:32,height:204,fill:"#eebab2"},tr);
+  for(let y=52;y<238;y+=14) svgEl("path",{d:`M384 ${y} Q400 ${y+5} 416 ${y}`,fill:"none",stroke:"#f8efe0","stroke-width":6,"stroke-linecap":"round"},tr);
+  const lx=part("larynx"); svgEl("path",{d:"M370 0 L370 22 Q372 40 384 46 L416 46 Q428 40 430 22 L430 0 Z",fill:"#f1d6c6",stroke:"#9b5a55","stroke-width":2},lx); svgEl("path",{d:"M378 14 L400 30 L422 14",fill:"none",stroke:"#c69a87","stroke-width":3},lx);
+  const bz=part("bronchus");
+  [-1,1].forEach(s=>{ const d=`M400 244 Q${400+s*30} 250 ${400+s*66} 266`; svgEl("path",{d,fill:"none",stroke:"#9b5a55","stroke-width":21},bz); svgEl("path",{d,fill:"none",stroke:"#eebab2","stroke-width":17},bz);
+    [0.3,0.55,0.8].forEach(t=>{ const x=400+s*66*t, y=244+22*t*t+4*t; svgEl("path",{d:`M${x-s*3} ${y-8} L${x+s*3} ${y+8}`,stroke:"#f8efe0","stroke-width":5,"stroke-linecap":"round"},bz); }); });
+  // diaphragm
+  const dg=part("diaphragm"); const dia=svgEl("path",{fill:"none",stroke:"#b8463f","stroke-width":13,"stroke-linecap":"round"},dg); const diaFib=svgEl("path",{fill:"none",stroke:"#7f2a25","stroke-width":13,"stroke-dasharray":"1.5 5",opacity:.5},dg);
+  const tendon=svgEl("path",{fill:"none",stroke:"#eadcc6","stroke-width":13},dg); const diaGlow=svgEl("path",{fill:"none",stroke:"#ffd23f","stroke-width":13,opacity:0,"stroke-linecap":"round","pointer-events":"none"},dg);
+  // ribs and intercostal muscles
+  const icG=part("intercostal"), ribG=part("rib"); const ribs=[], ics=[];
+  [-1,1].forEach(s=>{ RIBY.forEach((y,k)=>{ const e=svgEl("ellipse",{rx:8.5,ry:13,fill:"url(#boneG)",stroke:"#a8956b","stroke-width":1.6},ribG); const m=svgEl("ellipse",{rx:3,ry:5,fill:"#e9c9a8"},ribG); ribs.push({s,k,y,e,m}); });
+    for(let k=0;k<8;k++){ const ext=svgEl("line",{stroke:"#b84a43","stroke-width":7,"stroke-linecap":"round"},icG), extF=svgEl("line",{stroke:"#fff","stroke-width":7,"stroke-dasharray":"1.2 3.2",opacity:.28},icG), int=svgEl("line",{stroke:"#8f3631","stroke-width":5.5,"stroke-linecap":"round"},icG), gE=svgEl("line",{stroke:"#ffd23f","stroke-width":7,opacity:0,"stroke-linecap":"round"},icG), gI=svgEl("line",{stroke:"#ffd23f","stroke-width":5.5,opacity:0,"stroke-linecap":"round"},icG); ics.push({s,k,ext,extF,int,gE,gI}); } });
+  // air particles
+  const airG=svgEl("g",{"pointer-events":"none"},g), air=[];
+  for(let i=0;i<64;i++){ const s=i%2?1:-1; let tx,ty,n=0; do{ tx=400+s*(70+rnd()*150); ty=150+rnd()*330; n++; } while(!inPoly(tx,ty,shrink(rest[s],400+s*66,266,0.85))&&n<200);
+    air.push({s,tx,ty,p0:rnd()*0.62,off:(rnd()*2-1)*10,el:svgEl("circle",{r:3.6,stroke:"#fff","stroke-width":1},airG)}); }
+  // alveoli inset (zoom)
+  const inG=part("alveoli");
+  svgEl("circle",{cx:578,cy:404,r:9,fill:"none",stroke:"#3d4846","stroke-width":1.4,"stroke-dasharray":"3 2"},inG);
+  svgEl("path",{d:"M585 398 L668 440 M584 412 L664 506",stroke:"#3d4846","stroke-width":1,"stroke-dasharray":"3 2",fill:"none"},inG);
+  const ins=svgEl("g",{"clip-path":"url(#insetClip)"},inG); svgEl("circle",{cx:716,cy:470,r:56,fill:"#fbe9e6"},ins);
+  svgEl("path",{d:"M716 404 L716 440",stroke:"#d48c8f","stroke-width":12,fill:"none"},ins); svgEl("path",{d:"M716 404 L716 440",stroke:"#f4fbff","stroke-width":7,fill:"none"},ins);
+  [[700,452],[732,452],[690,476],[716,474],[742,476],[700,498],[730,498],[716,520]].forEach(([x,y])=>{ svgEl("circle",{cx:x,cy:y,r:14,fill:"#f4fbff",stroke:"#d48c8f","stroke-width":2.4},ins); });
+  ["M672 450 C690 440, 700 470, 690 490 C682 510, 700 530, 720 528","M760 448 C744 444, 736 470, 746 490 C756 510, 744 530, 724 534","M680 500 C700 490, 730 492, 752 504"].forEach((d,i)=>svgEl("path",{d,fill:"none",stroke:i===1?"#d42a35":"#3c5ab0","stroke-width":2.4},ins));
+  svgEl("circle",{cx:716,cy:470,r:56,fill:"none",stroke:"#3d4846","stroke-width":1.6},inG);
+  // labels: left column ends at x 160, right column starts at x 640
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const G1=geom(0.3,0.3), ribPt=(s,k)=>[400+s*(G1.W(RIBY[k])+13),RIBY[k]];
+  const L=[["larynx","Larynx",160,30,372,26],["trachea","Trachea",160,104,384,120],["rib","Ribs",160,196,...ribPt(-1,1)],["intercostal","Intercostal muscles",160,262,ribPt(-1,2)[0]+2,RIBY[2]+19],
+   ["bronchiole","Bronchioles",160,330,320,330],["pleura","Pleural membranes",160,404,400-G1.W(404)+3,404],["diaphragm","Diaphragm",160,500,G1.dia(-1,0.82).x,G1.dia(-1,0.82).y+2],["abdomen","Liver",160,592,290,560],
+   ["bronchus","Bronchus",640,212,438,256],["lung","Lungs",640,286,540,300],["heart","Heart",640,370,450,410],["alveoli","Alveoli",716,548,716,528]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=Math.abs(x-ax)<10?"middle":x<ax?"end":"start";
+    const ln=anchor==="middle"?null:svgEl("line",{x1:x+(x<ax?5:-5),y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp);
+    if(ln) svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const c1=svgEl("text",{x:440,y:20},ctx); c1.textContent="air in and out";
+  B={svg,body,abd,liver,stom,heart,cav,lung,lungTex,fiss,trees,treeEl,dia,diaFib,tendon,diaGlow,ribs,ics,air,labs,ctx,pneumoTxt,rest};
+  return svg; }
+function tickBreath(){
+  const {V,dV,v,ph}=volume(), c=S.cyc, gv=c.a*v;
+  const gR=S.move.ribs?gv:0, gD=S.move.diaphragm?gv:0, G=geom(gR,gD), W=G.W, yc=G.yc;
+  // body outline
+  const bp=[[352,-10],[352,44],[326,72],[250,92],[190,112],[168,150]]; for(let y=200;y<=620;y+=45) bp.push([400-(Math.max(W(Math.min(y,520)),168)+44),y]); bp.push([400-(W(520)+44),660]);
+  const right=bp.slice().reverse().map(([x,y])=>[800-x,y]); B.body.setAttribute("d",smooth(bp.concat([[400,662]]).concat(right),false)+" Z");
+  // abdomen space under the diaphragm
+  const ab=[]; for(let u=1;u>=0;u-=0.1){ const d=G.dia(-1,u); ab.push([d.x,d.y+7]); } for(let u=0;u<=1;u+=0.1){ const d=G.dia(1,u); ab.push([d.x,d.y+7]); }
+  B.abd.setAttribute("d",smooth(ab,false)+` L${f1(400+W(520)+30)} 660 L${f1(400-W(520)-30)} 660 Z`);
+  const lv=[]; for(let u=0.97;u>=0.02;u-=0.1){ const d=G.dia(-1,u); lv.push([d.x+2,d.y+9]); } lv.push([418,yc+14],[396,yc+56],[330,yc+86],[250,yc+92],[400-W(520)+10,yc+72]);
+  B.liver.setAttribute("d",smooth(lv,true));
+  const st=[]; for(let u=0.2;u<=0.9;u+=0.1){ const d=G.dia(1,u); st.push([d.x,d.y+10]); } st.push([400+W(520)-24,yc+40],[530,yc+108],[468,yc+122],[440,yc+80],[454,yc+40]);
+  B.stom.setAttribute("d",smooth(st,true));
+  // heart sits on the central part of the diaphragm
+  const hp=[[404,318],[400-26,324]]; for(let y=340;y<=yc-14;y+=18) hp.push([400-hr(y,yc),y]); hp.push([400-32,yc-4],[400+20,yc+1],[400+80,yc-10]); for(let y=yc-28;y>=340;y-=18) hp.push([400+hl(y,yc),y]); hp.push([400+30,322]);
+  B.heart.setAttribute("d",smooth(hp,true));
+  // pleural cavities and lungs
+  const hx={"-1":334,"1":466}, rH=266;
+  [-1,1].forEach(s=>{ const cp=cavityPts(G,s,0); B.cav[s].setAttribute("d",smooth(cp,true)); B.cav[s].setAttribute("fill",S.pneumo&&s<0?"#f7fbff":"#cde7f5");
+    let lp=cavityPts(G,s,6); if(S.pneumo&&s<0) lp=shrink(B.rest[s],hx[s],rH,0.6);
+    B["lp"+s]=lp; const d=smooth(lp,true); B.lung[s].setAttribute("d",d); B.lungTex[s].setAttribute("d",d);
+    // stretch factors used for the bronchial tree, the fissures and the air
+    const st=S.pneumo&&s<0?{sx:0.6,sy:0.6,sy0:0.6}:{sx:(W(380)-66)/(BW(380)-66),sy:(G.dia(s,0.6).y-rH)/(geom(0,0).dia(s,0.6).y-rH),sy0:1};
+    B["st"+s]=st;
+    const map=(x,y)=>[hx[s]+(x-hx[s])*st.sx, rH+(y-rH)*(y>rH?st.sy:st.sy0)];
+    // fissures (lobes): oblique on both lungs, horizontal on the right lung
+    const fp=[map(400+s*(BW(250)-12),250),map(400+s*120,320),map(400+s*112,430)];
+    let fd=smooth(fp,false); if(s<0){ const hp2=[map(400-(BW(330)-10),330),map(400-110,326)]; fd+=` M${f1(hp2[0][0])} ${f1(hp2[0][1])} L${f1(hp2[1][0])} ${f1(hp2[1][1])}`; }
+    B.fiss[s].setAttribute("d",fd);
+    const T=B.trees[s], E=B.treeEl[s];
+    E.lay.forEach((ly,i)=>{ let dd=""; T.forEach(sg=>{ const lvl=sg.w>5?0:sg.w>3.2?1:sg.w>2?2:3; if(lvl!==i) return; const a=map(sg.x1,sg.y1), b=map(sg.x2,sg.y2); dd+=`M${f1(a[0])} ${f1(a[1])}L${f1(b[0])} ${f1(b[1])}`; }); ly.o.setAttribute("d",dd||"M0 0"); ly.i.setAttribute("d",dd||"M0 0"); }); });
+  B.pneumoTxt.setAttribute("visibility",S.pneumo?"visible":"hidden");
+  // diaphragm
+  const dp=[]; for(let u=1;u>=0;u-=0.05){ const d=G.dia(-1,u); dp.push([d.x,d.y+1]); } dp.push([400,yc+1]); for(let u=0;u<=1.001;u+=0.05){ const d=G.dia(1,u); dp.push([d.x,d.y+1]); }
+  const dd=smooth(dp,false); B.dia.setAttribute("d",dd); B.diaFib.setAttribute("d",dd); B.diaGlow.setAttribute("d",dd);
+  B.tendon.setAttribute("d",`M${f1(G.dia(-1,0.12).x)} ${f1(G.dia(-1,0.12).y+1)} Q400 ${f1(yc+2)} ${f1(G.dia(1,0.12).x)} ${f1(G.dia(1,0.12).y+1)}`);
+  // muscle activity: diaphragm and external intercostals when breathing in; internal intercostals when breathing out hard
+  const act=ph.k==="IN"?Math.sin(Math.PI*S.t/0.4):0, actOut=ph.k==="OUT"&&(S.mode==="ex"||c.deep)?Math.sin(Math.PI*(S.t-0.4)/0.6):0;
+  B.diaGlow.setAttribute("opacity",S.move.glow&&S.move.diaphragm?(0.55*act).toFixed(2):0);
+  B.dia.setAttribute("stroke-width",(13+3*act*(S.move.diaphragm?1:0)).toFixed(1));
+  // ribs move up and out
+  const ribPos=(s,k)=>[400+s*(W(RIBY[k])+13),RIBY[k]-gR*12*(0.45+0.55*k/8)];
+  B.ribs.forEach(r=>{ const [x,y]=ribPos(r.s,r.k), rot=`rotate(${-r.s*(18+gR*10)} ${f1(x)} ${f1(y)})`; [r.e,r.m].forEach(e=>{ e.setAttribute("cx",f1(x)); e.setAttribute("cy",f1(y)); e.setAttribute("transform",rot); }); });
+  B.ics.forEach(m=>{ const [x1,y1]=ribPos(m.s,m.k), [x2,y2]=ribPos(m.s,m.k+1);
+    const set=(e,o)=>{ e.setAttribute("x1",f1(x1+m.s*o)); e.setAttribute("y1",f1(y1+12)); e.setAttribute("x2",f1(x2+m.s*o)); e.setAttribute("y2",f1(y2-12)); };
+    [m.ext,m.extF,m.gE].forEach(e=>set(e,4)); [m.int,m.gI].forEach(e=>set(e,-4));
+    m.gE.setAttribute("opacity",S.move.glow&&S.move.ribs?(0.6*act).toFixed(2):0); m.gI.setAttribute("opacity",S.move.glow&&S.move.ribs?(0.6*actOut).toFixed(2):0); });
+  // air: fresh air moves in, then the same air (now with more carbon dioxide) moves out
+  const e=v<0.5?2*v*v:1-2*(1-v)*(1-v);
+  B.air.forEach(a=>{ let side=a.s; if(S.pneumo&&side<0) side=1;
+    const st=B["st"+side]||{sx:1,sy:1,sy0:1}, tx0=side===a.s?a.tx:800-a.tx, ty0=a.ty, hxx=hx[side];
+    let tx=hxx+(tx0-hxx)*st.sx, ty=rH+(ty0-rH)*(ty0>rH?st.sy:st.sy0); const LP=B["lp"+side]; for(let n=0;n<6&&LP&&!inPoly(tx,ty,LP);n++){ tx=hxx+(tx-hxx)*0.85; ty=rH+(ty-rH)*0.85; }
+    const p=a.p0+(1-a.p0)*e*Math.min(1,c.a/0.55);
+    let x,y; if(p<0.55){ const q=p/0.55; x=400+a.off*0.9; y=-20+q*266; } else if(p<0.68){ const q=(p-0.55)/0.13; x=lerp(400+a.off*0.4,hxx,q); y=lerp(246,rH,q); } else { const q=(p-0.68)/0.32, cx=lerp(hxx,tx,0.5)+side*10, cy=lerp(rH,ty,0.5)-8; x=(1-q)*(1-q)*hxx+2*(1-q)*q*cx+q*q*tx; y=(1-q)*(1-q)*rH+2*(1-q)*q*cy+q*q*ty; }
+    a.el.setAttribute("cx",f1(x)); a.el.setAttribute("cy",f1(y)); a.el.setAttribute("fill",ph.k==="IN"?"#1c96d4":"#7d7f8c");
+    a.el.setAttribute("visibility",S.move.air&&y>-4?"visible":"hidden"); });
+  // readouts
+  S.simTime+=S.dtSim; S.hist.push([S.simTime,V]); while(S.hist.length&&S.hist[0][0]<S.simTime-15) S.hist.shift();
+  if(S.frameN++%3===0) drawSpiro();
+  const P=-0.26*dV; const rv=$("rvol"); if(rv){ rv.textContent=V.toFixed(2)+" litres"; $("rpres").textContent=(P>=0?"+":"−")+Math.abs(P).toFixed(2)+" kPa";
+    $("rpdesc").textContent=Math.abs(P)<0.01?"same as the air outside: no air moves":P<0?"lower than the air outside, so air flows in":"higher than the air outside, so air flows out";
+    const bar=$("pbar"); bar.style.left=P<0?`calc(50% - ${Math.min(50,Math.abs(P)/0.6*50)}%)`:"50%"; bar.style.width=Math.min(50,Math.abs(P)/0.6*50)+"%"; bar.style.background=P<0?"#1c96d4":"#7d7f8c"; }
+  const pm=$("pmark"); if(pm) pm.style.left=`calc(${(S.t*100).toFixed(2)}% - 1px)`;
+}
+function drawSpiro(){ const pl=$("spiroLine"); if(!pl) return; const t1=S.simTime; let pts=""; S.hist.forEach(([t,V])=>{ pts+=`${f1(36+(t-(t1-15))/15*356)},${f1(96-(V-1)/5*84)} `; }); pl.setAttribute("points",pts); }
+function spiroSVG(){ const ys=[1,2,3,4,5,6].map(v=>`<line x1="36" x2="392" y1="${f1(96-(v-1)/5*84)}" y2="${f1(96-(v-1)/5*84)}" stroke="#dbe3e0" stroke-width="1"/><text x="30" y="${f1(99-(v-1)/5*84)}" text-anchor="end" font-size="9" font-family="IBM Plex Mono, monospace" fill="#5a6966">${v}</text>`).join("");
+  return `<div id="spirobox" style="padding:2px 6px 6px"><svg viewBox="0 0 400 112" style="max-height:140px" role="img" aria-label="Spirometer trace of lung volume against time"><rect x="0" y="0" width="400" height="112" fill="#f4f8f5" rx="6"/>${ys}<polyline id="spiroLine" fill="none" stroke="#1c96d4" stroke-width="2"/>
+   <text x="6" y="10" font-size="9" font-family="IBM Plex Mono, monospace" fill="#5a6966">litres</text><text x="392" y="108" text-anchor="end" font-size="10" font-family="IBM Plex Mono, monospace" fill="#5a6966">spirometer: lung volume over the last 15 seconds</text></svg></div>`; }
+
+const PTXT={IN:"The diaphragm contracts and flattens, moving down. The external intercostal muscles contract, pulling the ribs up and out. The chest gets bigger, so the pressure inside the lungs falls below the air pressure outside. Air rushes in through the trachea.",
+ OUT:"The diaphragm relaxes and returns to its dome shape. The external intercostal muscles relax and the ribs move down and in. The chest gets smaller, so the pressure inside the lungs rises above the air pressure outside. Air is pushed out."};
+function updatePhaseUI(){ if(!$("pname")) return; const ph=phaseOf(S.t), c=S.cyc;
+  $("pname").textContent=ph.name+(c.deep?" (deep breath)":"");
+  $("ptext").textContent=PTXT[ph.k]+(ph.k==="OUT"&&(S.mode==="ex"||c.deep)?" Because you are breathing hard, the internal intercostal muscles also contract to pull the ribs down, and the abdominal muscles push the diaphragm up, so air is forced out faster.":"")+(S.pneumo?" The right lung (on your left) has collapsed: air has got between the pleural membranes, so that lung no longer follows the chest wall.":"");
+  const IN=ph.k==="IN", hard=!IN&&(S.mode==="ex"||c.deep);
+  $("bstate").innerHTML=[["Diaphragm",IN?"contracts, flattens":"relaxes, domes up"],["External intercostals",IN?"contract":"relax"],["Internal intercostals",hard?"contract":"relaxed"],["Ribs",IN?"up and out":"down and in"],["Volume of chest",IN?"increases":"decreases"],["Air",IN?"flows in":"flows out"]].map(([a,b])=>`<span>${a}</span><span class="${/contract|in$|increases/.test(b)&&!/relax/.test(b)?"op":"cl"}">${b}</span>`).join(""); }
+function breathSide(){
+  $("side").innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><span class="phase" id="pname"></span><span class="note" id="bpmtxt"></span></div>
+    <div class="phasebar" style="grid-template-columns:40fr 60fr"><i style="background:#8cc9ea"></i><i style="background:#c3c6cf"></i><b id="pmark"></b></div><div class="plabels" style="grid-template-columns:40fr 60fr"><span>In</span><span>Out</span></div>
+    <p id="ptext" style="margin:8px 0 0;font-size:.9rem"></p><div class="vstate" id="bstate"></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button><button id="step">Next stage</button><button id="deep">Take a deep breath</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div>
+    <div class="ctl"><label for="bpm">Breathing rate <span id="bpmv"></span></label><input type="range" id="bpm" min="8" max="40" step="1"></div>
+    <div class="row" style="margin-top:6px"><button id="rest" aria-pressed="${S.mode==="rest"}">At rest</button><button id="exer" aria-pressed="${S.mode==="ex"}">During exercise</button></div></div>
+   <div class="card"><h2>Inside the lungs</h2><div class="vstate" style="margin-top:0"><span>Lung volume</span><span class="op" id="rvol" style="color:var(--ink)"></span><span>Pressure compared with outside</span><span class="op" id="rpres" style="color:var(--ink)"></span></div>
+    <div style="position:relative;height:12px;background:var(--line);border-radius:99px;margin:8px 0 2px;overflow:hidden"><i id="pbar" style="position:absolute;top:0;bottom:0;display:block"></i><i style="position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--ink)"></i></div>
+    <div class="plabels" style="grid-template-columns:1fr 1fr"><span>lower: air in</span><span style="text-align:right">higher: air out</span></div><p class="note" id="rpdesc" style="margin:6px 0 0"></p></div>
+   <div class="card"><h2>Choose what moves</h2><div class="chips" id="moves">${[["ribs","Ribs and intercostal muscles"],["diaphragm","Diaphragm"],["air","Air flow","#1c96d4"],["glow","Show muscles contracting","#ffd23f"]].map(([k,t,c])=>`<label class="chip"><input type="checkbox" data-m="${k}" ${S.move[k]?"checked":""}>${c?`<span class="sw" style="background:${c}"></span>`:""}${t}</label>`).join("")}</div>
+    <div class="row" style="margin-top:8px"><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label><label class="chip"><input type="checkbox" id="pnx" ${S.pneumo?"checked":""}>What if: a punctured chest wall</label></div></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><p class="note" style="margin:0">Tap a part of the chest to see what it does.</p><div class="chips" style="margin-top:8px">${["trachea","bronchus","bronchiole","lung","alveoli","pleura","rib","intercostal","diaphragm","larynx","heart","abdomen"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>
+   <div class="card" id="quiz"><h2>Test yourself</h2><p class="note" style="margin:0 0 8px">Eight questions: tap the right part, or choose the right answer.</p><button class="primary" id="qstart">Start the test</button></div>`;
+  commonControls();
+  const setB=()=>{ S.bpm=+$("bpm").value; $("bpmv").textContent=S.bpm+" breaths per minute"; $("bpmtxt").textContent=`one breath = ${(60/S.bpm).toFixed(1)} s`; }; $("bpm").value=S.bpm; $("bpm").oninput=setB; setB();
+  const mode=m=>{ S.mode=m; $("bpm").value=m==="ex"?30:12; setB(); $("rest").setAttribute("aria-pressed",m==="rest"); $("exer").setAttribute("aria-pressed",m==="ex"); };
+  $("rest").onclick=()=>mode("rest"); $("exer").onclick=()=>mode("ex");
+  $("deep").onclick=()=>{ S.deepReq=true; if(S.t>0.05&&S.t<0.95){ /* start the deep breath at the next breath in */ } $("deep").textContent="Deep breath next…"; setTimeout(()=>{ if($("deep")) $("deep").textContent="Take a deep breath"; },2500); };
+  $("moves").querySelectorAll("[data-m]").forEach(c=>c.onchange=()=>{ S.move[c.dataset.m]=c.checked; });
+  $("pnx").onchange=e=>{ S.pneumo=e.target.checked; updatePhaseUI(); if(S.pneumo) showInfo("pleura"); };
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick));
+  $("qstart").onclick=startQuiz;
+  updatePhaseUI(); }
+function commonControls(){
+  const rates=[0.25,0.5,1], rn=["Slow motion (25%)","Half speed","Real time"];
+  if(!rates.includes(S.rate)) S.rate=0.5;
+  $("rate").value=rates.indexOf(S.rate); const setRate=()=>{ S.rate=rates[+$("rate").value]; $("ratev").textContent=rn[+$("rate").value]; }; $("rate").oninput=setRate; setRate();
+  const playLbl=()=>$("play").textContent=S.playing?"Pause":"Play"; $("play").onclick=()=>{ S.playing=!S.playing; S.stepTo=null; playLbl(); }; playLbl();
+  if($("step")) $("step").onclick=()=>{ const ph=phaseOf(S.t); S.stepTo=ph.b; S.playing=true; playLbl(); };
+  if($("lbl")) $("lbl").onchange=e=>{ S.labels=e.target.checked; applyLabels(); }; }
+function curSvg(){ return S.view==="breath"?B.svg:S.view==="gas"?GX.svg:AW.svg; }
+function curLabs(){ return S.view==="breath"?B.labs:S.view==="gas"?GX.labs:AW.labs; }
+function applyLabels(){ curLabs().forEach(l=>l.grp.setAttribute("visibility",S.labels?"visible":"hidden")); }
+function dimTo(id){ curSvg().querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==id)); }
+function undim(){ curSvg().querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); }
+function showInfo(id){ const p=PARTS[id]; if(!p||!$("info")) return; S.selected=id; dimTo(id);
+  $("info").innerHTML=`<h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="row" style="margin-top:6px"><button id="clr">Show everything</button>${id==="alveoli"?`<button class="primary" id="gogas">Watch gas exchange</button>`:""}${id==="trachea"?`<button id="goair">See the cilia</button>`:""}</div>`;
+  $("clr").onclick=()=>{ S.selected=null; undim(); setView(S.view); };
+  if($("gogas")) $("gogas").onclick=()=>setView("gas"); if($("goair")) $("goair").onclick=()=>setView("air"); }
+
+// ---------- quiz ----------
+const QZ=[{tap:"diaphragm",q:"Tap the diaphragm."},{tap:"trachea",q:"Tap the trachea."},{tap:"intercostal",q:"Tap the intercostal muscles."},{tap:"bronchus",q:"Tap a bronchus."},
+ {q:"What does the diaphragm do when you breathe in?",o:["It relaxes and moves up","It contracts and flattens","It contracts and moves up","It does not move"],a:1},
+ {q:"When you breathe in, the pressure inside the lungs…",o:["rises above the pressure of the air outside","falls below the pressure of the air outside","stays the same as the air outside","falls to zero"],a:1},
+ {q:"Why do the trachea and bronchi have rings of cartilage?",o:["To make mucus","To keep the airways open","To trap dust","To take part in gas exchange"],a:1},
+ {q:"Which of these does NOT help the alveoli to exchange gases?",o:["A very large surface area","Walls only one cell thick","A rich supply of blood capillaries","Thick walls supported by cartilage"],a:3}];
+function startQuiz(){ S.quiz={i:0,score:0}; drawQuiz(); }
+function drawQuiz(){ const Q=S.quiz, el=$("quiz"); if(!el) return;
+  if(Q.i>=QZ.length){ el.innerHTML=`<h2>Test complete</h2><p class="phase" style="font-size:1.6rem;margin:4px 0">${Q.score} / ${QZ.length}</p><p>${Q.score===QZ.length?"Excellent: you know how we breathe.":"Tap the parts you missed to read about them, then try again."}</p><button class="primary" id="qagain">Try again</button>`; $("qagain").onclick=startQuiz;
+    try{ parent.postMessage({type:"lablink-3d-result",prac:"lungs",score:Math.round(Q.score/QZ.length*100)},"*"); }catch(e){} Q.done=true; return; }
+  const q=QZ[Q.i]; el.innerHTML=`<h2>Question ${Q.i+1} of ${QZ.length}</h2><div class="q"><p><b>${esc(q.q)}</b></p>${q.tap?`<p class="note">Tap it in the picture. Labels are hidden during the test.</p>`:`<div class="opts">${q.o.map((o,i)=>`<button data-o="${i}">${esc(o)}</button>`).join("")}</div>`}</div><div id="qfb"></div>`;
+  if(q.tap){ S.labels=false; applyLabels(); }
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>answer(+b.dataset.o===q.a,b,el.querySelector(`[data-o="${q.a}"]`))); }
+function answer(ok,btn,right){ const Q=S.quiz; if(Q.lock) return; Q.lock=true; if(ok) Q.score++; if(btn){ btn.classList.add(ok?"right":"wrong"); if(right) right.classList.add("right"); }
+  const q=QZ[Q.i]; $("qfb").innerHTML=`<div class="msg ${ok?"":"warn"}">${ok?"Correct.":q.tap?`Not quite: look at the highlighted part, the ${esc(PARTS[q.tap].n.toLowerCase())}.`:"Not quite: the right answer is highlighted."}</div><button class="primary" id="qnext" style="margin-top:8px">${Q.i+1<QZ.length?"Next question":"See your score"}</button>`;
+  if(q.tap&&!ok) dimTo(q.tap);
+  $("qnext").onclick=()=>{ Q.lock=false; Q.i++; undim(); if(Q.i>=QZ.length){ S.labels=true; applyLabels(); } drawQuiz(); }; }
+
+// ============================================================
+// GAS EXCHANGE IN AN ALVEOLUS
+// ============================================================
+const AC={x:430,y:232,rx:214,ry:166};
+let GX=null;
+function alvPts(k){ const P=[]; for(let i=0;i<40;i++){ const a=i/40*Math.PI*2, wob=1+0.025*Math.sin(a*5)+0.015*Math.sin(a*3+1); P.push([AC.x+Math.cos(a)*AC.rx*k*wob,AC.y+Math.sin(a)*AC.ry*k*wob]); } return P; }
+function buildGas(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 560",role:"img","aria-label":"Live close-up of gas exchange between an alveolus and a capillary"});
+  svgEl("defs",{},svg).innerHTML=`<pattern id="tis" width="22" height="18" patternUnits="userSpaceOnUse"><rect width="22" height="18" fill="#fbe7e3"/><circle cx="6" cy="6" r="1.4" fill="#e7b9b4"/><circle cx="16" cy="13" r="1.2" fill="#e7b9b4"/></pattern>
+   <g id="o2m"><circle cx="-2.7" cy="0" r="3.3" fill="#f08c00" stroke="#8a5000" stroke-width=".7"/><circle cx="2.7" cy="0" r="3.3" fill="#f08c00" stroke="#8a5000" stroke-width=".7"/></g>
+   <g id="co2m"><circle cx="-4.6" cy="0" r="2.7" fill="#9a9a9a" stroke="#4d4d4d" stroke-width=".6"/><circle cx="4.6" cy="0" r="2.7" fill="#9a9a9a" stroke="#4d4d4d" stroke-width=".6"/><circle cx="0" cy="0" r="3.2" fill="#2f2f2f"/></g>
+   <radialGradient id="rbcHi"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+   <marker id="arG" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker>`;
+  const g=svgEl("g",{},svg);
+  svgEl("rect",{width:800,height:560,fill:"url(#tis)"},g);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  // neighbouring alveoli and capillaries cut across
+  const nb=svgEl("g",{},g); [[30,140,150,130],[800,150,140,130],[150,520,130,70],[720,530,120,64]].forEach(([cx,cy,rx,ry])=>svgEl("ellipse",{cx,cy,rx,ry,fill:"#f4fbff",stroke:"#d27c78","stroke-width":6},nb));
+  [[200,70],[650,70],[300,500],[560,520]].forEach(([x,y])=>{ svgEl("circle",{cx:x,cy:y,r:14,fill:"#fbe1bf",stroke:"#c0605f","stroke-width":2.5},nb); svgEl("ellipse",{cx:x,cy:y,rx:8,ry:6,fill:mixc(0.5)},nb); });
+  const emphG=svgEl("g",{visibility:"hidden"},g); svgEl("path",{d:"M230 120 L260 160 M600 130 L630 170 M250 330 L218 370",stroke:"#d27c78","stroke-width":5,"stroke-linecap":"round"},emphG);
+  // capillary wrapping under the alveolus
+  const cp=[[-30,318],[80,322],[170,338]]; for(let a=Math.PI*0.83;a>=Math.PI*0.17-1e-6;a-=Math.PI*0.06) cp.push([AC.x+Math.cos(a)*(AC.rx+31),AC.y+Math.sin(a)*(AC.ry+31)]); cp.push([690,338],[780,322],[830,318]);
+  const R=mkRoute(cp), capD=smooth(cp,false);
+  const capG=part("cap"); svgEl("path",{d:capD,fill:"none",stroke:"#b4504f","stroke-width":38},capG); svgEl("path",{d:capD,fill:"none",stroke:"#fbe1bf","stroke-width":32},capG);
+  const plG=part("plasma"); svgEl("path",{d:capD,fill:"none",stroke:"#fff3df","stroke-width":8,opacity:.6},plG);
+  // exchange zone: where the capillary lies against the alveolus
+  let zA=null,zB=null; for(let s=0;s<R.L;s+=4){ const p=R.at(s); const d=Math.hypot((p.x-AC.x)/(AC.rx+31),(p.y-AC.y)/(AC.ry+31)); if(d<1.03&&p.y>AC.y+60){ if(zA==null) zA=s; zB=s; } }
+  // the alveolus
+  const alG=part("alv"); const alv=svgEl("path",{fill:"#f4fbff"},alG);
+  const fluid=svgEl("path",{fill:"#8ecdf0",opacity:.55,visibility:"hidden"},alG);
+  const wlG=part("alvwall"); const wall=svgEl("path",{fill:"none",stroke:"#d27c78","stroke-width":7},wlG); const nuc=[...Array(7)].map(()=>svgEl("ellipse",{rx:9,ry:3.4,fill:"#8b4f93"},wlG));
+  const liG=part("lining"); const lining=svgEl("path",{fill:"none",stroke:"#7cc4ee","stroke-width":4,opacity:.85},liG);
+  const brG=part("bronchiole2"); const bro=svgEl("rect",{x:398,y:-10,width:64,height:90,fill:"#f4fbff"},brG); svgEl("path",{d:"M398 -10 L398 76 M462 -10 L462 76",stroke:"#d27c78","stroke-width":7,fill:"none"},brG);
+  // diffusion arrows
+  const arr=svgEl("g",{"pointer-events":"none",opacity:.9},g);
+  svgEl("path",{d:"M312 372 L300 428",stroke:"#f08c00","stroke-width":5,fill:"none","marker-end":"url(#arG)"},arr);
+  svgEl("path",{d:"M560 430 L548 374",stroke:"#555","stroke-width":5,fill:"none","marker-end":"url(#arG)"},arr);
+  // blood cells and molecules
+  const rbG=part("rbc"); const cells=[]; const NC=13;
+  for(let i=0;i<NC;i++){ const gg=svgEl("g",{},rbG); const e=svgEl("ellipse",{rx:15,ry:11.5,stroke:"rgba(40,0,0,.35)","stroke-width":.8},gg); svgEl("ellipse",{rx:7,ry:4.5,fill:"url(#rbcHi)",stroke:"rgba(0,0,0,.12)","stroke-width":.8},gg); cells.push({s:i*R.L/NC,oxy:clamp((i*R.L/NC-(zA||0))/((zB||1)-(zA||0)),0,1),co2:1,g:gg,e}); }
+  const molG=svgEl("g",{"pointer-events":"none"},g); const mols=[];
+  const newMol=(kind,x,y,st)=>{ const el=svgEl("use",{href:kind==="o2"?"#o2m":"#co2m"},molG); const m={kind,x,y,vx:0,vy:0,st:st||"air",el,ang:Math.random()*180}; mols.push(m); return m; };
+  for(let i=0;i<54;i++){ const a=Math.random()*Math.PI*2, r=Math.sqrt(Math.random())*0.85; newMol("o2",AC.x+Math.cos(a)*AC.rx*r,AC.y+Math.sin(a)*AC.ry*r); }
+  for(let i=0;i<8;i++){ const a=Math.random()*Math.PI*2, r=Math.sqrt(Math.random())*0.85; newMol("co2",AC.x+Math.cos(a)*AC.rx*r,AC.y+Math.sin(a)*AC.ry*r); }
+  // labels
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["bronchiole2","Bronchiole",320,40,398,40],["alv","Air inside the alveolus",430,150,430,150],["alvwall","Alveolus wall (one cell thick)",780,92,AC.x+AC.rx*0.62,AC.y-AC.ry*0.8],["lining","Moist lining",780,286,AC.x+AC.rx*0.93,AC.y+AC.ry*0.1],
+   ["cap","Capillary",780,410,R.at(R.L*0.93).x,R.at(R.L*0.93).y+14],["rbc","Red blood cell",20,250,R.at(R.L*0.07).x,R.at(R.L*0.07).y],["plasma","Plasma",20,410,R.at(R.L*0.13).x,R.at(R.L*0.13).y+10]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=Math.abs(x-ax)<10?"middle":x<ax?"start":"end";
+    const ln=anchor==="middle"?null:svgEl("line",{x1:x,y1:y+6,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); if(ln) svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  [["O₂",276,414,"#c26f00"],["CO₂",590,414,"#333"]].forEach(([t,x,y,c])=>{ const grp=svgEl("g",{},labG); const tx=svgEl("text",{x,y,"font-size":18,class:"lbl",fill:c,"text-anchor":"middle"},grp); tx.textContent=t; tx.style.fill=c; labs.push({id:"arrow",grp}); });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  [["from the pulmonary artery",10,548,"start"],["to the pulmonary vein",790,548,"end"],["air in and out",470,20,"start"]].forEach(([t,x,y,a])=>{ const e=svgEl("text",{x,y,"text-anchor":a},ctx); e.textContent=t; });
+  GX={svg,R,zA,zB,alv,fluid,wall,nuc,lining,bro,cells,mols,newMol,labs,ctx,emphG,stats:{o2:0,co2:0,leave:[]}};
+  return svg; }
+function tickGas(dt){
+  const G=S.gas, v=G.breath?vOf(S.t):0.5, ph=phaseOf(S.t), k=1+0.04*(v-0.5);
+  const P=alvPts(k), d=smooth(P,true); GX.alv.setAttribute("d",d); GX.wall.setAttribute("d",d); GX.lining.setAttribute("d",smooth(alvPts(k*0.975),true));
+  GX.wall.setAttribute("stroke-dasharray",G.emph?"70 26":"none"); GX.emphG.setAttribute("visibility",G.emph?"visible":"hidden");
+  GX.fluid.setAttribute("visibility",G.fluid?"visible":"hidden"); if(G.fluid){ const fp=alvPts(k*0.97).filter(p=>p[1]>AC.y+AC.ry*0.42); GX.fluid.setAttribute("d",smooth(fp,true)); }
+  GX.nuc.forEach((n,i)=>{ const a=-0.5+i*0.95, x=AC.x+Math.cos(a)*AC.rx*k*1.01, y=AC.y+Math.sin(a)*AC.ry*k*1.01; n.setAttribute("cx",f1(x)); n.setAttribute("cy",f1(y)); n.setAttribute("transform",`rotate(${f1(Math.atan2(Math.cos(a)*AC.ry,-Math.sin(a)*AC.rx)*180/Math.PI)} ${f1(x)} ${f1(y)})`); });
+  const R=GX.R, eff=(G.emph?0.06:1)*(G.fluid?0.035:1), cross=G.fluid?1.3:0.45, speed=(G.exercise?110:55)*(G.blood?1:0);
+  const zA=G.emph?lerp(GX.zA,GX.zB,0.25):GX.zA, zB=G.emph?lerp(GX.zA,GX.zB,0.75):GX.zB;
+  const inside=(x,y,sc)=>((x-AC.x)/(AC.rx*k*sc))**2+((y-AC.y)/(AC.ry*k*sc))**2<1;
+  // blood cells
+  GX.cells.forEach(c=>{ c.s+=speed*dt; if(c.s>R.L){ c.s-=R.L; GX.stats.leave.push(c.oxy); if(GX.stats.leave.length>12) GX.stats.leave.shift(); c.oxy=0; c.co2=G.exercise?1.4:1; }
+    const p=R.at(c.s); c.x=p.x; c.y=p.y; c.g.setAttribute("transform",`translate(${f1(p.x)} ${f1(p.y)}) rotate(${f1(p.ang*180/Math.PI)})`); c.e.setAttribute("fill",mixc(c.oxy));
+    if(dt>0&&c.s>zA&&c.s<zB){
+      // oxygen diffuses in if a molecule is close to the wall above this cell
+      if(G.o2&&c.oxy<0.99&&Math.random()<2.4*eff*(1-c.oxy)*dt/0.2){ let best=null,bd=1e9; GX.mols.forEach(m=>{ if(m.kind!=="o2"||m.st!=="air") return; const dd=Math.hypot(m.x-c.x,m.y-c.y); if(dd<250&&dd<bd){ bd=dd; best=m; } }); if(best){ best.st="in"; best.cell=c; best.t=0; best.x0=best.x; best.y0=best.y; } }
+      // carbon dioxide diffuses out
+      if(G.co2&&c.co2>0.05&&Math.random()<1.6*eff*c.co2*dt/0.2){ c.co2-=0.2; const m=GX.newMol("co2",c.x,c.y,"out"); const a=Math.atan2(c.y-AC.y,c.x-AC.x); m.t=0; m.x0=c.x; m.y0=c.y; m.x1=AC.x+Math.cos(a)*AC.rx*0.8; m.y1=AC.y+Math.sin(a)*AC.ry*0.8; GX.stats.co2++; } } });
+  // molecules
+  const fresh=ph.k==="IN"&&G.breath, out=ph.k==="OUT"&&G.breath;
+  for(let i=GX.mols.length-1;i>=0;i--){ const m=GX.mols[i];
+    if(m.st==="in"){ m.t+=dt/cross; const c=m.cell; m.x=lerp(m.x0,c.x,Math.min(1,m.t)); m.y=lerp(m.y0,c.y,Math.min(1,m.t)); if(m.t>=1){ c.oxy=Math.min(1,c.oxy+0.2); GX.stats.o2++; m.el.remove(); GX.mols.splice(i,1); continue; } }
+    else if(m.st==="leave"){ const tx=430+(m.x-430)*0.5; m.x+=(tx-m.x)*Math.min(1,dt*3); m.y-=170*dt; if(m.y<4){ m.el.remove(); GX.mols.splice(i,1); continue; } }
+    else if(m.st==="out"){ m.t+=dt/cross; m.x=lerp(m.x0,m.x1,Math.min(1,m.t)); m.y=lerp(m.y0,m.y1,Math.min(1,m.t)); if(m.t>=1) m.st="air"; }
+    else { m.vx+=(Math.random()-0.5)*5200*dt; m.vy+=(Math.random()-0.5)*5200*dt; m.vx*=0.94; m.vy*=0.94;
+      // breathing out carries some of the air (and its carbon dioxide) away up the bronchiole
+      if(out&&Math.random()<(m.kind==="co2"?0.35*(S.bpm/12):0.06)*dt){ m.st="leave"; }
+      if(fresh&&m.y<AC.y-AC.ry*0.6) m.vy+=200*dt; if(m.y<AC.y-AC.ry*0.85){ if(fresh) m.vy=Math.max(m.vy,90); if(out) m.vy=Math.min(m.vy,-90); }
+      let nx=m.x+m.vx*dt, ny=m.y+m.vy*dt; const inTube=Math.abs(nx-430)<26&&ny<AC.y-AC.ry*0.8;
+      if(!inTube&&!inside(nx,ny,0.93)){ m.vx*=-0.6; m.vy*=-0.6; nx=m.x+(AC.x-m.x)*0.02; ny=m.y+(AC.y-m.y)*0.02; }
+      m.x=nx; m.y=ny; if(m.y<4){ m.el.remove(); GX.mols.splice(i,1); continue; } }
+    const vis=(m.kind==="o2"?G.o2:G.co2); m.el.setAttribute("visibility",vis?"visible":"hidden"); m.el.setAttribute("transform",`translate(${f1(m.x)} ${f1(m.y)}) rotate(${f1(m.ang)})`); }
+  // breathing in brings fresh air with plenty of oxygen
+  const nO2=GX.mols.filter(m=>m.kind==="o2"&&m.st==="air").length;
+  if(fresh&&nO2<54){ GX.spawn=(GX.spawn||0)+dt*(54-nO2)*3; while(GX.spawn>=1){ GX.spawn--; const m=GX.newMol("o2",430+(Math.random()-0.5)*44,6+Math.random()*30); m.vy=110; } }
+  if(!G.breath&&nO2<20&&Math.random()<dt*4){ const m=GX.newMol("o2",430+(Math.random()-0.5)*40,60); m.vy=60; }
+  // readouts
+  if(S.frameN%6===0&&$("gsat")){ const lv=GX.stats.leave; const sat=lv.length?Math.round(75+23*lv.reduce((a,b)=>a+b,0)/lv.length):98;
+    $("gsat").textContent=sat+"%"; $("go2").textContent=GX.stats.o2; $("gco2").textContent=GX.stats.co2; $("gair").textContent=nO2+" oxygen, "+GX.mols.filter(m=>m.kind==="co2").length+" carbon dioxide";
+    $("gph").textContent=G.breath?ph.name:"Breathing paused"; }
+}
+function gasSide(){
+  $("side").innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><span class="phase" id="gph"></span><span class="note">orange = oxygen, grey = carbon dioxide</span></div>
+    <div class="vstate"><span>Blood arriving from the body</span><span class="cl">about 75% full of oxygen</span><span>Blood leaving the alveolus</span><span class="op" id="gsat"></span><span>Oxygen molecules taken up</span><span class="op" id="go2" style="color:var(--ink)"></span><span>Carbon dioxide given off</span><span class="op" id="gco2" style="color:var(--ink)"></span><span>In the alveolus now</span><span class="op" id="gair" style="color:var(--ink);font-family:var(--f-body);font-weight:500"></span></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div></div>
+   <div class="card"><h2>Choose what moves</h2><div class="chips" id="gmoves">${[["o2","Oxygen","#f08c00"],["co2","Carbon dioxide","#2f2f2f"],["blood","Blood flow","#d42a35"],["breath","Breathing (fresh air in, stale air out)","#1c96d4"]].map(([k,t,c])=>`<label class="chip"><input type="checkbox" data-g="${k}" ${S.gas[k]?"checked":""}><span class="sw" style="background:${c}"></span>${t}</label>`).join("")}</div>
+    <div class="row" style="margin-top:8px"><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div>
+    <h2 style="margin-top:12px">What if…</h2><div class="chips" id="gwhat">${[["exercise","During exercise"],["emph","Emphysema (damaged alveoli)"],["fluid","Fluid in the alveolus (pneumonia)"]].map(([k,t])=>`<label class="chip"><input type="checkbox" data-w="${k}" ${S.gas[k]?"checked":""}>${t}</label>`).join("")}</div><div id="gwmsg"></div></div>
+   <div class="card info" id="info"><h2>Why alveoli are so good at gas exchange</h2><ul style="margin:4px 0 0;padding-left:18px;font-size:.9rem"><li><b>Huge surface area:</b> about 700 million alveoli, together about the size of a tennis court.</li><li><b>Very thin walls:</b> one cell thick, and the capillary wall is one cell thick too.</li><li><b>Moist lining:</b> oxygen dissolves before it diffuses.</li><li><b>Rich blood supply:</b> flowing blood carries oxygen away, keeping the gradient steep.</li><li><b>Breathing:</b> brings fresh air in and takes stale air out, keeping the gradient steep.</li></ul>
+    <div class="chips" style="margin-top:10px">${["alv","alvwall","lining","cap","rbc","plasma","bronchiole2"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  $("gmoves").querySelectorAll("[data-g]").forEach(c=>c.onchange=()=>{ S.gas[c.dataset.g]=c.checked; });
+  const WM={exercise:"During exercise your muscles make more carbon dioxide and use more oxygen. Blood flows faster and you breathe faster and deeper, so the gradients stay steep and gas exchange keeps up.",emph:"In emphysema (often caused by smoking) the walls between alveoli break down. There is much less surface area, so less oxygen gets into the blood: watch the blood leave less red. People with emphysema get breathless easily.",fluid:"In pneumonia, fluid collects in the alveoli. Gases have further to diffuse, so exchange is much slower and less oxygen reaches the blood."};
+  $("gwhat").querySelectorAll("[data-w]").forEach(c=>c.onchange=()=>{ S.gas[c.dataset.w]=c.checked; if(c.dataset.w==="exercise"){ S.bpm=c.checked?30:12; } GX.stats.leave=[]; $("gwmsg").innerHTML=c.checked?`<div class="msg">${WM[c.dataset.w]}</div>`:""; });
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ============================================================
+// AIRWAYS AND CILIA (section through the lining of the trachea)
+// ============================================================
+let AW=null;
+function buildAir(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 560",role:"img","aria-label":"Live section through the lining of the trachea showing cilia and mucus"});
+  svgEl("defs",{},svg).innerHTML=`<linearGradient id="lum" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f9fd"/><stop offset="1" stop-color="#e3f0f8"/></linearGradient>
+   <linearGradient id="cellG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8d7d2"/><stop offset="1" stop-color="#eebfb8"/></linearGradient>
+   <pattern id="cartP" width="40" height="30" patternUnits="userSpaceOnUse"><rect width="40" height="30" fill="#dfe7ef"/><ellipse cx="10" cy="10" rx="5" ry="4" fill="#c4d0de" stroke="#9aaabd" stroke-width=".8"/><ellipse cx="30" cy="22" rx="5" ry="4" fill="#c4d0de" stroke="#9aaabd" stroke-width=".8"/><circle cx="10" cy="10" r="1.5" fill="#7a6aa0"/><circle cx="30" cy="22" r="1.5" fill="#7a6aa0"/></pattern>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("rect",{width:800,height:262,fill:"url(#lum)"},g); svgEl("rect",{y:244,width:800,height:18,fill:"#e4f1f9"},g);
+  const haze=svgEl("rect",{width:800,height:205,fill:"#8a6a3a",opacity:0,"pointer-events":"none"},g);
+  // tissue below the lining
+  svgEl("rect",{y:260,width:800,height:170,fill:"#ecc9c2"},g); svgEl("rect",{y:428,width:800,height:40,fill:"#f7e3dc"},g); svgEl("line",{x1:0,x2:800,y1:428,y2:428,stroke:"#b98a84","stroke-width":2.5},g);
+  [[120,446],[520,450]].forEach(([x,y])=>{ svgEl("ellipse",{cx:x,cy:y,rx:30,ry:12,fill:"#fbe1bf",stroke:"#b4504f","stroke-width":2},g); [-12,0,12].forEach(o=>svgEl("ellipse",{cx:x+o,cy:y,rx:5,ry:4,fill:"#c22a33"},g)); });
+  const ct=part("cart"); svgEl("rect",{y:470,width:800,height:90,fill:"url(#cartP)"},ct); svgEl("line",{x1:0,x2:800,y1:470,y2:470,stroke:"#9aaabd","stroke-width":2},ct);
+  // cells: ciliated columns with goblet cells between them
+  const cellG=part("ciliated"), gobG=part("goblet"), cil=[], gobs=[];
+  for(let i=0;i<19;i++){ const x=i*44-14, isG=i%4===2;
+    if(isG){ const grp=svgEl("g",{},gobG); svgEl("path",{d:`M${x+8} 428 L${x+14} 330 Q${x+2} 300 ${x+8} 262 L${x+36} 262 Q${x+42} 300 ${x+30} 330 L${x+36} 428 Z`,fill:"#eef1f7",stroke:"#b6a6b8","stroke-width":1.5},grp);
+      const gr=[]; for(let j=0;j<9;j++) gr.push(svgEl("circle",{cx:x+14+(j%3)*8,cy:276+Math.floor(j/3)*14,r:4.5,fill:"#d9e8b4",stroke:"#a9bf7a","stroke-width":.6},grp));
+      svgEl("ellipse",{cx:x+22,cy:395,rx:7,ry:10,fill:"#6d4a8f"},grp); gobs.push({x,gr}); }
+    else { const grp=svgEl("g",{},cellG); svgEl("rect",{x:x+1,y:262,width:42,height:166,rx:7,fill:"url(#cellG)",stroke:"#c48f88","stroke-width":1.4},grp); svgEl("ellipse",{cx:x+22,cy:372,rx:9,ry:15,fill:"#7a4f9a"},grp); svgEl("circle",{cx:x+24,cy:368,r:2.4,fill:"#3d2357"},grp);
+      for(let j=0;j<7;j++) cil.push({x:x+5+j*5.6}); } }
+  // cilia
+  const ciG=part("cilia"); cil.forEach(c=>{ c.el=svgEl("path",{fill:"none",stroke:"#b5767a","stroke-width":2.2,"stroke-linecap":"round"},ciG); });
+  // mucus layer
+  const muG=part("mucus"); const mucus=svgEl("path",{fill:"#d6e6a8",opacity:.92,stroke:"#a9bf7a","stroke-width":1.5},muG); const streak=svgEl("path",{fill:"none",stroke:"#b9cf86","stroke-width":2,"stroke-dasharray":"18 26",opacity:.8},muG);
+  // particles in the air
+  const paG=part("particles"), parts=[];
+  for(let i=0;i<26;i++){ const kind=i%3, el=kind===0?svgEl("path",{d:"M-5 -3 L1 -6 L6 -1 L3 5 L-4 4 Z",fill:"#8a7a66"},paG):kind===1?svgEl("rect",{x:-6,y:-2.5,width:12,height:5,rx:2.5,fill:"#4f9a52"},paG):svgEl("circle",{r:5,fill:"#f2c230",stroke:"#b88a10","stroke-width":1.2,"stroke-dasharray":"1.5 1.5"},paG);
+    parts.push({x:Math.random()*800,y:20+Math.random()*170,vy:20+Math.random()*18,st:"air",el,kind,rot:Math.random()*360}); }
+  const tar=svgEl("g",{"pointer-events":"none"},g); const tars=[...Array(40)].map(()=>({x:Math.random()*800,y:Math.random()*200,el:svgEl("circle",{r:2+Math.random()*2,fill:"#5a3d1a",opacity:0},tar)}));
+  // labels
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["particles","Dust, pollen and bacteria",20,40,0,0],["mucus","Mucus",20,190,64,222],["cilia","Cilia",20,282,40,256],["goblet","Goblet cell (makes mucus)",780,150,100,300],["ciliated","Ciliated cell",780,320,722,330],["cart","Cartilage",780,520,700,512]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x<400?"start":"end";
+    const ln=ax?svgEl("line",{x1:x+(anchor==="start"?4:-4),y1:y+6,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp):null; if(ln) svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  labs.find(l=>l.id==="goblet").ln.setAttribute("x2",gobs[3].x+22); labs.find(l=>l.id==="goblet").ln.setAttribute("y2",300); labs.find(l=>l.id==="goblet").grp.querySelector("circle").setAttribute("cx",gobs[3].x+22); labs.find(l=>l.id==="goblet").grp.querySelector("circle").setAttribute("cy",300);
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const flowT=svgEl("text",{x:780,y:250,"text-anchor":"end"},ctx); flowT.textContent="mucus swept up to the throat →";
+  svgEl("text",{x:400,y:120,"text-anchor":"middle"},ctx).textContent="air inside the trachea";
+  AW={svg,cil,gobs,mucus,streak,parts,tars,haze,labs,ctx,flowT,mt:205,off:0};
+  return svg; }
+function tickAir(dt){
+  const A=S.air, smoke=A.smoke, cough=A.cough>0; if(cough) A.cough-=dt;
+  const beat=A.cilia&&!smoke, sp=cough?520:beat?42:0;
+  AW.off+=sp*dt; AW.time=(AW.time||0)+dt*(beat?1:0);
+  // mucus gets thicker when smoke irritates the goblet cells
+  const target=smoke?168:205; AW.mt+=(target-AW.mt)*Math.min(1,dt*0.6);
+  const mt=AW.mt, mp=[]; for(let x=-20;x<=820;x+=40) mp.push([x,mt+6*Math.sin((x+AW.off)*0.03)]);
+  AW.mucus.setAttribute("d",smooth(mp,false)+" L820 250 L-20 250 Z"); AW.streak.setAttribute("d",`M-20 ${f1(mt+(250-mt)*0.55)} L820 ${f1(mt+(250-mt)*0.55)}`); AW.streak.setAttribute("stroke-dashoffset",f1(-AW.off));
+  AW.flowT.textContent=sp>0?(cough?"cough! mucus forced up and out →":"mucus swept up to the throat →"):"cilia not beating: mucus stuck";
+  // cilia: a wave of beats travels along the surface; each stroke is fast forwards, slow back
+  AW.cil.forEach(c=>{ let a; if(beat){ const ph=((AW.time*3-c.x/120)%1+1)%1; a=ph<0.3?lerp(-0.7,0.75,ph/0.3):lerp(0.75,-0.7,(ph-0.3)/0.7); } else a=smoke?1.15:0.1;
+    const L=smoke?20:28, bx=c.x, by=262, tx=bx+Math.sin(a)*L, ty=by-Math.cos(a)*L*(smoke?0.6:1), qx=bx+Math.sin(a*0.4)*L*0.5, qy=by-L*0.55; c.el.setAttribute("d",`M${f1(bx)} ${by} Q${f1(qx)} ${f1(qy)} ${f1(tx)} ${f1(ty)}`); c.el.setAttribute("stroke",smoke?"#8a6a4a":"#b5767a"); });
+  AW.gobs.forEach(gb=>gb.gr.forEach((c,j)=>c.setAttribute("r",smoke?5.6:4.5)));
+  AW.haze.setAttribute("opacity",smoke?0.14:0); AW.tars.forEach(t=>{ t.el.setAttribute("opacity",smoke?0.75:0); if(smoke){ t.y+=8*dt; if(t.y>mt) t.y=Math.random()*40; t.el.setAttribute("cx",f1(t.x)); t.el.setAttribute("cy",f1(t.y)); } });
+  // particles fall, get stuck in mucus, and are carried along
+  AW.parts.forEach(p=>{ if(p.st==="air"){ p.y+=p.vy*dt*(dt>0?1:0); p.x+=Math.sin((p.y+p.rot)*0.05)*8*dt; if(p.y>=mt+6*Math.sin((p.x+AW.off)*0.03)+4){ p.st="stuck"; p.dy=4+Math.random()*(242-mt-8); } }
+    else { p.x+=sp*dt; p.y=mt+p.dy; if(p.x>820){ p.x=Math.random()*700-20; p.y=6; p.st="air"; } }
+    p.el.setAttribute("transform",`translate(${f1(p.x)} ${f1(p.y)}) rotate(${f1(p.rot)})`); p.el.setAttribute("visibility",A.particles?"visible":"hidden"); }); }
+function airSide(){
+  $("side").innerHTML=`<div class="card"><h2>Keeping the lungs clean</h2><p style="margin:0;font-size:.9rem">The trachea and bronchi are lined with two kinds of cell. <b>Goblet cells</b> make sticky mucus that traps dust, pollen and bacteria. <b>Ciliated cells</b> have tiny hairs, cilia, that beat in waves and sweep the mucus up to the throat, where it is swallowed. Rings of <b>cartilage</b> underneath hold the airway open.</p>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button><button id="cough">Cough</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div></div>
+   <div class="card"><h2>Choose what moves</h2><div class="chips">${[["cilia","Cilia beating"],["particles","Dust, pollen and bacteria"]].map(([k,t])=>`<label class="chip"><input type="checkbox" data-a="${k}" ${S.air[k]?"checked":""}>${t}</label>`).join("")}<label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div>
+    <h2 style="margin-top:12px">What if…</h2><label class="chip"><input type="checkbox" id="smoke" ${S.air.smoke?"checked":""}>The person smokes</label><div id="smsg"></div></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["cilia","mucus","goblet","ciliated","cart","particles"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  $("side").querySelectorAll("[data-a]").forEach(c=>c.onchange=()=>{ S.air[c.dataset.a]=c.checked; });
+  const sm=()=>{ $("smsg").innerHTML=S.air.smoke?`<div class="msg warn">Tar in cigarette smoke stops the cilia beating, and smoke makes the goblet cells produce extra mucus. The mucus and the dirt in it collect in the airways. The only way to clear it is coughing: this is "smoker's cough". Bacteria trapped in the mucus can cause bronchitis and chest infections. Try the Cough button.</div>`:""; };
+  $("smoke").onchange=e=>{ S.air.smoke=e.target.checked; sm(); }; sm();
+  $("cough").onclick=()=>{ S.air.cough=0.7; };
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ---------- shell ----------
+const LEG={breath:`<span><i style="background:#1c96d4"></i>Air breathed in (more oxygen)</span><span><i style="background:#7d7f8c"></i>Air breathed out (more carbon dioxide)</span><span><i style="background:#ffd23f"></i>Muscle contracting</span><span>Drawn as if you are facing the person: their right lung is on your left.</span>`,
+ gas:`<span><i style="background:#f08c00"></i>Oxygen</span><span><i style="background:#2f2f2f"></i>Carbon dioxide</span><span><i style="background:${mixc(0)}"></i>Blood low in oxygen</span><span><i style="background:${mixc(1)}"></i>Blood full of oxygen</span><span>Magnified about 1500 times</span>`,
+ air:`<span><i style="background:#d6e6a8"></i>Mucus</span><span><i style="background:#8a7a66"></i>Dust</span><span><i style="background:#f2c230"></i>Pollen</span><span><i style="background:#4f9a52"></i>Bacteria</span><span>Magnified about 1000 times</span>`};
+const BELOW={gas:`<h2>Air breathed in and out</h2><div class="tbl"><table><tr><th>Gas</th><th>Breathed in</th><th>Breathed out</th><th>Why</th></tr><tr><td>Oxygen</td><td>21%</td><td>16%</td><td>Some diffuses into the blood</td></tr><tr><td>Carbon dioxide</td><td>0.04%</td><td>4%</td><td>Diffuses out of the blood</td></tr><tr><td>Nitrogen</td><td>78%</td><td>78%</td><td>Not used by the body</td></tr><tr><td>Water vapour</td><td>varies</td><td>saturated</td><td>Evaporates from the moist lining</td></tr><tr><td>Temperature</td><td>air temperature</td><td>about 37 °C</td><td>Warmed inside the body</td></tr></table></div><p class="note">Test it: breathed-out air turns limewater milky much faster than breathed-in air, because it contains about 100 times more carbon dioxide.</p>`,
+ air:`<h2>How the airways protect the lungs</h2><ul style="margin:0;padding-left:18px;font-size:.9rem"><li><b>Nose:</b> hairs and mucus filter the air, and it is warmed and moistened.</li><li><b>Mucus and cilia:</b> trap dirt and microbes and sweep them away from the lungs.</li><li><b>Coughing and sneezing:</b> force out irritants.</li><li><b>White blood cells:</b> in the alveoli, they engulf any microbes that get that far.</li></ul>`};
+function setView(v){
+  S.view=v; document.querySelectorAll("[data-view]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.view===v));
+  const st=$("stage"); st.innerHTML=""; S.selected=null; S.quiz=null; $("legend").innerHTML=LEG[v];
+  $("below").hidden=!BELOW[v]; $("below").innerHTML=BELOW[v]||"";
+  if(v==="breath"){ if(!B) buildBreath(); st.appendChild(B.svg); st.insertAdjacentHTML("beforeend",spiroSVG()); breathSide(); }
+  else if(v==="gas"){ if(!GX) buildGas(); st.appendChild(GX.svg); gasSide(); }
+  else { if(!AW) buildAir(); st.appendChild(AW.svg); airSide(); }
+  if(v!=="gas"&&S.gas.exercise===false&&S.mode==="rest") S.bpm=12;
+  undim(); applyLabels(); fitLabels(); }
+function fitLabels(){ const narrow=innerWidth<600;
+  [B,GX,AW].forEach(V=>{ if(!V) return; V.labs.forEach(l=>{ if(!l.tx) return; const words=l.t.split(" "); l.tx.textContent=""; l.tx.setAttribute("font-size",narrow?24:16);
+    if(narrow&&words.length>1){ const cut=Math.ceil(words.length/2); [words.slice(0,cut).join(" "),words.slice(cut).join(" ")].forEach((w,i)=>{ const sp=document.createElementNS(NS,"tspan"); sp.setAttribute("x",l.x); sp.setAttribute("y",l.y+(i?13:-11)); sp.textContent=w; l.tx.appendChild(sp); }); if(l.ln&&l.anchor!=="middle"&&V===B) l.ln.setAttribute("y1",l.y-8); }
+    else { l.tx.textContent=l.t; if(l.ln&&V===B) l.ln.setAttribute("y1",l.y-5); } }); V.ctx.setAttribute("font-size",narrow?17:13); }); }
+addEventListener("resize",fitLabels);
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("stage").addEventListener("click",e=>{ const p=e.target.closest(".part"); if(!p) return; const id=p.dataset.part;
+  if(S.view==="breath"&&S.quiz&&!S.quiz.done&&QZ[S.quiz.i]&&QZ[S.quiz.i].tap&&!S.quiz.lock){ answer(id===QZ[S.quiz.i].tap); return; } showInfo(id); });
+$("stage").addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("part")){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click",{bubbles:true})); } });
+let last=performance.now(), lastPh=null; S.frameN=0;
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  let dc=S.playing?dtReal*S.rate*S.bpm/60:0;
+  if(S.stepTo!=null&&S.playing&&S.t+dc>=S.stepTo){ dc=S.stepTo-S.t+1e-6; S.playing=false; S.stepTo=null; if($("play")) $("play").textContent="Play"; }
+  let nt=S.t+dc; if(nt>=1){ nt-=1; newCycle(); } S.t=nt; S.dtSim=S.playing||dc>0?dtReal*S.rate:0;
+  const ph=phaseOf(S.t).k+S.cyc.deep; if(ph!==lastPh){ lastPh=ph; updatePhaseUI(); }
+  if(S.view==="breath"&&B) tickBreath(); else if(S.view==="gas"&&GX) tickGas(S.dtSim); else if(S.view==="air"&&AW) tickAir(S.dtSim);
+  S.frameN++; requestAnimationFrame(frame); }
+setView("breath");
+if(RM) S.playing=false;
+requestAnimationFrame(frame);
+window.__lungs={S,get B(){return B;},get GX(){return GX;},get AW(){return AW;},setView};
+})();
+</script></body></html>
