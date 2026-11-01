@@ -126,7 +126,6 @@ const PHTXT={AS:"The atria contract and push blood through the open tricuspid an
  VS:"The ventricles contract. Rising pressure shuts the tricuspid and bicuspid valves (the “lub” sound) and opens the semilunar valves. Blood is forced into the pulmonary artery and the aorta. The tendons stop the valves turning inside out.",
  D:"The heart muscle relaxes. The semilunar valves close (the “dub” sound), so blood cannot flow back from the arteries. Blood from the veins fills the atria and flows on into the ventricles through the open valves."};
 const phaseOf=t=>PH.find(p=>t>=p.a&&t<p.b)||PH[2];
-const CH={ra:{x:285,y:238},la:{x:512,y:236},rv:{x:312,y:398},lv:{x:482,y:405}};
 const PARTS={
  ra:{n:"Right atrium",b:"d",t:"Receives deoxygenated blood from the body through the vena cava, then contracts to push it into the right ventricle. Its wall is thin: it only pumps blood a short way.",g:"ra"},
  la:{n:"Left atrium",b:"o",t:"Receives oxygenated blood from the lungs through the pulmonary veins, then contracts to push it into the left ventricle.",g:"la"},
@@ -144,128 +143,170 @@ const PARTS={
  aorta:{n:"Aorta",b:"o",t:"The largest artery. It carries oxygenated blood at high pressure from the left ventricle to every part of the body except the lungs.",g:"aorta"},
  chordae:{n:"Tendons (chordae tendineae)",t:"Tough cords attaching the tricuspid and bicuspid valves to muscles in the ventricle walls. They stop the valves turning inside out when the ventricles contract.",g:"chordae"},
  coronary:{n:"Coronary arteries",b:"o",t:"Branch from the base of the aorta and supply the heart muscle itself with oxygen and glucose. A blockage here causes a heart attack.",g:"coronary"},
+ myo:{n:"Heart muscle (cardiac muscle)",t:"The wall of the heart is cardiac muscle, which contracts again and again without tiring. Look how much thicker it is round the left ventricle than round the right ventricle and the atria. The muscle gets its own oxygen and glucose from the coronary arteries.",g:"myo"},
  san:{n:"Pacemaker (sinoatrial node)",t:"A patch of tissue in the wall of the right atrium that starts each heartbeat with an electrical impulse. The impulse spreads over the atria, pauses at the atrioventricular node, then travels down the septum and up the ventricle walls (A Level).",g:"san"}};
 let H=null;
+// Geometry of a textbook frontal (four-chamber) section, viewBox 800 x 640.
+// Myocardium is one continuous muscle; cavities are cut into it. Ventricles shorten towards the base when they contract.
+const HG={
+ outer:"M244 198 C224 202, 212 224, 212 254 C212 284, 218 302, 226 314 C220 324, 220 334, 222 346 C226 400, 244 456, 286 498 C330 540, 410 580, 470 598 C490 604, 510 604, 528 594 C578 566, 612 500, 620 420 C624 370, 620 340, 610 324 C616 306, 614 290, 610 262 C606 222, 584 200, 540 198 C508 196, 478 206, 468 226 C460 244, 440 256, 412 258 C380 260, 350 252, 334 236 C326 212, 300 196, 270 196 C258 196, 250 196, 244 198 Z",
+ ra:"M246 322 C236 312, 228 296, 228 270 C228 232, 244 206, 274 204 C302 202, 318 222, 318 252 C318 282, 316 302, 310 322 Z",
+ la:"M480 322 C474 304, 472 282, 474 256 C478 226, 500 208, 532 208 C566 208, 590 226, 592 256 C594 284, 586 306, 548 322 Z",
+ rv:"M246 322 L372 322 C376 380, 386 440, 404 494 C386 508, 362 512, 336 504 C298 490, 262 456, 248 410 C240 384, 238 350, 246 322 Z",
+ lv:"M404 322 L560 322 C572 380, 568 452, 542 502 C524 538, 500 552, 478 546 C462 540, 452 524, 446 504 C430 452, 414 390, 404 322 Z",
+ sep:"M372 322 L404 322 C414 390, 430 452, 446 504 C452 524, 462 540, 470 556 L430 560 C410 530, 404 512, 404 494 C386 440, 376 380, 372 322 Z"};
+const XC={ra:[273,262],la:[533,262],rv:[308,322],lv:[484,322]}, MC=[410,320];
 function buildHeart(){
   const svg=svgEl("svg",{viewBox:"0 0 800 640",role:"img","aria-label":"Live cross-section of the human heart"});
   const defs=svgEl("defs",{},svg);
-  defs.innerHTML=`<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5a6966"/></marker>
-   <radialGradient id="glow"><stop offset="0" stop-color="#ffe14d" stop-opacity="1"/><stop offset="1" stop-color="#ffb000" stop-opacity="0"/></radialGradient>`;
+  defs.innerHTML=`<radialGradient id="glow"><stop offset="0" stop-color="#ffe14d" stop-opacity="1"/><stop offset="1" stop-color="#ffb000" stop-opacity="0"/></radialGradient>
+   <radialGradient id="myo" gradientUnits="userSpaceOnUse" cx="380" cy="300" r="340" fx="330" fy="250"><stop offset="0" stop-color="#e7837a"/><stop offset=".45" stop-color="#cf5a51"/><stop offset=".8" stop-color="#ad3b35"/><stop offset="1" stop-color="#8c2a26"/></radialGradient>
+   <radialGradient id="cavR" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#eef1fb"/><stop offset=".75" stop-color="#d8def3"/><stop offset="1" stop-color="#c2cbec"/></radialGradient>
+   <radialGradient id="cavL" cx=".45" cy=".4" r=".7"><stop offset="0" stop-color="#fdf0ee"/><stop offset=".75" stop-color="#f8d9d5"/><stop offset="1" stop-color="#f0c1bb"/></radialGradient>
+   <radialGradient id="rbcO"><stop offset="0" stop-color="#ef6a6f"/><stop offset=".45" stop-color="#d42a35"/><stop offset=".8" stop-color="#b3141f"/><stop offset="1" stop-color="#8a0d16"/></radialGradient>
+   <radialGradient id="rbcD"><stop offset="0" stop-color="#7d93d6"/><stop offset=".45" stop-color="#3c5ab0"/><stop offset=".8" stop-color="#2a4290"/><stop offset="1" stop-color="#1b2c66"/></radialGradient>
+   <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+   <filter id="hshadow" x="-10%" y="-10%" width="120%" height="125%"><feGaussianBlur stdDeviation="7"/></filter>
+   <clipPath id="clipA"><rect x="0" y="0" width="800" height="321"/></clipPath><clipPath id="clipV"><rect x="0" y="319" width="800" height="330"/></clipPath>
+   <clipPath id="clipOuter"><path d="${HG.outer}"/></clipPath>`;
   const g=svgEl("g",{},svg);
-  // vessel tube helper: wall path + lumen path
-  const tube=(id,d,w,side,parent)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
-    svgEl("path",{d,fill:"none",stroke:side==="r"?"#8193cf":"#d9706c","stroke-width":w,"stroke-linecap":"butt","stroke-linejoin":"round"},grp);
-    svgEl("path",{d,fill:"none",stroke:side==="r"?"var(--cav-r)":"var(--cav-l)","stroke-width":w-9,"stroke-linecap":"butt","stroke-linejoin":"round"},grp); return grp; };
-  // ----- behind: descending aorta, vena cavae, pulmonary veins -----
-  tube("aorta","M612 92 C624 140, 626 200, 626 640",30,"l");
-  tube("ivc","M206 640 C206 520, 208 420, 224 330 C232 300, 244 288, 258 282",32,"r");
-  tube("svc","M282 0 L282 196",32,"r");
-  const pvG=svgEl("g",{class:"part","data-part":"pv",tabindex:0,role:"button","aria-label":PARTS.pv.n},g);
-  ["M800 214 C700 214, 620 214, 556 226","M800 262 C700 262, 620 262, 556 252"].forEach(d=>{ svgEl("path",{d,fill:"none",stroke:"#d9706c","stroke-width":24},pvG); svgEl("path",{d,fill:"none",stroke:"var(--cav-l)","stroke-width":15},pvG); });
-  // ----- chambers -----
-  const chamber=(id,d,wall,side)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},g);
-    svgEl("path",{d,fill:"var(--muscle)",stroke:"var(--muscle)","stroke-width":wall*2,"stroke-linejoin":"round"},grp);
-    svgEl("path",{d,fill:"none",stroke:"var(--muscle-d)","stroke-width":wall*2+2.5,"stroke-linejoin":"round",opacity:.0},grp);
-    const cav=svgEl("path",{d,fill:side==="r"?"var(--cav-r)":"var(--cav-l)"},grp); return {grp,cav}; };
-  const outline=svgEl("path",{d:"",fill:"none"},g);
-  const rv=chamber("rv","M246 316 L374 316 C384 360, 386 410, 374 452 C360 488, 318 494, 290 472 C262 448, 246 384, 246 316 Z",11,"r");
-  const lv=chamber("lv","M424 316 L542 316 C552 362, 544 424, 518 468 C498 504, 466 520, 448 508 C430 494, 422 444, 424 316 Z",24,"l");
-  const ra=chamber("ra","M232 242 C232 198, 262 180, 288 182 C318 184, 340 206, 340 240 C340 270, 330 290, 316 300 L264 300 C244 292, 232 270, 232 242 Z",10,"r");
-  const la=chamber("la","M460 238 C460 204, 482 188, 512 188 C542 188, 564 208, 564 236 C564 262, 552 282, 540 292 L486 292 C468 280, 460 262, 460 238 Z",10,"l");
-  // AV channels (part of atria visually)
-  svgEl("rect",{x:270,y:292,width:68,height:34,fill:"var(--cav-r)"},ra.grp);
-  svgEl("rect",{x:470,y:286,width:62,height:40,fill:"var(--cav-l)"},la.grp);
-  // papillary muscles
-  [[290,452,18,10],[336,458,16,9]].forEach(([x,y,rx,ry])=>svgEl("ellipse",{cx:x,cy:y,rx,ry,fill:"var(--muscle)"},rv.grp));
-  [[470,478,18,11],[518,452,16,10]].forEach(([x,y,rx,ry])=>svgEl("ellipse",{cx:x,cy:y,rx,ry,fill:"var(--muscle)"},lv.grp));
-  // septum hit area
-  const sep=svgEl("path",{d:"M376 330 L422 330 L428 470 L392 480 Z",fill:"transparent",class:"part","data-part":"septum",tabindex:0,role:"button","aria-label":"Septum"},g);
-  // ----- front: pulmonary artery, ascending aorta + arch -----
-  const paG=tube("pa","M360 330 L360 160 M360 160 C330 150, 260 146, 0 146 M360 160 C420 150, 520 146, 800 146",30,"r");
-  const aoG=tube("aorta","M440 330 L440 150 C440 92, 470 60, 520 56 C570 54, 600 66, 612 92",34,"l");
-  ["M486 60 L486 0","M528 56 L528 0","M566 60 L570 0"].forEach(d=>{ svgEl("path",{d,fill:"none",stroke:"#d9706c","stroke-width":16},aoG); svgEl("path",{d,fill:"none",stroke:"var(--cav-l)","stroke-width":9},aoG); });
-  // coronary arteries on the surface
-  const cor=svgEl("g",{class:"part","data-part":"coronary",tabindex:0,role:"button","aria-label":PARTS.coronary.n},g);
-  const corD=["M458 312 C520 298, 584 318, 586 392 C588 452, 556 520, 486 548","M584 400 C600 430, 598 470, 580 500","M424 312 C360 300, 236 300, 228 352 C222 410, 236 470, 288 500"];
-  const corPaths=corD.map(d=>svgEl("path",{d,fill:"none",stroke:"#b5121b","stroke-width":4.5,"stroke-linecap":"round"},cor));
-  // valves
+  // vessel drawn as a cut-open tube: dark outline, coloured wall, pale lumen with a lighter core
+  const VC={r:{o:"#1d2d68",w:"#4b66b8",l:"#dce2f5",c:"#eef1fb"},l:{o:"#741515",w:"#c7333b",l:"#f8d6d2",c:"#fdecea"}};
+  const tube=(id,paths,W,side,parent)=>{ const grp=svgEl("g",id?{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n}:{},parent||g); const c=VC[side];
+    const P=paths.map(p=>typeof p==="string"?{d:p,w:W}:p);
+    [["o",3],["w",0],["l",-11],["c",-19]].forEach(([k,dw])=>P.forEach(p=>{ const w=p.w+dw*(p.w/W); if(w>0) svgEl("path",{d:p.d,fill:"none",stroke:c[k],"stroke-width":w.toFixed(1),"stroke-linecap":"butt","stroke-linejoin":"round"},grp); }));
+    return grp; };
+  // ----- behind the heart: the descending part of the aorta -----
+  tube("aorta",["M538 58 C578 58, 594 86, 594 132 L594 660"],38,"l");
+  // ----- heart muscle: soft shadow, then atrial and ventricular halves -----
+  svgEl("path",{d:HG.outer,fill:"#3b0c0a",opacity:.22,transform:"translate(6 9)",filter:"url(#hshadow)"},g);
+  const myoAttrs={class:"part","data-part":"myo","data-also":"myo ra la rv lv septum",tabindex:0,role:"button","aria-label":"Heart muscle"};
+  const half=(clip)=>{ const grp=svgEl("g",{"clip-path":`url(#${clip})`},g); const inner=svgEl("g",{},grp);
+    svgEl("path",Object.assign({d:HG.outer,fill:"url(#myo)"},myoAttrs),inner);
+    svgEl("path",{d:HG.outer,fill:"url(#sheen)","pointer-events":"none"},inner);
+    svgEl("path",{d:HG.outer,fill:"none",stroke:"#5e1714","stroke-width":2.4,"pointer-events":"none"},inner);
+    return {grp,inner}; };
+  const A=half("clipA"), V=half("clipV");
+  // chambers: endocardium lining, cavity, papillary muscles and ridged walls (trabeculae)
+  const chamber=(id,parent,side)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent);
+    svgEl("path",{d:HG[id],fill:"none",stroke:"#f2b6ad","stroke-width":5,"stroke-linejoin":"round"},grp);
+    const cav=svgEl("path",{d:HG[id],fill:`url(#cav${side==="r"?"R":"L"})`,stroke:"#8f2e2a","stroke-width":1,"stroke-opacity":.35},grp); return {grp,cav}; };
+  const ra=chamber("ra",A.inner,"r"), la=chamber("la",A.inner,"l"), rv=chamber("rv",V.inner,"r"), lv=chamber("lv",V.inner,"l");
+  // papillary muscles: cone-shaped, rising from the ventricle floor
+  const papi=(grp,base,tip,w)=>{ const [bx,by]=base,[tx,ty]=tip, dx=tx-bx, dy=ty-by, l=Math.hypot(dx,dy), ux=dx/l, uy=dy/l, nx=-uy*w, ny=ux*w, f=v=>v.toFixed(1);
+    const bx2=bx-ux*10, by2=by-uy*10; // base sunk into the wall
+    svgEl("path",{d:`M${f(bx2+nx*1.5)} ${f(by2+ny*1.5)} C${f(bx+dx*.25+nx*.9)} ${f(by+dy*.25+ny*.9)} ${f(bx+dx*.6+nx*.45)} ${f(by+dy*.6+ny*.45)} ${f(tx+nx*.3)} ${f(ty+ny*.3)} Q${f(tx+ux*w*.55)} ${f(ty+uy*w*.55)} ${f(tx-nx*.3)} ${f(ty-ny*.3)} C${f(bx+dx*.6-nx*.45)} ${f(by+dy*.6-ny*.45)} ${f(bx+dx*.25-nx*.9)} ${f(by+dy*.25-ny*.9)} ${f(bx2-nx*1.5)} ${f(by2-ny*1.5)} Z`,fill:"#c8524b",stroke:"#7c2420","stroke-width":1,"stroke-opacity":.45},grp);
+    svgEl("path",{d:`M${f(bx+dx*.15+nx*.35)} ${f(by+dy*.15+ny*.35)} Q${f(bx+dx*.55+nx*.3)} ${f(by+dy*.55+ny*.3)} ${f(tx+nx*.1)} ${f(ty+ny*.1+2)}`,fill:"none",stroke:"#fff",opacity:.25,"stroke-width":2,"stroke-linecap":"round"},grp); };
+  const PAP={rv:[[[268,482],[280,438],10],[[372,492],[350,446],9]],lv:[[[556,470],[530,426],13],[[468,544],[476,494],12]]};
+  papi(rv.grp,...PAP.rv[0]); papi(rv.grp,...PAP.rv[1]); papi(lv.grp,...PAP.lv[0]); papi(lv.grp,...PAP.lv[1]);
+  // septum hit area (muscle between the ventricles)
+  const sep=svgEl("path",{d:HG.sep,fill:"transparent",class:"part","data-part":"septum",tabindex:0,role:"button","aria-label":"Septum"},V.inner);
+  // ----- valves -----
   const valveG={};
-  const flap=(parent,x,y)=>svgEl("line",{x1:x,y1:y,x2:x,y2:y,stroke:"#f7efe2","stroke-width":5,"stroke-linecap":"round"},parent);
-  const mkAV=(id,x1,x2,y)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},g); svgEl("rect",{x:x1-6,y:y-10,width:x2-x1+12,height:44,fill:"transparent"},grp);
-    const a=flap(grp,x1,y), b=flap(grp,x2,y); [a,b].forEach(l=>l.setAttribute("stroke","#fffaf0")); const out=svgEl("g",{},grp);
-    [a,b].forEach(l=>{ const sh=l.cloneNode(); sh.setAttribute("stroke","#8a3a33"); sh.setAttribute("stroke-width","8"); grp.insertBefore(sh,l); l._sh=sh; });
-    return {grp,x1,x2,y,a,b,ang:0}; };
-  valveG.tric=mkAV("tric",272,336,318); valveG.mitral=mkAV("mitral",472,530,318);
-  const mkSL=(id,cx,y,half)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},g); svgEl("rect",{x:cx-half-6,y:y-26,width:half*2+12,height:40,fill:"transparent"},grp);
-    const a=flap(grp,cx-half,y), b=flap(grp,cx+half,y); [a,b].forEach(l=>{ const sh=l.cloneNode(); sh.setAttribute("stroke","#8a3a33"); sh.setAttribute("stroke-width","8"); grp.insertBefore(sh,l); l._sh=sh; });
-    return {grp,cx,y,half,a,b,ang:0}; };
-  valveG.pvalve=mkSL("pvalve",360,300,11); valveG.avalve=mkSL("avalve",440,300,13);
+  const leaf=(parent,w0)=>{ const e=svgEl("path",{fill:"#fbf1e1",stroke:"#8d5446","stroke-width":1.3,"stroke-linejoin":"round"},parent);
+    // hinge (x0,y0), bend point (qx,qy), tip (tx,ty): a flap that tapers from w0 at the hinge to a rounded edge at the tip
+    return {set(x0,y0,qx,qy,tx,ty){ const f=v=>v.toFixed(1); let dx=tx-x0, dy=ty-y0; const l=Math.hypot(dx,dy)||1; const nx=-dy/l, ny=dx/l, w=w0/2;
+      e.setAttribute("d",`M${f(x0+nx*w)} ${f(y0+ny*w)} Q${f(qx+nx*w*.8)} ${f(qy+ny*w*.8)} ${f(tx+nx*1.1)} ${f(ty+ny*1.1)} Q${f(tx+dx/l*2.2)} ${f(ty+dy/l*2.2)} ${f(tx-nx*1.1)} ${f(ty-ny*1.1)} Q${f(qx-nx*w*.8)} ${f(qy-ny*w*.8)} ${f(x0-nx*w)} ${f(y0-ny*w)} Z`); }}; };
+  const mkAV=(id,x1,x2,y)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},V.inner); svgEl("rect",{x:x1-6,y:y-12,width:x2-x1+12,height:50,fill:"transparent"},grp);
+    // fibrous ring the flaps hang from
+    [x1,x2].forEach(x=>svgEl("ellipse",{cx:x,cy:y,rx:6,ry:4,fill:"#f3e3c8",stroke:"#a77c5f","stroke-width":1},grp));
+    const a=leaf(grp,7), b=leaf(grp,7); return {grp,x1,x2,y,a,b,ang:0}; };
+  valveG.tric=mkAV("tric",244,308,322); valveG.mitral=mkAV("mitral",480,548,322);
   // chordae
-  const chG=svgEl("g",{class:"part","data-part":"chordae",tabindex:0,role:"button","aria-label":PARTS.chordae.n},g);
-  const chords=[[valveG.tric,"a",[290,444]],[valveG.tric,"b",[336,450]],[valveG.mitral,"a",[470,470]],[valveG.mitral,"b",[518,444]]].map(([v,w,pt])=>{ const l=svgEl("line",{stroke:"#fff","stroke-width":1.6,opacity:.9},chG); const hit=svgEl("line",{stroke:"transparent","stroke-width":12},chG); return {v,w,pt,l,hit}; });
+  const chG=svgEl("g",{class:"part","data-part":"chordae",tabindex:0,role:"button","aria-label":PARTS.chordae.n},V.inner);
+  const chords=[];
+  [[valveG.tric,"a",PAP.rv[0][1]],[valveG.tric,"b",PAP.rv[1][1]],[valveG.mitral,"a",PAP.lv[1][1]],[valveG.mitral,"b",PAP.lv[0][1]]].forEach(([v,w,pt])=>{ [-6,0,6].forEach(off=>{ const l=svgEl("line",{stroke:"#fff8ee","stroke-width":1.3,opacity:.95},chG); const hit=off?null:svgEl("line",{stroke:"transparent","stroke-width":12},chG); chords.push({v,w,pt,off,l,hit}); }); });
+  // ----- in front of the heart: veins entering, pulmonary artery, superior vena cava, ascending aorta -----
+  tube("ivc",["M200 660 L200 420 C200 362, 210 326, 240 292"],46,"r");
+  tube("pv",["M810 226 L640 226 C616 226, 600 230, 580 238","M810 272 L640 272 C616 272, 602 270, 584 268"],26,"l");
+  tube("pa",["M352 340 L352 186 C352 160, 336 150, 300 150 L-10 150","M352 186 C352 160, 368 150, 404 150 L810 150"],46,"r");
+  tube("svc",["M282 -10 L282 214"],46,"r");
+  tube("aorta",[{d:"M470 80 L470 -10",w:22},{d:"M520 70 L520 -10",w:24},{d:"M560 72 L566 -10",w:22},"M424 340 L424 150 C424 96, 462 60, 520 58 L548 58"],54,"l");
+  // semilunar valves: two pocket-shaped cusps in each artery
+  const mkSL=(id,cx,y,half)=>{ const grp=svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},g); svgEl("rect",{x:cx-half-8,y:y-40,width:half*2+16,height:56,fill:"transparent"},grp);
+    const a=leaf(grp,4.5), b=leaf(grp,4.5); return {grp,cx,y,half,a,b,ang:0}; };
+  valveG.pvalve=mkSL("pvalve",352,302,17); valveG.avalve=mkSL("avalve",424,302,19);
+  // coronary arteries run over the surface of the heart from the base of the aorta
+  const cor=svgEl("g",{class:"part","data-part":"coronary",tabindex:0,role:"button","aria-label":PARTS.coronary.n},g);
+  const corD=["M450 292 C486 288, 528 290, 562 298 C598 306, 610 334, 610 384 C610 452, 588 524, 532 574","M609 420 C592 446, 588 488, 596 516","M398 294 C384 304, 360 310, 330 312 C292 314, 252 314, 238 332 C226 352, 228 420, 258 464 C284 500, 322 520, 372 538"];
+  corD.forEach(d=>svgEl("path",{d,fill:"none",stroke:"#5b0a0e","stroke-width":7.5,"stroke-linecap":"round"},cor));
+  const corPaths=corD.map(d=>svgEl("path",{d,fill:"none",stroke:"#e0313b","stroke-width":4.5,"stroke-linecap":"round"},cor));
   // electrical conduction
   const el=svgEl("g",{"pointer-events":"none"},g);
-  const atrWave=svgEl("path",{d:"M300 196 C350 220, 420 210, 470 220 M300 196 C280 240, 270 270, 300 296",fill:"none",stroke:"#ffd23f","stroke-width":5,"stroke-linecap":"round",opacity:0},el);
-  const bundle=svgEl("path",{d:"M392 304 L398 470 C400 500, 420 520, 452 528 C510 520, 552 470, 552 330 M398 470 C392 500, 360 500, 300 488 C262 470, 240 420, 238 330",fill:"none",stroke:"#ffd23f","stroke-width":4,"stroke-linecap":"round",opacity:0},el);
+  const atrWave=svgEl("path",{d:"M310 210 C330 236, 380 258, 420 252 C450 246, 470 222, 500 208 C540 200, 584 210, 600 240 M310 210 C268 218, 226 250, 234 304",fill:"none",stroke:"#ffd23f","stroke-width":5,"stroke-linecap":"round",opacity:0},el);
+  const bundle=svgEl("path",{d:"M388 318 L390 352 C396 420, 420 500, 476 566 C540 566, 592 500, 592 336 M390 352 C380 430, 360 490, 312 514 C262 496, 226 420, 230 340",fill:"none",stroke:"#ffd23f","stroke-width":4,"stroke-linecap":"round",opacity:0},el);
   const sanG=svgEl("g",{class:"part","data-part":"san",tabindex:0,role:"button","aria-label":PARTS.san.n},g);
-  const san=svgEl("circle",{cx:308,cy:196,r:9,fill:"#ffd23f",stroke:"#a07400","stroke-width":1.5},sanG); const sanGlow=svgEl("circle",{cx:308,cy:196,r:26,fill:"url(#glow)",opacity:0,"pointer-events":"none"},sanG);
-  const avn=svgEl("circle",{cx:390,cy:302,r:6,fill:"#ffd23f",stroke:"#a07400","stroke-width":1.2,opacity:.85},el);
+  svgEl("circle",{cx:310,cy:208,r:8,fill:"#ffd23f",stroke:"#8a6400","stroke-width":1.5},sanG); const sanGlow=svgEl("circle",{cx:310,cy:208,r:26,fill:"url(#glow)",opacity:0,"pointer-events":"none"},sanG);
+  const avn=svgEl("circle",{cx:388,cy:316,r:6,fill:"#ffd23f",stroke:"#8a6400","stroke-width":1.2,opacity:.9},el);
   // blood cells layer
   const cellsG=svgEl("g",{"pointer-events":"none"},g);
-  // labels
+  // labels: left column ends at x 196, right column starts at x 668, so no label sits on the heart
   const labG=svgEl("g",{"pointer-events":"none"},svg);
-  // left column ends at x 196, right column starts at x 650, so no label sits on the heart
-  const L=[["svc","Vena cava",196,66,266,62],["pa","Pulmonary artery",196,124,250,146],["san","Pacemaker",196,206,299,197],["ra","Right atrium",196,262,236,252],["tric","Tricuspid valve",196,334,274,320],
-   ["rv","Right ventricle",196,412,252,404],["chordae","Tendons",196,486,296,462],["ivc","Vena cava",190,606,204,600],
-   ["aorta","Aorta",650,40,602,72],["la","Left atrium",650,186,560,220],["pv","Pulmonary veins",650,300,700,272],["mitral","Bicuspid valve",650,370,530,320],["lv","Left ventricle",650,436,548,428],["coronary","Coronary artery",650,520,582,470],["septum","Septum",404,604,404,488]];
-  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=Math.abs(x-ax)<8?"middle":x<ax?"end":"start";
-    const ln=svgEl("line",{x1:anchor==="middle"?x:x+(x<ax?5:-5),y1:anchor==="middle"?y-16:y-5,x2:ax,y2:ay,stroke:"#5a6966","stroke-width":1.2},grp);
+  const L=[["svc","Vena cava",196,72,258,84],["pa","Pulmonary artery",196,128,232,150],["san","Pacemaker",196,200,302,208],["ra","Right atrium",196,262,240,262],["tric","Tricuspid valve",196,336,248,328],
+   ["rv","Right ventricle",196,412,252,410],["chordae","Tendons",196,488,276,404],["ivc","Vena cava",168,596,177,580],
+   ["aorta","Aorta",668,72,613,112],["la","Left atrium",668,186,560,232],["pv","Pulmonary veins",668,312,640,285],["mitral","Bicuspid valve",668,372,548,332],["lv","Left ventricle",668,440,556,440],["coronary","Coronary artery",668,522,604,476],["myo","Heart muscle",668,580,588,506],["septum","Septum",436,630,428,476]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=Math.abs(x-ax)<10?"middle":x<ax?"end":"start";
+    const ln=svgEl("line",{x1:anchor==="middle"?x:x+(x<ax?5:-5),y1:anchor==="middle"?y-16:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp);
+    svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
     const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
-  { const grp=svgEl("g",{},labG); [[360,304],[440,304]].forEach(([ax,ay])=>svgEl("line",{x1:400,y1:338,x2:ax,y2:ay+4,stroke:"#5a6966","stroke-width":1.2},grp)); const tx=svgEl("text",{x:400,y:356,"text-anchor":"middle","font-size":15,class:"lbl"},grp); tx.textContent="Semilunar valves"; labs.push({id:"sl",grp}); }
-  // flow arrows (context)
+  { const grp=svgEl("g",{},labG); [[352,306],[424,306]].forEach(([ax,ay])=>{ svgEl("line",{x1:388,y1:362,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp); }); const tx=svgEl("text",{x:388,y:380,"text-anchor":"middle","font-size":15,class:"lbl"},grp); tx.textContent="Semilunar valves"; labs.push({id:"sl",grp}); }
+  // where the vessels go (context)
   const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg);
   ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
-  [["from head and arms",290,22,"start"],["from lower body",216,632,"start"],["to right lung",8,184,"start"],["to left lung",792,124,"end"],["from lungs",792,243,"end"],["to head and arms",590,18,"start"],["to lower body",636,632,"start"]].forEach(([t,x,y,a])=>{ const e=svgEl("text",{x,y,"text-anchor":a},ctx); e.textContent=t; });
-  // routes
-  const R={};
-  R.svc=mkRoute([[282,-10,"vc"],[282,90,"vc"],[284,186,"vc"],[288,236,"ra"],[300,290,"ra","av"],[304,322,"rv"],[300,390,"rv"],[316,452,"rv"],[350,430,"rv"],[360,370,"rv"],[360,304,"pa","sl"],[360,230,"pa"],[360,165,"pa"],[300,148,"pa"],[150,146,"pa"],[-10,146,"pa"]],{side:"r"});
-  R.ivc=mkRoute([[206,650,"vc"],[206,520,"vc"],[214,380,"vc"],[234,304,"vc"],[262,280,"ra"],[300,290,"ra","av"],[304,322,"rv"],[300,390,"rv"],[316,452,"rv"],[350,430,"rv"],[360,370,"rv"],[360,304,"pa","sl"],[360,230,"pa"],[360,165,"pa"],[430,150,"pa"],[620,146,"pa"],[810,146,"pa"]],{side:"r"});
-  R.pv1=mkRoute([[810,214,"pv"],[680,214,"pv"],[566,224,"pv"],[516,238,"la"],[500,288,"la","av"],[500,322,"lv"],[498,392,"lv"],[476,470,"lv"],[450,452,"lv"],[440,380,"lv"],[440,304,"ao","sl"],[440,220,"ao"],[442,140,"ao"],[470,74,"ao"],[528,58,"ao"],[528,-10,"ao"]],{side:"l"});
-  R.pv2=mkRoute([[810,262,"pv"],[680,262,"pv"],[566,254,"pv"],[516,248,"la"],[500,288,"la","av"],[500,322,"lv"],[498,392,"lv"],[476,470,"lv"],[450,452,"lv"],[440,380,"lv"],[440,304,"ao","sl"],[440,220,"ao"],[442,140,"ao"],[480,70,"ao"],[560,58,"ao"],[606,84,"ao"],[624,170,"ao"],[626,650,"ao"]],{side:"l"});
-  const WZ={vc:9,ra:30,rv:30,pa:9,pv:7,la:28,lv:30,ao:10};
-  // particles
+  [["from head and arms",252,22,"end"],["from lower body",228,632,"start"],["to right lung",8,184,"start"],["to left lung",792,128,"end"],["from lungs",792,253,"end"],["to head and arms",584,22,"start"],["to lower body",620,632,"start"]].forEach(([t,x,y,a])=>{ const e=svgEl("text",{x,y,"text-anchor":a},ctx); e.textContent=t; });
+  // routes (zones ending in "b" are hidden: the vessel passes behind another one or behind the heart)
+  const R={}, RV=[[276,316,"ra","av"],[272,338,"rv"],[268,372,"rv"],[272,432,"rv"],[302,474,"rv"],[340,472,"rv"],[354,414,"rv"],[352,352,"rv"],[352,302,"pa","sl"],[352,240,"pa"],[352,186,"pa"]],
+   LV=[[514,316,"la","av"],[516,340,"lv"],[524,390,"lv"],[522,458,"lv"],[498,518,"lv"],[466,512,"lv"],[448,450,"lv"],[434,382,"lv"],[426,334,"lv"],[424,302,"ao","sl"],[424,230,"ao"],[424,150,"ao"],[440,96,"ao"]];
+  const toR=[[338,156,"pa"],[312,150,"pab"],[252,150,"pa"],[120,150,"pa"],[-10,150,"pa"]], toL=[[366,156,"pa"],[392,150,"pab"],[456,150,"pa"],[620,150,"pa"],[810,150,"pa"]];
+  R.svc=mkRoute([[282,-10,"vc"],[282,100,"vc"],[282,200,"vc"],[276,240,"ra"],[274,290,"ra"],...RV,...toR],{side:"r"});
+  R.ivc=mkRoute([[200,650,"vc"],[200,520,"vc"],[200,420,"vc"],[208,350,"vc"],[230,304,"ra"],[256,298,"ra"],...RV,...toL],{side:"r"});
+  R.pv1=mkRoute([[810,226,"pv"],[700,226,"pv"],[610,228,"pv"],[574,240,"la"],[530,272,"la"],...LV,[480,64,"ao"],[520,46,"ao"],[520,-10,"ao"]],{side:"l"});
+  R.pv2=mkRoute([[810,272,"pv"],[700,272,"pv"],[610,270,"pv"],[584,268,"la"],[540,284,"la"],...LV,[480,66,"ao"],[540,58,"ao"],[576,66,"ao"],[592,98,"ao"],[594,134,"aob"],[594,166,"ao"],[594,192,"aob"],[594,568,"ao"],[594,660,"ao"]],{side:"l"});
+  const WZ={vc:12,ra:24,rv:20,pa:11,pab:11,pv:6,la:24,lv:20,ao:12,aob:12};
+  // particles: red blood cells drawn as shaded discs
   const cells=[]; const N=150;
-  const startRoute=(c,side,fresh)=>{ c.route=side==="r"?(Math.random()<0.55?R.svc:R.ivc):(Math.random()<0.5?R.pv1:R.pv2); c.s=fresh?0:Math.random()*c.route.L; c.oxy=side==="l"?1:0; c.wait=0; };
-  for(let i=0;i<N;i++){ const c={o:(Math.random()*2-1)*0.9,k:Math.random(),el:svgEl("circle",{r:4.6,fill:mixc(0),stroke:"rgba(0,0,0,.25)","stroke-width":.6},cellsG)}; startRoute(c,i%2?"r":"l",false); cells.push(c); }
-  H={startRoute,svg,parts:{ra,la,rv,lv},valveG,chords,R,WZ,cells,atrWave,bundle,sanGlow,avn,corPaths,labs,ctx,sep,svgRoot:svg};
+  const startRoute=(c,side,fresh)=>{ c.route=side==="r"?(Math.random()<0.55?R.svc:R.ivc):(Math.random()<0.5?R.pv1:R.pv2); c.s=fresh?0:Math.random()*c.route.L; c.oxy=side==="l"?1:0; c.wait=0; c.el.setAttribute("fill",side==="r"?"url(#rbcD)":"url(#rbcO)"); };
+  for(let i=0;i<N;i++){ const c={o:(Math.random()*2-1)*0.9,k:Math.random(),el:svgEl("circle",{r:4.8,fill:"url(#rbcD)",stroke:"rgba(40,0,0,.35)","stroke-width":.6},cellsG)}; startRoute(c,i%2?"r":"l",false); cells.push(c); }
+  H={startRoute,svg,parts:{ra,la,rv,lv},vMus:V.inner,valveG,chords,R,WZ,cells,atrWave,bundle,sanGlow,avn,corPaths,labs,ctx,sep,svgRoot:svg,xf:{}};
   return svg;
 }
 const FAC={vc:{AS:.3,VS:1,D:.9},pv:{AS:.3,VS:1,D:.9},ra:{AS:2.4,VS:.6,D:1.1},la:{AS:2.4,VS:.6,D:1.1},rv:{AS:1,VS:2.9,D:.8},lv:{AS:1,VS:2.9,D:.8},pa:{AS:.45,VS:2.7,D:.45},ao:{AS:.45,VS:2.7,D:.45}};
+FAC.pab=FAC.pa; FAC.aob=FAC.ao;
 const ZNAME={vc:"in the vena cava, coming back from the body",ra:"in the right atrium",rv:"in the right ventricle",pa:"in the pulmonary artery, on its way to the lungs",pv:"in a pulmonary vein, coming back from the lungs",la:"in the left atrium",lv:"in the left ventricle",ao:"in the aorta, on its way to the body",lungs:"in the lungs (off screen): it gives up carbon dioxide and picks up oxygen in the capillaries round the alveoli",body:"in the body's capillaries (off screen): it gives oxygen and glucose to the cells and picks up carbon dioxide"};
 let lastPhase=null;
 function tickHeart(dt){
   const t=S.t, ph=phaseOf(t), u=(t-ph.a)/(ph.b-ph.a);
   // phase change effects
   if(ph.k!==lastPhase){ if(ph.k==="VS"){ thump(70,0.16,0.9); S.beats++; if(S.follow) S.follow.beats++; } if(ph.k==="D") thump(95,0.11,0.6); lastPhase=ph.k; updatePhaseUI(); }
-  // chambers
+  // chambers: cavities shrink more than the outer muscle, so the walls visibly thicken; ventricles shorten towards the base
   const pulse=(on,active)=>on&&active?Math.sin(Math.PI*u):0;
-  const sc={ra:1-0.075*pulse(S.move.atria,ph.k==="AS"),la:1-0.075*pulse(S.move.atria,ph.k==="AS"),rv:1-0.085*pulse(S.move.ventricles,ph.k==="VS"),lv:1-0.07*pulse(S.move.ventricles,ph.k==="VS")};
-  for(const k in H.parts){ const c=CH[k]; H.parts[k].grp.setAttribute("transform",`translate(${c.x} ${c.y}) scale(${sc[k].toFixed(4)}) translate(${-c.x} ${-c.y})`); }
+  const pA=pulse(S.move.atria,ph.k==="AS"), pV=pulse(S.move.ventricles,ph.k==="VS");
+  const XF={ra:[1-0.10*pA,1-0.10*pA],la:[1-0.10*pA,1-0.10*pA],rv:[1-0.15*pV,1-0.12*pV],lv:[1-0.13*pV,1-0.11*pV]}, MS=[1-0.03*pV,1-0.055*pV];
+  const tf=(c,s)=>`translate(${c[0]} ${c[1]}) scale(${s[0].toFixed(4)} ${s[1].toFixed(4)}) translate(${-c[0]} ${-c[1]})`;
+  H.vMus.setAttribute("transform",tf(MC,MS));
+  for(const k in H.parts) H.parts[k].grp.setAttribute("transform",tf(XC[k],XF[k]));
+  const cav=(k,x,y)=>[XC[k][0]+(x-XC[k][0])*XF[k][0],XC[k][1]+(y-XC[k][1])*XF[k][1]];
+  const mus=(x,y)=>[MC[0]+(x-MC[0])*MS[0],MC[1]+(y-MC[1])*MS[1]];
   // valves
   const avOpen=ph.k!=="VS", slOpen=ph.k==="VS";
-  const vm=S.move.valves;
-  for(const id of ["tric","mitral"]){ const v=H.valveG[id]; const target=vm?(avOpen&&!(S.leaky&&id==="mitral"&&false)?72:0):40; v.ang+= (target-v.ang)*Math.min(1,dt*60*0.25);
-    const len=(v.x2-v.x1)/2+4, r=v.ang*Math.PI/180;
-    const leakGap=(S.leaky&&id==="mitral"&&!avOpen)?16:0;
-    const ax=v.x1+Math.cos(r)*(len-leakGap/2), ay=v.y+Math.sin(r)*len, bx=v.x2-Math.cos(r)*(len-leakGap/2), by=v.y+Math.sin(r)*len;
-    [["a",ax,ay,v.x1],["b",bx,by,v.x2]].forEach(([w,x,y,x0])=>{ const l=v[w]; [l,l._sh].forEach(e=>{ e.setAttribute("x1",x0); e.setAttribute("y1",v.y); e.setAttribute("x2",x.toFixed(1)); e.setAttribute("y2",y.toFixed(1)); }); v[w+"tip"]=[x,y]; }); }
+  const vm=S.move.valves, f1=n=>n.toFixed(1);
+  for(const id of ["tric","mitral"]){ const v=H.valveG[id]; const target=vm?(avOpen?72:0):40; v.ang+=(target-v.ang)*Math.min(1,dt*60*0.25);
+    // closed: the two flaps meet in a shallow V; open: they hang down into the ventricle
+    const deg=24+v.ang*(56/72), r=deg*Math.PI/180, half=(v.x2-v.x1)/2, len=half/Math.cos(24*Math.PI/180)+2;
+    const leakGap=(S.leaky&&id==="mitral"&&!avOpen)?18:0, L2=len-leakGap/2;
+    [["a",v.x1,1],["b",v.x2,-1]].forEach(([w,x0,sg])=>{ const tx=x0+sg*Math.cos(r)*L2, ty=v.y+Math.sin(r)*L2;
+      const mx=(x0+tx)/2, my=(v.y+ty)/2, nx=-(ty-v.y)/L2*sg, ny=(tx-x0)/L2*sg, bow=L2*0.16;
+      v[w].set(x0,v.y,mx-nx*bow,my-ny*bow,tx,ty); v[w+"tip"]=[tx,ty]; }); }
   for(const id of ["pvalve","avalve"]){ const v=H.valveG[id]; const target=vm?(slOpen?80:0):40; v.ang+=(target-v.ang)*Math.min(1,dt*60*0.3);
-    const r=v.ang*Math.PI/180, len=v.half+3;
-    const ax=v.cx-v.half+Math.sin(r)*0+Math.cos(r)*len, ay=v.y-Math.sin(r)*len, bx=v.cx+v.half-Math.cos(r)*len, by=v.y-Math.sin(r)*len;
-    [["a",ax,ay,v.cx-v.half],["b",bx,by,v.cx+v.half]].forEach(([w,x,y,x0])=>{ const l=v[w]; [l,l._sh].forEach(e=>{ e.setAttribute("x1",x0); e.setAttribute("y1",v.y); e.setAttribute("x2",x.toFixed(1)); e.setAttribute("y2",y.toFixed(1)); }); }); }
-  // chordae follow valve tips and ventricle scale
-  H.chords.forEach(c=>{ const tip=c.v[c.w+"tip"]; if(!tip) return; const ch=c.v===H.valveG.tric?"rv":"lv", cc=CH[ch], s=sc[ch]; const px=cc.x+(c.pt[0]-cc.x)*s, py=cc.y+(c.pt[1]-cc.y)*s;
-    [c.l,c.hit].forEach(e=>{ e.setAttribute("x1",tip[0].toFixed(1)); e.setAttribute("y1",tip[1].toFixed(1)); e.setAttribute("x2",px.toFixed(1)); e.setAttribute("y2",py.toFixed(1)); }); });
+    const k=v.ang/80, hy=v.y-10;
+    // closed: cusps sag into pockets that meet in the middle; open: pressed flat against the artery wall
+    [["a",-1],["b",1]].forEach(([w,sg])=>{ const x0=v.cx+sg*v.half;
+      const tx=lerp(v.cx+sg*1.5,x0-sg*5,k), ty=lerp(v.y+2,hy-30,k), qx=lerp(v.cx+sg*v.half*0.45,x0-sg*6,k), qy=lerp(v.y+14,hy-12,k);
+      v[w].set(x0,hy,qx,qy,tx,ty); }); }
+  // chordae: fan of cords from each flap to the tip of its papillary muscle
+  H.chords.forEach(c=>{ const tip=c.v[c.w+"tip"]; if(!tip) return; const ch=c.v===H.valveG.tric?"rv":"lv"; const [px,py]=cav(ch,c.pt[0],c.pt[1]);
+    const sx=c.v.x1<tip[0]?-1:1, x1=tip[0]+c.off*0.5, x2=px+c.off*0.25;
+    [c.l,c.hit].forEach(e=>{ if(!e) return; e.setAttribute("x1",f1(x1)); e.setAttribute("y1",f1(tip[1]-Math.abs(c.off)*0.3)); e.setAttribute("x2",f1(x2)); e.setAttribute("y2",f1(py)); }); });
   // electrical
   const em=S.move.elec;
   const tt=t;
@@ -292,12 +333,12 @@ function tickHeart(dt){
     c.s=Math.max(c.s>r.marks.av&&!(S.leaky&&r.side==="l")?r.marks.av+0.5:0,s);
     if(c.s>=r.L-1){ c.wait=0.5+Math.random()*1.4; c.next=r.side==="r"?"l":"r"; if(c===S.follow) followNote(r.side==="r"?"lungs":"body"); continue; }
     const p=r.at(c.s), w=H.WZ[p.z]||10; let x=p.x+p.nx*c.o*w, y=p.y+p.ny*c.o*w;
-    const ch={ra:"ra",la:"la",rv:"rv",lv:"lv"}[p.z]; if(ch){ const cc=CH[ch], s2=sc[ch]; x=cc.x+(x-cc.x)*s2; y=cc.y+(y-cc.y)*s2; }
-    const show=r.side==="r"?S.move.rblood:S.move.lblood;
-    c.el.setAttribute("visibility",show||c===S.follow?"visible":"hidden"); c.el.setAttribute("cx",x.toFixed(1)); c.el.setAttribute("cy",y.toFixed(1)); c.el.setAttribute("fill",r.side==="r"?"var(--deoxy)":"var(--oxy)");
-    if(c===S.follow&&c.zone!==p.z){ c.zone=p.z; followNote(p.z); }
+    if(p.z==="ra"||p.z==="la"){ [x,y]=cav(p.z,x,y); } else if(p.z==="rv"||p.z==="lv"){ [x,y]=cav(p.z,x,y); [x,y]=mus(x,y); }
+    const show=(r.side==="r"?S.move.rblood:S.move.lblood)||c===S.follow, behind=p.z.endsWith("b");
+    c.hid=behind; c.el.setAttribute("visibility",show&&!behind?"visible":"hidden"); c.el.setAttribute("cx",x.toFixed(1)); c.el.setAttribute("cy",y.toFixed(1));
+    const zn=behind?p.z.slice(0,-1):p.z; if(c===S.follow&&c.zone!==zn){ c.zone=zn; followNote(zn); }
   }
-  if(S.follow&&S.follow.wait<=0&&S.follow.route){ const f=S.follow; const ring=$("fring"); if(ring){ ring.setAttribute("cx",f.el.getAttribute("cx")); ring.setAttribute("cy",f.el.getAttribute("cy")); ring.setAttribute("visibility","visible"); } }
+  if(S.follow&&S.follow.wait<=0&&S.follow.route&&!S.follow.hid){ const f=S.follow; const ring=$("fring"); if(ring){ ring.setAttribute("cx",f.el.getAttribute("cx")); ring.setAttribute("cy",f.el.getAttribute("cy")); ring.setAttribute("visibility","visible"); } }
   else { const ring=$("fring"); if(ring) ring.setAttribute("visibility",S.follow?"hidden":"hidden"); }
   // phase marker + ECG cursor
   const pm=$("pmark"); if(pm) pm.style.left=`calc(${(t*100).toFixed(2)}% - 1px)`;
@@ -339,9 +380,10 @@ function heartSide(){
 function stopFollow(){ if(S.follow){ const c=S.follow; c.el.setAttribute("r",4.6); c.el.setAttribute("stroke","rgba(0,0,0,.25)"); c.el.setAttribute("stroke-width",.6); } S.follow=null; if($("follow")) $("follow").hidden=true; if($("unfol")){ $("unfol").hidden=true; $("fol").hidden=false; } }
 function updatePhaseUI(){ const ph=phaseOf(S.t); if(!$("pname")) return; $("pname").textContent=ph.name; $("ptext").textContent=PHTXT[ph.k]+(S.leaky&&ph.k==="VS"?" With a leaky bicuspid valve, some blood is pushed back into the left atrium, so less reaches the body: the heart has to work harder.":""); }
 function applyLabels(){ if(!H) return; H.labs.forEach(l=>l.grp.setAttribute("visibility",S.labels?"visible":"hidden")); }
+function dimHeart(id){ H.svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",!(e.dataset.also||e.dataset.part).split(" ").includes(id))); }
 function showInfo(id,keepQuiz){
   const p=PARTS[id]; if(!p) return; S.selected=id;
-  H.svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==id));
+  dimHeart(id);
   const el=$("info"); el.innerHTML=`<h3>${esc(p.n)}</h3>${p.b?`<span class="tag ${p.b}">${p.b==="o"?"oxygenated blood":"deoxygenated blood"}</span>`:""}<p>${esc(p.t)}</p><div class="row" style="margin-top:6px"><button id="clr">Show the whole heart</button></div>`;
   $("clr").onclick=()=>{ S.selected=null; H.svg.querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); heartSide(); };
 }
@@ -363,7 +405,7 @@ function drawQuiz(){ const Q=S.quiz, el=$("quiz"); if(!el) return; if(Q.i>=QZ.le
 }
 function answer(ok,btn,right){ const Q=S.quiz; if(Q.lock) return; Q.lock=true; if(ok) Q.score++; if(btn){ btn.classList.add(ok?"right":"wrong"); if(right) right.classList.add("right"); }
   const q=QZ[Q.i]; $("qfb").innerHTML=`<div class="msg ${ok?"":"warn"}">${ok?"Correct.":q.tap?`Not quite: the ${esc(PARTS[q.tap].n.toLowerCase())} is highlighted.`:"Not quite: the right answer is highlighted."}</div><button class="primary" id="qnext" style="margin-top:8px">${Q.i+1<QZ.length?"Next question":"See your score"}</button>`;
-  if(q.tap&&!ok) H.svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==q.tap));
+  if(q.tap&&!ok) dimHeart(q.tap);
   $("qnext").onclick=()=>{ Q.lock=false; Q.i++; H.svg.querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); if(Q.i>=QZ.length){ S.labels=true; applyLabels(); } drawQuiz(); }; }
 
 // ============================================================
