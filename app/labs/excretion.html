@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Body Systems: Excretion</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+/* Layout: view tabs on top; stage (live SVG) left, control and explanation panel right; stacks on phones */
+:root{--navy:#023d84;--orange:#f58300;--bio:#2f7d4f;--bio-soft:#e3f1e8;--ink:#17221f;--muted:#5a6966;--line:#d3dbd8;--bg:#eef1f0;--panel:#fff;
+ --deoxy:#2f4ea0;--oxy:#d4232f;--muscle:#d9726a;--muscle-d:#a94a43;--cav-r:#d9def3;--cav-l:#f7d3d0;--warn:#b4442f;--good:#2f7d4f;
+ --f-display:"Montserrat",system-ui,sans-serif;--f-body:"IBM Plex Sans",system-ui,sans-serif;--f-mono:"IBM Plex Mono",ui-monospace,monospace;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+[hidden]{display:none!important}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{font-family:var(--f-display);font-size:1.15rem;margin:0;color:var(--navy)}
+.top .sub{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--bio)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+button{font-family:var(--f-body);font-weight:600;font-size:.88rem;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;min-height:40px;cursor:pointer}
+button:hover{border-color:var(--bio)}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+button[aria-pressed=true]{background:var(--bio-soft);border-color:var(--bio);color:var(--bio)}
+button.primary{background:var(--bio);border-color:var(--bio);color:#fff}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:14px;padding:14px max(14px,env(safe-area-inset-right,0px)) 24px max(14px,env(safe-area-inset-left,0px));max-width:1280px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:0;position:relative}
+.stage svg{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.side{display:grid;gap:12px;align-content:start;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.card h2{font-family:var(--f-display);font-size:.98rem;margin:0 0 8px;color:var(--navy)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:500;border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:var(--panel);cursor:pointer;min-height:34px}
+.chip input{margin:0;accent-color:var(--bio);width:16px;height:16px}
+.chip .sw{width:10px;height:10px;border-radius:50%}
+.phase{font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--bio)}
+.phasebar{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;height:10px;border-radius:99px;overflow:hidden;margin:6px 0 2px;position:relative;background:var(--line)}
+.phasebar i{display:block} .phasebar i:nth-child(1){background:#f1b36b} .phasebar i:nth-child(2){background:#e0645c} .phasebar i:nth-child(3){background:#9cc7ad}
+.phasebar b{position:absolute;top:-3px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.plabels{display:grid;grid-template-columns:12.5fr 37.5fr 50fr;font-size:.68rem;color:var(--muted);font-family:var(--f-mono)}
+.vstate{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.86rem;margin-top:8px}
+.op{font-family:var(--f-mono);font-weight:500;color:var(--good)} .cl{font-family:var(--f-mono);font-weight:500;color:var(--warn)}
+.ctl{display:grid;gap:4px;margin-top:8px}
+.ctl label{display:flex;justify-content:space-between;font-size:.84rem;font-weight:500}
+.ctl label span{font-family:var(--f-mono);color:var(--bio)}
+input[type=range]{width:100%;accent-color:var(--bio)}
+.info h3{font-family:var(--f-display);margin:0 0 4px;font-size:1rem}
+.info p{margin:4px 0;font-size:.9rem}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.68rem;border-radius:99px;padding:1px 8px;border:1px solid}
+.tag.o{color:var(--oxy);border-color:var(--oxy)} .tag.d{color:var(--deoxy);border-color:var(--deoxy)}
+.follow{font-size:.9rem;background:#fff7ec;border-left:3px solid var(--orange);padding:8px 10px;border-radius:6px;margin-top:8px}
+.note{font-size:.78rem;color:var(--muted)}
+.part{cursor:pointer}
+.part:focus{outline:none}
+.lbl{font-family:var(--f-body);font-weight:600;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.lbl.small{font-weight:500}
+.dim{opacity:.28;transition:opacity .2s}
+table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+th{font-family:var(--f-mono);font-weight:500;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tbl{overflow-x:auto}
+.q p{margin:4px 0 8px}
+.opts{display:grid;gap:6px}
+.opts button{text-align:left;font-weight:500;justify-content:flex-start}
+.opts .right{border-color:var(--good);box-shadow:inset 0 0 0 2px var(--good)} .opts .wrong{border-color:var(--warn);box-shadow:inset 0 0 0 2px var(--warn)}
+.msg{font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bio-soft);border-left:3px solid var(--bio);margin-top:8px}
+.msg.warn{background:#fbe7e3;border-left-color:var(--warn)}
+@media (max-width:600px){svg .cz{font-size:21px} svg .cz-h{font-size:22px} svg .cz-s{font-size:17px} svg .vz-h{font-size:25px} svg .vz,svg .vz-s{font-size:15px}}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted);padding:4px 8px 6px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:50%;display:inline-block}
+.nb{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center;font-size:.86rem}
+.nbar{display:block;height:10px;background:var(--line);border-radius:99px;overflow:hidden;align-self:center}
+.nbar i{display:block;height:100%;width:0;transition:width .3s}
+ol li{margin:3px 0}
+</style></head><body>
+<div class="top"><div><div class="sub">STEMLight LabLink · Biology Lab · live demonstration</div><h1>Body systems: excretion and the kidneys</h1></div>
+<div class="tabs" role="tablist" aria-label="Views"><button data-view="uri" aria-pressed="true">The urinary system</button><button data-view="kid" aria-pressed="false">The kidney in section</button><button data-view="neph" aria-pressed="false">Inside a nephron</button></div></div>
+<div class="wrap">
+ <div><div class="stage" id="stage"></div>
+  <div class="legend" id="legend"></div>
+  <div class="card" id="below" hidden></div></div>
+ <div class="side" id="side"></div>
+</div>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lerp=(a,b,t)=>a+(b-a)*t, clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), f1=n=>n.toFixed(1);
+const RM=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const svgEl=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; };
+function smooth(P,closed){ const n=P.length, g=i=>closed?P[(i+n)%n]:P[clamp(i,0,n-1)]; let d=`M${f1(P[0][0])} ${f1(P[0][1])}`;
+  for(let i=0;i<(closed?n:n-1);i++){ const p0=g(i-1),p1=g(i),p2=g(i+1),p3=g(i+2);
+    d+=` C${f1(p1[0]+(p2[0]-p0[0])/6)} ${f1(p1[1]+(p2[1]-p0[1])/6)} ${f1(p2[0]-(p3[0]-p1[0])/6)} ${f1(p2[1]-(p3[1]-p1[1])/6)} ${f1(p2[0])} ${f1(p2[1])}`; }
+  return d+(closed?" Z":""); }
+function mkRoute(pts){ const P=[], marks={}; for(let i=0;i<pts.length-1;i++){ const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)]; if(p1[2]) marks[p1[2]]=P.length;
+    for(let k=0;k<12;k++){ const t=k/12,t2=t*t,t3=t2*t, f=(a,b,c,d)=>0.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3); P.push([f(p0[0],p1[0],p2[0],p3[0]),f(p0[1],p1[1],p2[1],p3[1])]); } }
+  const last=pts.at(-1); if(last[2]) marks[last[2]]=P.length; P.push([last[0],last[1]]); const cum=[0]; for(let i=1;i<P.length;i++) cum.push(cum[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+  const M={}; for(const k in marks) M[k]=cum[marks[k]];
+  return {P,cum,L:cum.at(-1),marks:M,d:smooth(pts.map(p=>[p[0],p[1]]),false),at(s){ s=clamp(s,0,this.L-0.01); let lo=1,hi=P.length-1; while(lo<hi){ const m=(lo+hi)>>1; if(cum[m]<s) lo=m+1; else hi=m; }
+    const a=P[lo-1],b=P[lo],t=(s-cum[lo-1])/((cum[lo]-cum[lo-1])||1); return {x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,ang:Math.atan2(b[1]-a[1],b[0]-a[0])}; },
+    nearest(x,y){ let bi=0,bd=1e9; for(let i=0;i<P.length;i+=2){ const d=Math.hypot(P[i][0]-x,P[i][1]-y); if(d<bd){ bd=d; bi=i; } } return cum[bi]; }}; }
+
+const S={view:"uri",playing:!RM,rate:1,labels:true,quiz:null,selected:null,frameN:0,simTime:0,
+  uri:{water:0.5,hot:false,fill:0.3,emptying:0},
+  neph:{adh:0.5,diabetes:false,damage:false}};
+const URINE=t=>{ const a=[253,246,201], b=[214,140,26]; return `rgb(${a.map((v,i)=>Math.round(lerp(v,b[i],clamp(t,0,1)))).join(",")})`; };
+const adhOf=()=>clamp(0.5-0.9*(S.uri.water-0.5)+(S.uri.hot?0.3:0),0.03,1);
+
+const PARTS={
+ kidney:{n:"Kidneys",t:"Two bean-shaped organs at the back of the abdomen. They filter the blood, removing urea, excess water and excess salts, which leave the body as urine. They also keep the water content of the blood steady (osmoregulation)."},
+ renalA:{n:"Renal artery",t:"Brings blood to the kidney from the aorta. This blood contains urea and other wastes."},
+ renalV:{n:"Renal vein",t:"Takes filtered blood from the kidney back to the vena cava. It contains much less urea."},
+ ureter:{n:"Ureters",t:"Tubes that carry urine from each kidney down to the bladder."},
+ bladder:{n:"Bladder",t:"A muscular bag that stores urine. When it is full, stretch receptors make you feel the need to urinate."},
+ urethra:{n:"Urethra",t:"Carries urine out of the body. A ring of sphincter muscle at the bottom of the bladder keeps it closed until you decide to urinate."},
+ sphincter:{n:"Sphincter muscle",t:"A ring of muscle that keeps the bladder closed. It relaxes when you urinate."},
+ aorta:{n:"Aorta",t:"The main artery, carrying oxygenated blood from the heart down the body."},
+ venacava:{n:"Vena cava",t:"The main vein, returning blood to the heart."},
+ liver:{n:"Liver",t:"Breaks down excess amino acids that the body cannot store (deamination). The nitrogen part becomes urea, which the blood carries to the kidneys."},
+ pituitary:{n:"Pituitary gland",t:"A gland at the base of the brain. When the blood is too concentrated (you are short of water), it releases more of the hormone ADH, which makes the kidneys reabsorb more water."},
+ adrenal:{n:"Adrenal glands",t:"Sit on top of the kidneys and make the hormone adrenaline. They are part of the endocrine system, not the excretory system."},
+ capsule:{n:"Capsule",t:"A tough outer layer that protects the kidney."},
+ cortex:{n:"Cortex",t:"The outer region of the kidney. It contains the filtering parts of the nephrons: the glomeruli and Bowman's capsules."},
+ medulla:{n:"Medulla",t:"The inner region, made of cone-shaped pyramids. The loops of Henle and collecting ducts run through it."},
+ pelvis:{n:"Renal pelvis",t:"A funnel where urine from the collecting ducts collects before it flows into the ureter."},
+ nephron:{n:"Nephron",t:"The filtering unit of the kidney. Each kidney has about a million of them. Open the Inside a nephron tab to watch one work."},
+ glom:{n:"Glomerulus",t:"A knot of capillaries. The blood here is under high pressure, because the vessel leaving it is narrower than the one entering. Small molecules are squeezed out into Bowman's capsule: ultrafiltration."},
+ bowman:{n:"Bowman's capsule",t:"The cup-shaped start of the nephron that collects the filtrate: water, glucose, salts and urea. Blood cells and proteins are too big to pass through."},
+ pct:{n:"First coiled tubule (proximal)",t:"Selective reabsorption: all the glucose and much of the water and salts are taken back into the blood. Its cells have microvilli and many mitochondria for active transport."},
+ loop:{n:"Loop of Henle",t:"Dips into the medulla. It sets up a high salt concentration there, which helps the collecting duct reabsorb water."},
+ dct:{n:"Second coiled tubule (distal)",t:"More salts are reabsorbed here, adjusting the amount in the blood."},
+ duct:{n:"Collecting duct",t:"Carries urine to the pelvis. ADH makes its walls more permeable, so more water is reabsorbed when you are short of water."},
+ capil:{n:"Blood capillaries",t:"Wrap around the tubule and take back the useful substances that are reabsorbed."}};
+
+// ============================================================
+// THE URINARY SYSTEM
+// ============================================================
+let UR=null;
+function buildUri(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 640",role:"img","aria-label":"Live diagram of the urinary system"});
+  svgEl("defs",{},svg).innerHTML=`<linearGradient id="skinU" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9bea2"/><stop offset=".2" stop-color="#f6dcc8"/><stop offset=".8" stop-color="#f6dcc8"/><stop offset="1" stop-color="#e9bea2"/></linearGradient>
+   <radialGradient id="kidG" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#b9534a"/><stop offset="1" stop-color="#7a2a24"/></radialGradient>
+   <radialGradient id="liverU" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#a95343"/><stop offset="1" stop-color="#6a2a20"/></radialGradient>
+   <clipPath id="bladClip"><ellipse cx="400" cy="530" rx="58" ry="46"/></clipPath>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("path",{d:"M170 660 C176 520, 168 400, 176 300 C182 200, 200 150, 250 130 L330 110 C350 104, 356 92, 356 70 C356 40, 374 18, 400 18 C426 18, 444 40, 444 70 C444 92, 450 104, 470 110 L550 130 C600 150, 618 200, 624 300 C632 400, 624 520, 630 660 Z",fill:"url(#skinU)",stroke:"#bf8f71","stroke-width":2},g);
+  const pit=part("pituitary"); svgEl("circle",{cx:400,cy:52,r:8,fill:"#c97ab0",stroke:"#7d3f6c","stroke-width":1.5},pit);
+  const adhPath=svgEl("path",{d:"M400 62 C400 110, 360 150, 330 196 M400 62 C400 110, 440 150, 470 196",fill:"none",stroke:"#7aa04a","stroke-width":1.5,"stroke-dasharray":"3 4",opacity:.7},g);
+  const adhDots=[...Array(10)].map(()=>svgEl("circle",{r:3.4,fill:"#5f9a35",stroke:"#fff","stroke-width":.8},g));
+  const lv=part("liver"); svgEl("path",{d:"M196 196 C214 160, 300 150, 380 168 C410 176, 420 196, 404 210 C370 226, 300 236, 240 240 C210 240, 190 222, 196 196 Z",fill:"url(#liverU)",stroke:"#4f1d16","stroke-width":1.5},lv);
+  // main vessels
+  const ao=part("aorta"); svgEl("path",{d:"M412 110 L412 420 C412 440, 470 460, 500 520 L520 640 M412 420 C412 440, 340 460, 312 520 L296 640",fill:"none",stroke:"#c22a33","stroke-width":16,"stroke-linecap":"round"},ao);
+  const vc=part("venacava"); svgEl("path",{d:"M384 110 L384 432 C384 452, 330 470, 296 530 L278 640 M384 432 C384 452, 470 476, 514 540 L536 640",fill:"none",stroke:"#3c5ab0","stroke-width":18,"stroke-linecap":"round"},vc);
+  const ra=part("renalA"), rv=part("renalV");
+  const RA=[mkRoute([[412,250],[380,252],[340,250],[322,252]]),mkRoute([[412,250],[440,252],[470,250],[478,252]])];
+  const RV=[mkRoute([[322,266],[340,268],[370,268],[384,266]]),mkRoute([[478,266],[460,268],[420,268],[384,266]])];
+  RA.forEach(r=>svgEl("path",{d:r.d,fill:"none",stroke:"#c22a33","stroke-width":9,"stroke-linecap":"round"},ra)); RV.forEach(r=>svgEl("path",{d:r.d,fill:"none",stroke:"#3c5ab0","stroke-width":10,"stroke-linecap":"round"},rv));
+  // kidneys, adrenal glands
+  const kd=part("kidney"); const bean=(cx,s)=>`M${cx} 170 C${cx-s*50} 168, ${cx-s*62} 230, ${cx-s*56} 270 C${cx-s*50} 316, ${cx-s*20} 330, ${cx} 326 C${cx+s*26} 322, ${cx+s*30} 300, ${cx+s*22} 284 C${cx+s*14} 270, ${cx+s*14} 250, ${cx+s*22} 236 C${cx+s*32} 214, ${cx+s*30} 172, ${cx} 170 Z`;
+  [[300,1],[500,-1]].forEach(([cx,s])=>{ svgEl("path",{d:bean(cx,s),fill:"url(#kidG)",stroke:"#4f1a16","stroke-width":2},kd); svgEl("path",{d:`M${cx-s*36} 210 C${cx-s*42} 240, ${cx-s*40} 286, ${cx-s*28} 306`,fill:"none",stroke:"#d77a70","stroke-width":2,opacity:.6},kd); });
+  const ad=part("adrenal"); [[294,166],[506,166]].forEach(([x,y])=>svgEl("path",{d:`M${x-24} ${y+4} C${x-18} ${y-16}, ${x+16} ${y-18}, ${x+22} ${y+4} Z`,fill:"#e8c45a",stroke:"#a8862a","stroke-width":1.4},ad));
+  // ureters, bladder, urethra
+  const ut=part("ureter"); const UT=[mkRoute([[318,286],[330,330],[352,400],[372,460],[384,494]]),mkRoute([[482,286],[470,330],[448,400],[428,460],[416,494]])];
+  UT.forEach(r=>{ svgEl("path",{d:r.d,fill:"none",stroke:"#b88a5a","stroke-width":9,"stroke-linecap":"round"},ut); svgEl("path",{d:r.d,fill:"none",stroke:"#fbeccb","stroke-width":4,"stroke-linecap":"round"},ut); });
+  const bl=part("bladder"); svgEl("ellipse",{cx:400,cy:530,rx:58,ry:46,fill:"#f7e3d6",stroke:"#a8705a","stroke-width":3},bl);
+  const urine=svgEl("rect",{x:340,width:120,fill:URINE(0.5),"clip-path":"url(#bladClip)"},bl);
+  svgEl("ellipse",{cx:400,cy:530,rx:58,ry:46,fill:"none",stroke:"#a8705a","stroke-width":3},bl);
+  const sp=part("sphincter"); const sph=svgEl("ellipse",{cx:400,cy:578,rx:12,ry:5,fill:"#9b3d36"},sp);
+  const uth=part("urethra"); svgEl("path",{d:"M400 582 L400 640",stroke:"#b88a5a","stroke-width":9},uth); const uflow=svgEl("path",{d:"M400 582 L400 640",stroke:URINE(0.5),"stroke-width":4,opacity:0},uth);
+  // moving things
+  const blood=[]; const bG=svgEl("g",{"pointer-events":"none"},g);
+  for(let i=0;i<16;i++) blood.push({r:i%2,kind:i%4<2?"a":"v",u:Math.random(),el:svgEl("circle",{r:3.4,stroke:"#fff","stroke-width":.6},bG)});
+  const ureaG=svgEl("g",{"pointer-events":"none"},g); const urea=[...Array(6)].map((_,i)=>({u:i/6,el:svgEl("circle",{r:3,fill:"#8e5bb5",stroke:"#fff","stroke-width":.6},ureaG)}));
+  const drops=[]; const dG=svgEl("g",{"pointer-events":"none"},g);
+  for(let i=0;i<10;i++) drops.push({r:i%2,u:Math.random(),el:svgEl("circle",{r:3,stroke:"#a8862a","stroke-width":.6},dG)});
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["pituitary","Pituitary gland (ADH)",580,40,408,52],["liver","Liver (makes urea)",20,120,240,190],["kidney","Kidney",20,250,262,250],["renalA","Renal artery",20,300,344,251],["renalV","Renal vein",20,345,350,268],["adrenal","Adrenal gland",780,150,520,164],
+   ["aorta","Aorta",780,330,412,330],["venacava","Vena cava",20,420,384,420],["ureter","Ureter",780,420,446,410],["bladder","Bladder",780,500,456,520],["sphincter","Sphincter muscle",780,580,410,578],["urethra","Urethra",20,620,396,620]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x>400?"end":"start"; const w=t.length*8.2, lx=anchor==="end"?x-w-4:x+w+4;
+    const ln=svgEl("line",{x1:lx,y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  const full=svgEl("text",{x:400,y:470,"text-anchor":"middle","font-size":14,fill:"#b4442f",opacity:0},ctx); full.textContent="bladder full!";
+  UR={svg,RA,RV,UT,urine,uflow,sph,blood,urea,drops,adhDots,adhPath,labs,ctx,full};
+  return svg; }
+function tickUri(dt){
+  const U=S.uri, Z=UR, adh=adhOf(), rate=lerp(420,30,adh), col=adh;
+  // bladder fills with urine; when full it empties through the urethra
+  if(U.emptying>0){ U.emptying-=dt; U.fill=Math.max(0,U.fill-dt*0.5); if(U.fill<=0) U.emptying=0; }
+  else U.fill=Math.min(1,U.fill+dt*rate/400*0.12);
+  if(U.fill>=1&&U.emptying<=0&&U.auto!==false){ U.emptying=2.2; }
+  const top=576-92*U.fill; Z.urine.setAttribute("y",f1(top)); Z.urine.setAttribute("height",f1(576-top)); Z.urine.setAttribute("fill",URINE(col));
+  Z.uflow.setAttribute("opacity",U.emptying>0?0.95:0); Z.uflow.setAttribute("stroke",URINE(col)); Z.sph.setAttribute("ry",U.emptying>0?2:5);
+  Z.full.setAttribute("opacity",U.fill>0.92&&U.emptying<=0?1:0);
+  // blood flowing in renal arteries and out renal veins
+  Z.blood.forEach(b=>{ b.u=(b.u+dt*0.7)%1; const r=b.kind==="a"?Z.RA[b.r]:Z.RV[b.r]; const p=r.at(b.u*r.L); b.el.setAttribute("cx",f1(p.x)); b.el.setAttribute("cy",f1(p.y)); b.el.setAttribute("fill",b.kind==="a"?"#e0505a":"#5b6ac0"); });
+  // urea from the liver travels in the blood to the kidneys
+  Z.urea.forEach((d,i)=>{ d.u=(d.u+dt*0.18)%1; const u=d.u; let x,y; if(u<0.3){ x=lerp(330,384,u/0.3); y=lerp(206,230,u/0.3); } else if(u<0.6){ x=384; y=lerp(230,110,(u-0.3)/0.3); } else { const k=(u-0.6)/0.4; x=lerp(412,i%2?330:470,k); y=lerp(130,250,k); } d.el.setAttribute("cx",f1(x)); d.el.setAttribute("cy",f1(y)); });
+  // urine trickling down the ureters
+  const sp=lerp(0.35,0.12,adh); Z.drops.forEach(d=>{ d.u=(d.u+dt*sp)%1; const r=Z.UT[d.r], p=r.at(d.u*r.L); d.el.setAttribute("cx",f1(p.x)); d.el.setAttribute("cy",f1(p.y)); d.el.setAttribute("fill",URINE(col)); d.el.setAttribute("r",lerp(3.6,2.4,adh)); });
+  // ADH from the pituitary gland
+  Z.adhDots.forEach((d,i)=>{ const show=i<Math.round(adh*10); const u=((S.simTime*0.25+i/10)%1); const p=u<0.5?[400+0*(u),lerp(62,140,u*2)]:[lerp(400,i%2?330:470,(u-0.5)*2),lerp(140,196,(u-0.5)*2)]; d.setAttribute("cx",f1(p[0])); d.setAttribute("cy",f1(p[1])); d.setAttribute("opacity",show?0.95:0); });
+  if(S.frameN%6===0&&$("uadh")){ $("uadh").style.width=Math.round(adh*100)+"%"; $("uvol").textContent=Math.round(rate)+" ml per hour"; $("ucol").style.background=URINE(col); $("ucolt").textContent=adh>0.7?"dark yellow: concentrated":adh<0.3?"pale: dilute":"straw coloured"; $("ufill").style.width=Math.round(U.fill*100)+"%"; $("ufillt").textContent=U.emptying>0?"emptying":U.fill>0.92?"full":Math.round(U.fill*400)+" ml"; } }
+function uriSide(){
+  const U=S.uri;
+  $("side").innerHTML=`<div class="card"><h2>Removing waste and balancing water</h2><p style="margin:0;font-size:.9rem">Excretion is removing the waste products of metabolism. The liver turns excess amino acids into <b>urea</b>; the kidneys filter it out of the blood with excess water and salts, making <b>urine</b>. The kidneys also keep the amount of water in the blood just right.</p>
+    <div class="ctl"><label for="uw">Water drunk today <span id="uwv"></span></label><input type="range" id="uw" min="0" max="1" step="0.01" value="${U.water}"></div>
+    <div class="row" style="margin-top:6px"><label class="chip"><input type="checkbox" id="uhot" ${U.hot?"checked":""}>Hot day or hard exercise (lots of sweating)</label></div>
+    <div class="vstate"><span>ADH released</span><span class="nbar"><i id="uadh" style="background:#5f9a35"></i></span><span>Urine made</span><span class="op" id="uvol" style="color:var(--ink)"></span><span>Urine colour</span><span style="display:flex;gap:6px;align-items:center"><i id="ucol" style="display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid #a8862a"></i><span id="ucolt" class="note"></span></span><span>Bladder</span><span class="nbar"><i id="ufill" style="background:#d9a630"></i></span><span></span><span id="ufillt" class="note"></span></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button><button id="uempty">Empty the bladder</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div><div id="umsg"></div></div>
+   <div class="card"><h2>Show</h2><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div>
+   <div class="card info" id="info"><h2>Tap any organ</h2><div class="chips">${["kidney","renalA","renalV","ureter","bladder","sphincter","urethra","liver","pituitary","aorta","venacava","adrenal"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>
+   <div class="card" id="quiz"><h2>Test yourself</h2><p class="note" style="margin:0 0 8px">Eight questions: tap the right organ, or choose the right answer.</p><button class="primary" id="qstart">Start the test</button></div>`;
+  commonControls();
+  const msg=()=>{ const a=adhOf(); $("umsg").innerHTML=`<div class="msg">${a>0.7?"The blood is getting too concentrated, so the pituitary gland releases <b>more ADH</b>. The kidneys reabsorb more water into the blood, making a small amount of dark, concentrated urine.":a<0.3?"There is plenty of water in the blood, so the pituitary gland releases <b>very little ADH</b>. Less water is reabsorbed and you make lots of pale, dilute urine.":"The water content of the blood is about right. A normal amount of ADH keeps it that way."} This is an example of <b>negative feedback</b>.</div>`; };
+  const setW=()=>{ U.water=+$("uw").value; $("uwv").textContent=U.water<0.3?"very little":U.water>0.7?"a lot":"a normal amount"; msg(); };
+  $("uw").oninput=setW; setW(); $("uhot").onchange=e=>{ U.hot=e.target.checked; msg(); };
+  $("uempty").onclick=()=>{ U.emptying=2.5; };
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick));
+  $("qstart").onclick=startQuiz; }
+
+// ============================================================
+// THE KIDNEY IN SECTION
+// ============================================================
+let KD=null;
+const KC=[330,290], PV=[452,290];
+const BEAN="M330 62 C470 62, 566 128, 552 210 C544 252, 492 262, 490 290 C492 318, 544 328, 552 370 C566 452, 470 518, 330 518 C188 518, 100 410, 100 290 C100 170, 188 62, 330 62 Z";
+const pol=(a,r)=>[PV[0]+Math.cos(a)*r,PV[1]+Math.sin(a)*r];
+const rBase=a=>{ let r=50; for(;r<420;r+=2){ const [x,y]=pol(a,r); if(((x-KC[0])/176)**2+((y-KC[1])/180)**2>1) break; } return r; };
+function buildKid(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 580",role:"img","aria-label":"Live section through a kidney"});
+  svgEl("defs",{},svg).innerHTML=`<radialGradient id="cortG" cx=".4" cy=".4" r=".8"><stop offset="0" stop-color="#c25a4f"/><stop offset="1" stop-color="#8a3229"/></radialGradient>
+   <linearGradient id="pyrG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9c3a32"/><stop offset="1" stop-color="#c46a5e"/></linearGradient>
+   <clipPath id="beanClip"><path d="${BEAN}"/></clipPath>`;
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("rect",{width:800,height:580,fill:"#f7f4ee"},g);
+  const cap=part("capsule"); svgEl("path",{d:BEAN,fill:"#f2d6c8",stroke:"#7a3a30","stroke-width":3},cap);
+  const co=part("cortex"); svgEl("path",{d:BEAN,fill:"url(#cortG)",transform:`translate(${KC[0]} ${KC[1]}) scale(.955) translate(${-KC[0]} ${-KC[1]})`},co);
+  const md=part("medulla"); const pyr=[];
+  [100,128,156,184,212,240,262].forEach(deg=>{ const a=deg*Math.PI/180, apex=pol(a,58), w=0.15;
+    const b1=pol(a-w,rBase(a-w)), b2=pol(a+w,rBase(a+w)), bm=pol(a,rBase(a)+6);
+    svgEl("path",{d:`M${f1(apex[0])} ${f1(apex[1])} L${f1(b1[0])} ${f1(b1[1])} Q${f1(bm[0])} ${f1(bm[1])} ${f1(b2[0])} ${f1(b2[1])} Z`,fill:"url(#pyrG)",stroke:"#6d241d","stroke-width":1.2},md);
+    for(let k=1;k<6;k++){ const t=k/6; svgEl("line",{x1:f1(apex[0]),y1:f1(apex[1]),x2:f1(lerp(b1[0],b2[0],t)),y2:f1(lerp(b1[1],b2[1],t)),stroke:"#6d241d","stroke-width":.8,opacity:.45},md); }
+    pyr.push({a,apex}); });
+  // blood vessels branch between the pyramids into the cortex
+  const rA=part("renalA"), rV=part("renalV"); const arts=[], veins=[];
+  [114,142,170,198,226,251].forEach(deg=>{ const a=deg*Math.PI/180, rb=rBase(a), e=pol(a,rb+16), m=pol(a,70);
+    const ra=mkRoute([[620,268],[PV[0]+20,276],[m[0],m[1]-3],[e[0],e[1]]]); arts.push(ra); svgEl("path",{d:ra.d,fill:"none",stroke:"#c22a33","stroke-width":4,"stroke-linecap":"round"},rA);
+    const a2=a+0.05, e2=pol(a2,rb+10), m2=pol(a2,74); const rv=mkRoute([[e2[0],e2[1]],[m2[0],m2[1]+3],[PV[0]+20,306],[620,314]]); veins.push(rv); svgEl("path",{d:rv.d,fill:"none",stroke:"#3c5ab0","stroke-width":4,"stroke-linecap":"round"},rV); });
+  svgEl("path",{d:"M620 268 L800 254",stroke:"#c22a33","stroke-width":16,"stroke-linecap":"round"},rA); svgEl("path",{d:"M620 314 L800 330",stroke:"#3c5ab0","stroke-width":18,"stroke-linecap":"round"},rV);
+  // renal pelvis and ureter
+  const pl=part("pelvis"); pyr.forEach(p=>svgEl("path",{d:`M${f1(p.apex[0])} ${f1(p.apex[1])} L${PV[0]} ${PV[1]}`,stroke:"#efe0c4","stroke-width":22,"stroke-linecap":"round"},pl));
+  svgEl("path",{d:`M${PV[0]} ${PV[1]} C500 296, 540 312, 560 350`,stroke:"#efe0c4","stroke-width":38,"stroke-linecap":"round",fill:"none"},pl);
+  const ut=part("ureter"); const UTR=mkRoute([[PV[0],PV[1]],[520,306],[560,356],[590,450],[612,590]]); svgEl("path",{d:"M560 350 C576 400, 600 480, 612 590",stroke:"#d8c09a","stroke-width":22,fill:"none","stroke-linecap":"round"},ut); svgEl("path",{d:"M560 350 C576 400, 600 480, 612 590",stroke:"#f6ecd6","stroke-width":13,fill:"none"},ut);
+  // one nephron, enlarged and highlighted
+  const np=part("nephron"); const na=150*Math.PI/180, rb=rBase(na); const P=(da,r)=>pol(na+da,r);
+  const gl=P(0.11,rb+24);
+  const tube=[P(0.09,rb+16),P(0.07,rb+28),P(0.05,rb+12),P(0.03,rb+26),P(0.015,rb-10),P(0.015,rb-70),P(0.0,110),P(-0.03,96),P(-0.05,112),P(-0.05,rb-60),P(-0.05,rb-8),P(-0.07,rb+20),P(-0.09,rb+8),P(-0.11,rb+22),P(-0.12,rb-6),P(-0.11,rb-80),P(-0.04,90),P(0,62)];
+  const neph=mkRoute(tube); svgEl("path",{d:neph.d,fill:"none",stroke:"#fff59a","stroke-width":7,"stroke-linecap":"round","stroke-linejoin":"round",opacity:.95},np); svgEl("path",{d:neph.d,fill:"none",stroke:"#c9a020","stroke-width":2},np); svgEl("circle",{cx:f1(gl[0]),cy:f1(gl[1]),r:9,fill:"#fff59a",stroke:"#c9a020","stroke-width":2},np);
+  // moving: blood and urine
+  const mv=svgEl("g",{"pointer-events":"none"},g); const cells=[]; arts.forEach(r=>{ for(let k=0;k<2;k++) cells.push({r,u:Math.random(),el:svgEl("circle",{r:3,fill:"#e0505a",stroke:"#fff","stroke-width":.5},mv)}); }); veins.forEach(r=>{ for(let k=0;k<2;k++) cells.push({r,u:Math.random(),el:svgEl("circle",{r:3,fill:"#5b6ac0",stroke:"#fff","stroke-width":.5},mv)}); });
+  const drips=[...Array(14)].map((_,i)=>({u:Math.random(),p:pyr[i%pyr.length],el:svgEl("circle",{r:3.2,fill:URINE(0.5),stroke:"#a8862a","stroke-width":.6},mv)}));
+  const nd=[...Array(5)].map((_,i)=>({u:i/5,el:svgEl("circle",{r:3,fill:"#d9a630",stroke:"#fff","stroke-width":.6},mv)}));
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const pm=pol(212*Math.PI/180,140);
+  const L=[["capsule","Capsule",20,50,250,72],["cortex","Cortex",20,120,150,170],["medulla","Medulla (pyramid)",20,330,f1(pm[0]),f1(pm[1])],["nephron","One nephron (enlarged)",20,470,f1(gl[0]),f1(gl[1])],["pelvis","Renal pelvis",780,200,470,292],["renalA","Renal artery",780,236,720,262],["renalV","Renal vein",780,380,720,324],["ureter","Ureter",780,520,606,520]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x>400?"end":"start"; const w=t.length*8.2, lx=anchor==="end"?x-w-4:x+w+4;
+    const ln=svgEl("line",{x1:lx,y1:y-5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  [["from the aorta",790,290,"end"],["to the vena cava",790,352,"end"],["urine to the bladder",600,575,"end"]].forEach(([t,x,y,a])=>{ svgEl("text",{x,y,"text-anchor":a},ctx).textContent=t; });
+  KD={svg,cells,drips,nd,neph,UTR,labs,ctx};
+  return svg; }
+function tickKid(dt){
+  const col=adhOf();
+  KD.cells.forEach(c=>{ c.u=(c.u+dt*0.35)%1; const p=c.r.at(c.u*c.r.L); c.el.setAttribute("cx",f1(p.x)); c.el.setAttribute("cy",f1(p.y)); });
+  KD.drips.forEach(d=>{ d.u=(d.u+dt*0.22)%1; let x,y; const u=d.u; if(u<0.4){ const k=u/0.4; x=lerp(d.p.apex[0],PV[0],k); y=lerp(d.p.apex[1],PV[1],k); } else { const p=KD.UTR.at((u-0.4)/0.6*KD.UTR.L); x=p.x; y=p.y; } d.el.setAttribute("cx",f1(x)); d.el.setAttribute("cy",f1(y)); d.el.setAttribute("fill",URINE(col)); });
+  KD.nd.forEach(d=>{ d.u=(d.u+dt*0.12)%1; const p=KD.neph.at(d.u*KD.neph.L); d.el.setAttribute("cx",f1(p.x)); d.el.setAttribute("cy",f1(p.y)); }); }
+function kidSide(){
+  $("side").innerHTML=`<div class="card"><h2>Inside a kidney</h2><p style="margin:0;font-size:.9rem">Cut in half, a kidney has three regions. The outer <b>cortex</b> holds the filtering parts of about a million <b>nephrons</b>. Their tubes run down through the <b>medulla</b>, arranged in pyramids, and empty urine into the <b>renal pelvis</b>, which drains into the <b>ureter</b>.</p>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button><button id="gon">Look inside a nephron</button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div>
+    <div class="row" style="margin-top:6px"><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["capsule","cortex","medulla","pelvis","nephron","renalA","renalV","ureter"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls(); $("gon").onclick=()=>setView("neph");
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ============================================================
+// INSIDE A NEPHRON
+// ============================================================
+let NP=null;
+const TYPES={rbc:{n:"Red blood cells",c:"#d42a35"},protein:{n:"Proteins",c:"#3f9a62"},glucose:{n:"Glucose",c:"#f2cf55"},urea:{n:"Urea",c:"#8e5bb5"},water:{n:"Water",c:"#5ea0d6"},salt:{n:"Salts",c:"#7d7f8c"}};
+function buildNeph(){
+  const svg=svgEl("svg",{viewBox:"0 0 800 620",role:"img","aria-label":"Live model of filtration and reabsorption in a nephron"});
+  const g=svgEl("g",{},svg);
+  const part=(id,parent)=>svgEl("g",{class:"part","data-part":id,tabindex:0,role:"button","aria-label":PARTS[id].n},parent||g);
+  svgEl("rect",{width:800,height:620,fill:"#fbf3ec"},g);
+  svgEl("rect",{y:330,width:800,height:290,fill:"#f3e2d6"},g);
+  // tubule route: capsule, first coiled tubule, loop of Henle, second coiled tubule, collecting duct
+  const TR=mkRoute([[196,176,"cap"],[226,188,"pct"],[250,160],[276,196],[302,158],[328,196],[352,162],[384,190],[402,230,"desc"],[404,330],[406,470],[426,532,"asc"],[452,470],[458,330],[462,240],[484,196,"dct"],[510,226],[536,190],[562,226],[592,196],[640,186,"cd"],[662,260],[664,400],[664,540],[664,620,"end"]]);
+  // blood route: afferent arteriole, glomerulus knot, efferent arteriole, capillaries round the tubule, vein
+  const GC=[172,150]; const knot=[]; for(let i=0;i<=24;i++){ const a=i/24*Math.PI*2*2.2+Math.PI*0.9, r=18+12*Math.sin(i*1.7); knot.push([GC[0]+Math.cos(a)*r,GC[1]+Math.sin(a)*r]); }
+  const BR=mkRoute([[-10,92],[80,104],[140,124,"g0"],...knot.map(p=>[p[0],p[1]]),[150,168,"g1"],[150,210],[200,236],[260,230],[320,236],[370,248],[378,300],[380,420],[392,560],[430,590],[476,560],[486,420],[488,300],[494,250],[540,250],[600,246],[620,220],[624,120],[690,100],[700,60],[810,40]]);
+  const VR=mkRoute([[700,600],[702,480],[700,360],[698,250],[700,100],[810,40]]);
+  const cp=part("capil"); [BR,VR].forEach(r=>{ svgEl("path",{d:r.d,fill:"none",stroke:"#b4404a","stroke-width":15,"stroke-linecap":"round","stroke-linejoin":"round",opacity:.85},cp); svgEl("path",{d:r.d,fill:"none",stroke:"#f6c9c4","stroke-width":10,"stroke-linecap":"round","stroke-linejoin":"round"},cp); });
+  const gl=part("glom"); svgEl("path",{d:smooth(knot,false),fill:"none",stroke:"#b4404a","stroke-width":12},gl); svgEl("path",{d:smooth(knot,false),fill:"none",stroke:"#f6c9c4","stroke-width":7},gl);
+  const bw=part("bowman"); svgEl("path",{d:`M${GC[0]+30} ${GC[1]-40} C${GC[0]+70} ${GC[1]-20}, ${GC[0]+66} ${GC[1]+40}, ${GC[0]+26} ${GC[1]+52} C${GC[0]-14} ${GC[1]+64}, ${GC[0]-56} ${GC[1]+36}, ${GC[0]-50} ${GC[1]-6}`,fill:"none",stroke:"#d6b25a","stroke-width":9,"stroke-linecap":"round"},bw);
+  // tubule wall
+  const zone=(id,a,b)=>{ const gp=part(id); const pts=[]; for(let s=TR.marks[a];s<=TR.marks[b];s+=6){ const p=TR.at(s); pts.push([p.x,p.y]); } const d=smooth(pts.filter((p,i)=>i%2===0||i===pts.length-1),false); svgEl("path",{d,fill:"none",stroke:"#d6b25a","stroke-width":20,"stroke-linecap":"round","stroke-linejoin":"round"},gp); svgEl("path",{d,fill:"none",stroke:"#fff6dc","stroke-width":13,"stroke-linecap":"round","stroke-linejoin":"round"},gp); };
+  zone("pct","cap","desc"); zone("loop","desc","dct"); zone("dct","dct","cd"); zone("duct","cd","end");
+  // step numbers
+  const st=svgEl("g",{"pointer-events":"none"},g);
+  [[1,236,96,"Filtration"],[2,290,124,"Reabsorption"],[3,348,520,"Salty medulla"],[4,706,520,"Water (ADH)"]].forEach(([n,x,y,t])=>{ svgEl("circle",{cx:x,cy:y,r:13,fill:"#023d84"},st); const tt=svgEl("text",{x,y:y+5,"text-anchor":"middle","font-size":14,fill:"#fff","font-weight":700},st); tt.textContent=n; const t2=svgEl("text",{x:x+(n===3?-20:18),y:y+5,"text-anchor":n===3?"end":"start","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#023d84",class:"lbl small"},st); t2.textContent=t; });
+  const molG=svgEl("g",{"pointer-events":"none"},g);
+  const mk=(type)=>{ const c=TYPES[type].c; return type==="rbc"?svgEl("ellipse",{rx:6.5,ry:4.5,fill:c,stroke:"#7a1018","stroke-width":.7},molG):type==="protein"?svgEl("path",{d:"M-6 -2 C-4 -7, 4 -7, 6 -2 C8 3, 3 7, 0 5 C-4 8, -8 4, -6 -2 Z",fill:c,stroke:"#1f5a36","stroke-width":.7},molG):type==="glucose"?svgEl("path",{d:"M-4 -2.3L0 -4.6L4 -2.3L4 2.3L0 4.6L-4 2.3Z",fill:c,stroke:"#a8892a","stroke-width":.7},molG):type==="salt"?svgEl("rect",{x:-2.6,y:-2.6,width:5.2,height:5.2,fill:c},molG):svgEl("circle",{r:type==="urea"?3.4:2.8,fill:c,stroke:type==="urea"?"#4b2c6a":"none","stroke-width":.6},molG); };
+  const parts=[];
+  const urineTally=[];
+  const labG=svgEl("g",{"pointer-events":"none"},svg);
+  const L=[["glom","Glomerulus",20,190,160,150],["bowman","Bowman's capsule",20,240,150,196],["pct","First coiled tubule",250,40,300,170],["loop","Loop of Henle",230,420,404,420],["dct","Second coiled tubule",470,140,536,196],["duct","Collecting duct",780,300,668,300],["capil","Blood capillaries",230,600,392,560]];
+  const labs=L.map(([id,t,x,y,ax,ay])=>{ const grp=svgEl("g",{},labG); const anchor=x>=700?"end":"start"; const w=t.length*8.2, lx=anchor==="end"?x-w-4:(ax>x+w?x+w+4:x+w/2);
+    const ln=svgEl("line",{x1:lx,y1:ax>x+w||anchor==="end"?y-5:y+5,x2:ax,y2:ay,stroke:"#3d4846","stroke-width":1.2},grp); svgEl("circle",{cx:ax,cy:ay,r:2.2,fill:"#3d4846"},grp);
+    const tx=svgEl("text",{x,y,"text-anchor":anchor,"font-size":16,class:"lbl"},grp); tx.textContent=t; return {id,grp,tx,ln,t,x,y,anchor}; });
+  const ctx=svgEl("g",{"pointer-events":"none","font-size":13,"font-family":"IBM Plex Mono, monospace",fill:"#5a6966"},svg); ctx.setAttribute("paint-order","stroke"); ctx.setAttribute("stroke","#fff"); ctx.setAttribute("stroke-width","3");
+  [["blood in (renal artery)",8,82,"start"],["blood out (renal vein)",790,30,"end"],["urine to the pelvis",650,612,"end"],["cortex",790,320,"end"],["medulla",790,348,"end"]].forEach(([t,x,y,a])=>{ svgEl("text",{x,y,"text-anchor":a},ctx).textContent=t; });
+  NP={svg,TR,BR,VR,mk,parts,urineTally,labs,ctx,stats:{filt:0,reab:{glucose:0,water:0,salt:0,urea:0}}};
+  for(let i=0;i<150;i++) spawnBlood(Math.random()*BR.L);
+  for(let k=0;k<600;k++) tickNeph(0.05);
+  return svg; }
+function spawnBlood(s){ const N=S.neph, r=Math.random(); const gw=N.diabetes?0.2:0.08;
+  const type=r<0.16?"rbc":r<0.22?"protein":r<0.22+gw?"glucose":r<0.32+gw?"urea":r<0.88?"water":"salt";
+  NP.parts.push({type,route:"B",s:s||0,el:NP.mk(type),o:(Math.random()-0.5)*6}); }
+function tickNeph(dt){
+  const N=S.neph, Z=NP, adh=N.adh;
+  // fraction of each substance reabsorbed in each part of the tubule, turned into a rate using the time spent there
+  const m=Z.TR.marks, tz={pct:(m.desc-m.pct)/110,desc:(m.asc-m.desc)/110,asc:(m.dct-m.asc)/110,dct:(m.cd-m.dct)/110,cd:(m.end-m.cd)/110};
+  const FR={glucose:{pct:N.diabetes?0.45:0.999},water:{pct:0.5,desc:0.25,cd:lerp(0.05,0.8,adh)},salt:{pct:0.6,asc:0.4,dct:0.3},urea:{pct:0.15}};
+  const RP={}; for(const k in FR){ RP[k]={}; for(const z in FR[k]) RP[k][z]=-Math.log(1-FR[k][z])/tz[z]; }
+  const zoneOf=s=>{ const m=Z.TR.marks; return s<m.pct?"cap":s<m.desc?"pct":s<m.asc?"desc":s<m.dct?"asc":s<m.cd?"dct":"cd"; };
+  for(let i=Z.parts.length-1;i>=0;i--){ const p=Z.parts[i];
+    if(p.move){ p.move.t+=dt/0.45; const k=clamp(p.move.t,0,1); p.x=lerp(p.move.x0,p.move.x1,k); p.y=lerp(p.move.y0,p.move.y1,k); if(k>=1){ p.route=p.move.to; p.s=p.move.s; p.move=null; } }
+    else if(p.route==="B"){ p.s+=dt*130; const R=Z.BR;
+      // ultrafiltration: small molecules are squeezed out of the glomerulus
+      if(p.s>R.marks.g0&&p.s<R.marks.g1&&(p.type!=="rbc"&&(p.type!=="protein"||N.damage))&&Math.random()<dt*3.5){ const a=R.at(p.s), b=Z.TR.at(4+Math.random()*10); p.move={x0:a.x,y0:a.y,x1:b.x,y1:b.y,t:0,to:"T",s:6}; Z.stats.filt++; }
+      if(p.s>=R.L){ p.el.remove(); Z.parts.splice(i,1); spawnBlood(0); continue; } const a=R.at(p.s); p.x=a.x+Math.sin(p.s*0.07)*p.o*0.4; p.y=a.y+p.o*0.5; }
+    else if(p.route==="V"){ p.s+=dt*105; if(p.s>=Z.VR.L){ p.el.remove(); Z.parts.splice(i,1); spawnBlood(0); continue; } const a=Z.VR.at(p.s); p.x=a.x; p.y=a.y; }
+    else { // in the tubule
+      p.s+=dt*110; const zn=zoneOf(p.s), pr=(RP[p.type]||{})[zn]||0;
+      if(pr&&Math.random()<dt*pr){ const a=Z.TR.at(p.s); let to="B", s2, b;
+        if(zn==="cd"){ to="V"; s2=Z.VR.nearest(a.x+36,a.y); b=Z.VR.at(s2); } else { s2=Z.BR.nearest(a.x,a.y); s2=Math.max(s2,Z.BR.marks.g1+10); b=Z.BR.at(s2); }
+        p.move={x0:a.x,y0:a.y,x1:b.x,y1:b.y,t:0,to,s:s2}; Z.stats.reab[p.type]=(Z.stats.reab[p.type]||0)+1; }
+      if(p.s>=Z.TR.L){ Z.urineTally.push(p.type); if(Z.urineTally.length>60) Z.urineTally.shift(); p.el.remove(); Z.parts.splice(i,1); spawnBlood(0); continue; }
+      const a=Z.TR.at(p.s); p.x=a.x+p.o*0.6; p.y=a.y+p.o*0.4; }
+    p.el.setAttribute("transform",`translate(${f1(p.x)} ${f1(p.y)})`); }
+  if(S.frameN%8===0&&$("nu-water")){ const T=Z.urineTally, n=T.length||1; ["water","urea","salt","glucose","protein"].forEach(k=>{ const c=T.filter(x=>x===k).length; $("nu-"+k).style.width=Math.round(c/n*100)+"%"; });
+    $("nglu").textContent=T.includes("glucose")?"Glucose is in the urine!":"No glucose in the urine"; $("nglu").className=T.includes("glucose")?"cl":"op"; $("npro").textContent=T.includes("protein")?"Protein is in the urine!":"No protein in the urine"; $("npro").className=T.includes("protein")?"cl":"op"; } }
+function nephSide(){
+  const N=S.neph;
+  $("side").innerHTML=`<div class="card"><h2>How a nephron makes urine</h2><ol style="margin:0;padding-left:20px;font-size:.9rem"><li><b>Ultrafiltration:</b> high pressure in the glomerulus squeezes water, glucose, salts and urea into Bowman's capsule. Blood cells and proteins are too big and stay in the blood.</li><li><b>Selective reabsorption:</b> in the first coiled tubule all the glucose, and much of the water and salts, go back into the blood.</li><li><b>The loop of Henle</b> makes the medulla salty, which helps water leave the collecting duct.</li><li><b>Water reabsorption:</b> ADH controls how much water the collecting duct returns to the blood. What is left is urine: urea, excess water and salts.</li></ol>
+    <div class="ctl"><label for="nadh">ADH in the blood <span id="nadhv"></span></label><input type="range" id="nadh" min="0" max="1" step="0.01" value="${N.adh}"></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="play"></button></div>
+    <div class="ctl"><label for="rate">Speed <span id="ratev"></span></label><input type="range" id="rate" min="0" max="2" step="1"></div></div>
+   <div class="card"><h2>What is in the urine</h2><div class="nb">${["water","urea","salt","glucose","protein"].map(k=>`<span>${TYPES[k].n}</span><span class="nbar"><i id="nu-${k}" style="background:${TYPES[k].c}"></i></span>`).join("")}</div><div class="vstate"><span id="nglu"></span><span></span><span id="npro"></span></div></div>
+   <div class="card"><h2>What if…</h2><div class="chips"><label class="chip"><input type="checkbox" id="ndia" ${N.diabetes?"checked":""}>Diabetes: very high blood glucose</label><label class="chip"><input type="checkbox" id="ndam" ${N.damage?"checked":""}>Damaged glomerulus</label><label class="chip"><input type="checkbox" id="lbl" ${S.labels?"checked":""}>Labels</label></div><div id="nmsg"></div></div>
+   <div class="card info" id="info"><h2>Tap any part</h2><div class="chips">${["glom","bowman","pct","loop","dct","duct","capil"].map(k=>`<button class="chip" data-pick="${k}">${esc(PARTS[k].n)}</button>`).join("")}</div></div>`;
+  commonControls();
+  const setA=()=>{ N.adh=+$("nadh").value; $("nadhv").textContent=N.adh>0.66?"high: little, concentrated urine":N.adh<0.33?"low: lots of dilute urine":"normal"; }; $("nadh").oninput=setA; setA();
+  const msg=()=>{ $("nmsg").innerHTML=(N.diabetes?`<div class="msg warn">In untreated diabetes there is so much glucose in the blood that the tubule cannot reabsorb it all, so glucose appears in the urine. Testing urine with Benedict's solution or a test strip is one sign of diabetes.</div>`:"")+(N.damage?`<div class="msg warn">If the glomerulus is damaged (for example by high blood pressure or infection), proteins leak into the filtrate and appear in the urine. When kidneys fail, a dialysis machine or a kidney transplant is needed.</div>`:""); };
+  $("ndia").onchange=e=>{ N.diabetes=e.target.checked; NP.urineTally.length=0; msg(); }; $("ndam").onchange=e=>{ N.damage=e.target.checked; NP.urineTally.length=0; msg(); }; msg();
+  $("side").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>showInfo(b.dataset.pick)); }
+
+// ---------- shared ----------
+function commonControls(){
+  const rates=[0.25,0.5,1], rn=["Very slow","Slow motion","Normal"];
+  if(!rates.includes(S.rate)) S.rate=1;
+  $("rate").value=rates.indexOf(S.rate); const setRate=()=>{ S.rate=rates[+$("rate").value]; $("ratev").textContent=rn[+$("rate").value]; }; $("rate").oninput=setRate; setRate();
+  const playLbl=()=>$("play").textContent=S.playing?"Pause":"Play"; $("play").onclick=()=>{ S.playing=!S.playing; playLbl(); }; playLbl();
+  if($("lbl")) $("lbl").onchange=e=>{ S.labels=e.target.checked; applyLabels(); }; }
+function cur(){ return S.view==="uri"?UR:S.view==="kid"?KD:NP; }
+function applyLabels(){ cur().labs.forEach(l=>l.grp.setAttribute("visibility",S.labels?"visible":"hidden")); }
+function dimTo(id){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.toggle("dim",e.dataset.part!==id)); }
+function undim(){ cur().svg.querySelectorAll(".part").forEach(e=>e.classList.remove("dim")); }
+function showInfo(id){ const p=PARTS[id]; if(!p||!$("info")) return; S.selected=id; dimTo(id);
+  $("info").innerHTML=`<h3>${esc(p.n)}</h3><p>${esc(p.t)}</p><div class="row" style="margin-top:6px"><button id="clr">Show everything</button>${id==="kidney"?`<button class="primary" id="gok">See inside a kidney</button>`:""}${id==="nephron"?`<button class="primary" id="gon2">Look inside a nephron</button>`:""}</div>`;
+  $("clr").onclick=()=>{ S.selected=null; undim(); setView(S.view); }; if($("gok")) $("gok").onclick=()=>setView("kid"); if($("gon2")) $("gon2").onclick=()=>setView("neph"); }
+const QZ=[{tap:"kidney",q:"Tap a kidney."},{tap:"ureter",q:"Tap a ureter."},{tap:"bladder",q:"Tap the bladder."},{tap:"urethra",q:"Tap the urethra."},
+ {q:"Where is urea made?",o:["In the kidneys","In the liver","In the bladder","In the lungs"],a:1},
+ {q:"Which substance is filtered out of the blood but then completely reabsorbed in a healthy kidney?",o:["Urea","Glucose","Protein","Red blood cells"],a:1},
+ {q:"On a hot day you sweat a lot. What happens?",o:["Less ADH is released and you make lots of pale urine","More ADH is released and you make a little concentrated urine","ADH stops completely","Urea stops being made"],a:1},
+ {q:"Why are proteins not found in the urine of a healthy person?",o:["They are digested in the bladder","They are too big to be filtered out of the glomerulus","They are all reabsorbed in the loop of Henle","They turn into urea"],a:1}];
+function startQuiz(){ S.quiz={i:0,score:0}; drawQuiz(); }
+function drawQuiz(){ const Q=S.quiz, el=$("quiz"); if(!el) return;
+  if(Q.i>=QZ.length){ el.innerHTML=`<h2>Test complete</h2><p class="phase" style="font-size:1.6rem;margin:4px 0">${Q.score} / ${QZ.length}</p><p>${Q.score===QZ.length?"Excellent: you know how the kidneys work.":"Tap the parts you missed to read about them, then try again."}</p><button class="primary" id="qagain">Try again</button>`; $("qagain").onclick=startQuiz;
+    try{ parent.postMessage({type:"lablink-3d-result",prac:"excretion",score:Math.round(Q.score/QZ.length*100)},"*"); }catch(e){} Q.done=true; return; }
+  const q=QZ[Q.i]; el.innerHTML=`<h2>Question ${Q.i+1} of ${QZ.length}</h2><div class="q"><p><b>${esc(q.q)}</b></p>${q.tap?`<p class="note">Tap it in the picture. Labels are hidden during the test.</p>`:`<div class="opts">${q.o.map((o,i)=>`<button data-o="${i}">${esc(o)}</button>`).join("")}</div>`}</div><div id="qfb"></div>`;
+  if(q.tap){ S.labels=false; applyLabels(); }
+  el.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>answer(+b.dataset.o===q.a,b,el.querySelector(`[data-o="${q.a}"]`))); }
+function answer(ok,btn,right){ const Q=S.quiz; if(Q.lock) return; Q.lock=true; if(ok) Q.score++; if(btn){ btn.classList.add(ok?"right":"wrong"); if(right) right.classList.add("right"); }
+  const q=QZ[Q.i]; $("qfb").innerHTML=`<div class="msg ${ok?"":"warn"}">${ok?"Correct.":q.tap?`Not quite: look at the highlighted part, the ${esc(PARTS[q.tap].n.toLowerCase())}.`:"Not quite: the right answer is highlighted."}</div><button class="primary" id="qnext" style="margin-top:8px">${Q.i+1<QZ.length?"Next question":"See your score"}</button>`;
+  if(q.tap&&!ok) dimTo(q.tap);
+  $("qnext").onclick=()=>{ Q.lock=false; Q.i++; undim(); if(Q.i>=QZ.length){ S.labels=true; applyLabels(); } drawQuiz(); }; }
+const LEG={uri:`<span><i style="background:#e0505a"></i>Blood with urea</span><span><i style="background:#5b6ac0"></i>Filtered blood</span><span><i style="background:#8e5bb5"></i>Urea from the liver</span><span><i style="background:#5f9a35"></i>ADH (hormone)</span><span><i style="background:#d9a630"></i>Urine</span>`,
+ kid:`<span><i style="background:#c22a33"></i>Renal artery</span><span><i style="background:#3c5ab0"></i>Renal vein</span><span><i style="background:#fff59a;border:1px solid #c9a020"></i>One nephron</span><span><i style="background:#d9a630"></i>Urine</span>`,
+ neph:Object.entries(TYPES).map(([k,t])=>`<span><i style="background:${t.c}"></i>${t.n}</span>`).join("")};
+const BELOW={neph:`<h2>Blood plasma, filtrate and urine compared</h2><div class="tbl"><table><tr><th>Substance</th><th>In blood plasma</th><th>In the filtrate</th><th>In urine</th></tr><tr><td>Proteins</td><td>Yes</td><td>No (too big)</td><td>No</td></tr><tr><td>Glucose</td><td>Yes</td><td>Yes</td><td>No (all reabsorbed)</td></tr><tr><td>Urea</td><td>A little</td><td>A little</td><td>Much more concentrated</td></tr><tr><td>Salts</td><td>Yes</td><td>Yes</td><td>Yes (the excess)</td></tr><tr><td>Water</td><td>Yes</td><td>Yes</td><td>Yes (amount depends on ADH)</td></tr></table></div>`,
+ uri:`<h2>Kidney failure</h2><p style="margin:0;font-size:.9rem">If both kidneys fail, urea and excess water and salts build up in the blood. Patients can be treated with <b>dialysis</b>: blood flows through a machine on one side of a partially permeable membrane, and urea and excess salts diffuse out into dialysis fluid, which contains the right amounts of glucose and salts so these are not lost. Dialysis takes several hours, three times a week. A <b>kidney transplant</b> from a donor is a long-term cure, but the patient must take drugs so that the new kidney is not rejected.</p>`};
+function setView(v){
+  S.view=v; document.querySelectorAll("[data-view]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.view===v));
+  const st=$("stage"); st.innerHTML=""; S.selected=null; S.quiz=null; $("legend").innerHTML=LEG[v]; $("below").hidden=!BELOW[v]; $("below").innerHTML=BELOW[v]||"";
+  if(v==="uri"){ if(!UR) buildUri(); st.appendChild(UR.svg); uriSide(); }
+  else if(v==="kid"){ if(!KD) buildKid(); st.appendChild(KD.svg); kidSide(); }
+  else { if(!NP) buildNeph(); st.appendChild(NP.svg); nephSide(); }
+  undim(); applyLabels(); fitLabels(); }
+function fitLabels(){ const narrow=innerWidth<600;
+  [UR,KD,NP].forEach(V=>{ if(!V) return; V.labs.forEach(l=>{ if(!l.tx) return; const words=l.t.split(" "); l.tx.textContent=""; l.tx.setAttribute("font-size",narrow?22:16);
+    if(narrow&&words.length>1){ const cut=Math.ceil(words.length/2); [words.slice(0,cut).join(" "),words.slice(cut).join(" ")].forEach((w,i)=>{ const sp=document.createElementNS(NS,"tspan"); sp.setAttribute("x",l.x); sp.setAttribute("y",l.y+(i?12:-10)); sp.textContent=w; l.tx.appendChild(sp); }); }
+    else l.tx.textContent=l.t; }); V.ctx.setAttribute("font-size",narrow?17:13); }); }
+addEventListener("resize",fitLabels);
+document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("stage").addEventListener("click",e=>{ const p=e.target.closest(".part"); if(!p) return; const id=p.dataset.part;
+  if(S.view==="uri"&&S.quiz&&!S.quiz.done&&QZ[S.quiz.i]&&QZ[S.quiz.i].tap&&!S.quiz.lock){ answer(id===QZ[S.quiz.i].tap); return; } showInfo(id); });
+$("stage").addEventListener("keydown",e=>{ if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("part")){ e.preventDefault(); e.target.dispatchEvent(new MouseEvent("click",{bubbles:true})); } });
+let last=performance.now();
+function frame(now){
+  const dtReal=Math.min(0.05,(now-last)/1000); last=now;
+  const dt=S.playing?dtReal*S.rate:0; S.simTime+=dt;
+  if(S.view==="uri"&&UR) tickUri(dt); else if(S.view==="kid"&&KD) tickKid(dt); else if(S.view==="neph"&&NP) tickNeph(dt);
+  S.frameN++; requestAnimationFrame(frame); }
+setView("uri");
+if(RM) S.playing=false;
+requestAnimationFrame(frame);
+window.__excr={S,get UR(){return UR;},get KD(){return KD;},get NP(){return NP;},setView};
+})();
+</script></body></html>
